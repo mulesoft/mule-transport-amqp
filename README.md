@@ -43,7 +43,7 @@ Run:
 
 The integration tests rely on a locally running RabbitMQ broker and an OS that can run shell scripts (for the setup of the testing vhost and user).
 
-If you have configured SSL support on the default port you can include the SSL tests by running:
+If you have configured SSL support on RabbitMQ as detailed [here](http://www.rabbitmq.com/ssl.html) on the default port you can include the SSL tests by running:
 
     mvn -Pit -DrunAmqpsTests=true clean verify
 

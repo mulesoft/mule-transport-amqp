@@ -9,14 +9,19 @@
        http://www.mulesoft.org/schema/mule/test http://www.mulesoft.org/schema/mule/test/current/mule-test.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <amqps:connector name="amqpsDefaultSslConnector"
-        virtualHost="mule-test" username="mule" password="elum" />
+    <amqps:connector name="amqpsTlsKeyStores" virtualHost="mule-test"
+        username="mule" password="elum">
+        <amqps:ssl-key-store path="keycert.p12" type="PKCS12"
+            algorithm="SunX509" keyPassword="MySecretPassword" storePassword="MySecretPassword" />
+        <amqps:ssl-trust-store path="trustStore.jks" type="JKS"
+            algorithm="SunX509" storePassword="rabbitstore" />
+    </amqps:connector>
 
     <!-- Declare an exchange, a queue, bind the latter to the former -->
     <amqps:endpoint name="amqpsFullGlobalEndpoint" exchangeName="target-exchange"
         exchangeType="fanout" exchangeAutoDelete="true" exchangeDurable="false"
         queueName="target-queue" queueDurable="false" queueExclusive="false"
-        queueAutoDelete="true" routingKey="sslTests" connector-ref="amqpsDefaultSslConnector" />
+        queueAutoDelete="true" routingKey="sslAdvancedTests" />
 
     <flow name="sslDispatcher">
         <vm:inbound-endpoint path="sslDispatcher.in" />

@@ -26,6 +26,12 @@
     <amqps:connector name="amqpsTlsTrustManagerConnector"
         sslProtocol="TLS" sslTrustManager-ref="nullTrustManager" />
 
+    <amqps:connector name="amqpsTlsKeyStores">
+        <amqps:ssl-key-store type="jks" storePassword="aPass"
+            keyPassword="bPass" />
+        <amqps:ssl-trust-store type="jks" storePassword="aPass" />
+    </amqps:connector>
+
     <!-- Declare an exchange, a queue, bind the latter to the former -->
     <amqps:endpoint name="amqpsFullGlobalEndpoint" exchangeName="target-exchange"
         exchangeType="fanout" exchangeDurable="true" exchangeAutoDelete="false"

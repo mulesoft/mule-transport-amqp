@@ -24,17 +24,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mule.api.MuleMessage;
 
-public class SslConnectivityITCase extends AbstractAmqpITCase
+public abstract class AbstractSslConnectivityITCase extends AbstractAmqpITCase
 {
-    public SslConnectivityITCase() throws IOException
+    public AbstractSslConnectivityITCase() throws IOException
     {
         super();
-    }
-
-    @Override
-    protected String getConfigResources()
-    {
-        return "ssl-tests-config.xml";
     }
 
     @Before

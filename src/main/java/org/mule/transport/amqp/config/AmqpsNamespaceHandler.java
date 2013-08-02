@@ -10,6 +10,8 @@
 
 package org.mule.transport.amqp.config;
 
+import org.mule.config.spring.parsers.specific.tls.KeyStoreDefinitionParser;
+import org.mule.config.spring.parsers.specific.tls.TrustStoreDefinitionParser;
 import org.mule.transport.amqp.AmqpConnector;
 import org.mule.transport.amqp.AmqpsConnector;
 
@@ -24,7 +26,8 @@ public class AmqpsNamespaceHandler extends AmqpNamespaceHandler
     {
         super.init();
 
-        // add standard key and trust store config
+        registerBeanDefinitionParser("ssl-key-store", new KeyStoreDefinitionParser());
+        registerBeanDefinitionParser("ssl-trust-store", new TrustStoreDefinitionParser());
     }
 
     @Override

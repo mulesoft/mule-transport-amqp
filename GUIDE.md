@@ -715,3 +715,13 @@ Connect using TLS and uses a custom trust manager:
 
     <amqps:connector name="amqpsTlsTrustManagerConnector"
         sslProtocol="TLS" sslTrustManager-ref="myTrustManager" />
+
+Connect with key and trust stores:
+
+    <amqps:connector name="amqpsTlsKeyStores">
+        <amqps:ssl-key-store path="keycert.p12" type="PKCS12"
+            algorithm="SunX509" keyPassword="MySecretPassword"
+            storePassword="MySecretPassword" />
+        <amqps:ssl-trust-store path="trustStore.jks" type="JKS"
+            algorithm="SunX509" storePassword="rabbitstore" />
+    </amqps:connector>
