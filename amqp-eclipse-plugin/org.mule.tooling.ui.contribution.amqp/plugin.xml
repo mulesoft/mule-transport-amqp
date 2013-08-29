@@ -5,9 +5,9 @@
          point="org.mule.tooling.core.contribution">
     
       <externalContribution
-            contributionJar="mule-transport-amqp-3.3.0.1.jar"
+            contributionJar="mule-transport-amqp-3.4.1.jar"
             contributionLibPathInMule="/plugins"
-            contributionLibs="mule-transport-amqp-3.3.0.1.zip"
+            contributionLibs="mule-transport-amqp-3.4.1.zip"
             contributionNamespace="http://www.mulesoft.org/schema/mule/amqp"
             contributionNamespaceFile="http://www.mulesoft.org/schema/mule/amqp/current/mule-amqp.xsd"
             contributionNamespacePrefix="amqp"
