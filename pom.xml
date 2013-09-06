@@ -11,7 +11,7 @@
     <artifactId>mule-transport-amqp</artifactId>
     <packaging>jar</packaging>
     <name>Mule AMQP Transport</name>
-    <version>3.4.0-SNAPSHOT</version>
+    <version>3.4.0</version>
     <description>Connects to AMQP brokers</description>
     <url>http://www.muleforge.org/projects/AMQP</url>
 
