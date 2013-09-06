@@ -283,12 +283,12 @@
         <repository>
             <id>muleforge-releases</id>
             <name>MuleForge Snapshot Repository</name>
-            <url>http://repository.mulesoft.org/releases/</url>
+            <url>http://repository-master.mulesoft.org/releases/</url>
         </repository>
         <snapshotRepository>
             <id>muleforge-snapshots</id>
             <name>MuleForge Repository</name>
-            <url>http://repository.mulesoft.org/snapshots/</url>
+            <url>http://repository-master.mulesoft.org/snapshots/</url>
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
     </distributionManagement>
