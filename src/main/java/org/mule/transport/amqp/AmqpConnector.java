@@ -456,7 +456,7 @@ public class AmqpConnector extends AbstractConnector
                                                                    + getName()), sse, AmqpConnector.this));
                     }
                 });
-
+                break;
             }
             catch (final Exception e)
             {
