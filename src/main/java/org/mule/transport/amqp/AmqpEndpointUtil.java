@@ -119,9 +119,12 @@ public abstract class AmqpEndpointUtil
                                   final String routingKey,
                                   final String queueName) throws IOException
     {
-        if ((isDefaultExchange(exchangeName)) && (LOG.isDebugEnabled()))
+        if (isDefaultExchange(exchangeName))
         {
-            LOG.debug("Skipped binding of queue: " + queueName + " to default exchange");
+            if (LOG.isDebugEnabled()) 
+            {
+                LOG.debug("Skipped binding of queue: " + queueName + " to default exchange");
+            }
             return;
         }
 
