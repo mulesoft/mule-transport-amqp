@@ -121,7 +121,7 @@ public abstract class AmqpEndpointUtil
     {
         if (isDefaultExchange(exchangeName))
         {
-            if (LOG.isDebugEnabled()) 
+            if (LOG.isDebugEnabled())
             {
                 LOG.debug("Skipped binding of queue: " + queueName + " to default exchange");
             }
