@@ -24,7 +24,7 @@
                            connector-ref="amqpAutoAckLocalhostConnector" />
     <test:component />
   </flow>
-  
+
   <flow name="amqpReplierService">
     <amqp:inbound-endpoint exchangeName="amqpReplierService-exchange"
                            exchangeType="fanout"
@@ -35,10 +35,8 @@
                            queueExclusive="false"
                            queueAutoDelete="true"
                            connector-ref="amqpAutoAckLocalhostConnector">
-      <!-- Carry a custom inbound property to the outbound scope so it is preserved in the rest of the message processing flow -->
-      <message-properties-transformer scope="outbound">
-        <add-message-property key="customHeader" value="#[header:INBOUND:customHeader]"/>
-      </message-properties-transformer>
+        <!-- Carry a custom inbound property to the outbound scope so it is preserved in the rest of the message processing flow -->
+        <copy-properties propertyName="customHeader" />
     </amqp:inbound-endpoint>
     <test:component appendString="-reply" />
   </flow>

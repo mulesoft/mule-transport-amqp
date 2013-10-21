@@ -172,7 +172,6 @@ public abstract class AbstractAmqpITCase extends FunctionalTestCase
     protected String setupQueue(final String flowName) throws IOException
     {
         final String queue = getQueueName(flowName);
-
         getChannel().queueDeclare(queue, false, false, true, Collections.<String, Object> emptyMap());
         return queue;
     }
@@ -260,6 +259,28 @@ public abstract class AbstractAmqpITCase extends FunctionalTestCase
         getChannel().basicPublish(exchangeName, "", props, body);
         logger.info("Published " + props + " / " + new String(body) + " to: " + exchangeName
                     + " with empty routing key");
+    }
+
+    protected String publishMessageWithAmqpToDefaultExchange(final byte[] body, final String routingKey)
+        throws IOException
+    {
+        final String correlationId = UUID.getUUID();
+        publishMessageWithAmqpToDefaultExchange(correlationId, body, routingKey);
+        return correlationId;
+    }
+
+    protected void publishMessageWithAmqpToDefaultExchange(final String correlationId,
+                                                           final byte[] body,
+                                                           final String routingKey) throws IOException
+    {
+        final AMQP.BasicProperties.Builder bob = new AMQP.BasicProperties.Builder();
+        bob.contentType("text/plain").correlationId(correlationId);
+        bob.headers(Collections.<String, Object> singletonMap("customHeader", 123L));
+
+        final BasicProperties props = bob.build();
+        getChannel().basicPublish("", routingKey, props, body);
+        logger.info("Published " + props + " / " + new String(body) + " to default exchange"
+                    + " with routing key " + routingKey);
     }
 
     protected Delivery consumeMessageWithAmqp(final String queue, final long timeout)

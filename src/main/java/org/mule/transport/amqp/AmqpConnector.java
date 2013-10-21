@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
@@ -50,10 +51,12 @@ import org.mule.transport.amqp.transformers.AmqpMessageToObject;
 import org.mule.util.NumberUtils;
 import org.mule.util.StringUtils;
 
+import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ReturnListener;
@@ -91,6 +94,43 @@ public class AmqpConnector extends AbstractConnector
     private ConnectionFactory connectionFactory;
     private Connection connection;
     private final StackObjectPool connectorConnectionPool;
+
+    /**
+     * A queueing consumer that disconnects after receiving one message and actively rejects any
+     * extra message received. <b>It must be used with a non auto-ack consumer</b>. It has the
+     * advantage of using the consume semantics, including non-blocking time-out, without polling as
+     * using basic get would do.
+     */
+    private static final class SingleMessageQueueingConsumer extends QueueingConsumer
+    {
+        private final AtomicBoolean received;
+
+        private SingleMessageQueueingConsumer(final Channel channel)
+        {
+            super(channel);
+            received = new AtomicBoolean();
+        }
+
+        @Override
+        public void handleDelivery(final String consumerTag,
+                                   final Envelope envelope,
+                                   final BasicProperties properties,
+                                   final byte[] body) throws IOException
+        {
+            if (received.get())
+            {
+                // extra messages could have been received before basicCancel happens -> actively
+                // reject them
+                getChannel().basicReject(envelope.getDeliveryTag(), true);
+            }
+            else
+            {
+                received.set(true);
+                super.handleDelivery(consumerTag, envelope, properties, body);
+                getChannel().basicCancel(consumerTag);
+            }
+        }
+    }
 
     /**
      * A fake {@link FlowConstruct} that is used when the events need to be dispatched on behalf of
@@ -636,20 +676,33 @@ public class AmqpConnector extends AbstractConnector
         }
     }
 
-    public AmqpMessage consume(final Channel channel,
-                               final String queue,
-                               final boolean autoAck,
-                               final long timeout) throws IOException, InterruptedException
+    public AmqpMessage consumeMessage(final Channel channel,
+                                      final String queue,
+                                      final boolean autoAck,
+                                      final long timeout) throws IOException, InterruptedException
     {
-        final QueueingConsumer consumer = new QueueingConsumer(channel);
-        final String consumerTag = channel.basicConsume(queue, autoAck, consumer);
+        final QueueingConsumer consumer = new SingleMessageQueueingConsumer(channel);
+
+        // false -> no AMQP-level autoAck with the SingleMessageQueueingConsumer
+        final String consumerTag = channel.basicConsume(queue, false, consumer);
         final Delivery delivery = consumer.nextDelivery(timeout);
         channel.basicCancel(consumerTag);
 
-        if (delivery == null) return null;
+        if (delivery == null)
+        {
+            return null;
+        }
+        else
+        {
+            if (autoAck)
+            {
+                // ack only if auto-ack was requested, otherwise it's up to the caller to ack
+                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+            }
 
-        return new AmqpMessage(consumerTag, delivery.getEnvelope(), delivery.getProperties(),
-            delivery.getBody());
+            return new AmqpMessage(consumerTag, delivery.getEnvelope(), delivery.getProperties(),
+                delivery.getBody());
+        }
     }
 
     public void ackMessageIfNecessary(final Channel channel,

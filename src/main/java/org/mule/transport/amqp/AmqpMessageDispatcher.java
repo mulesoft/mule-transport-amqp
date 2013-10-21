@@ -72,7 +72,7 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
                 amqpMessage.setReplyTo(temporaryReplyToQueue);
 
                 DISPATCH.run(amqpConnector, channel, exchange, routingKey, amqpMessage, timeout);
-                return amqpConnector.consume(channel, temporaryReplyToQueue, true, timeout);
+                return amqpConnector.consumeMessage(channel, temporaryReplyToQueue, true, timeout);
             }
         };
 

@@ -11,13 +11,13 @@
                   virtualHost="mule-test"
                   username="mule"
                   password="elum" />
-                  
+
   <amqp:connector name="amqpMuleAckLocalhostConnector"
                   virtualHost="mule-test"
                   username="mule"
                   password="elum"
                   ackMode="MULE_AUTO" />
-                  
+
   <amqp:connector name="amqpManualAckLocalhostConnector"
                   virtualHost="mule-test"
                   username="mule"

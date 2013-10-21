@@ -14,9 +14,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Test;
@@ -79,9 +78,43 @@ public class AmqpMessageRequesterITCase extends AbstractAmqpITCase
         assertTrue(TimeUnit.MILLISECONDS.convert(durationNano, TimeUnit.NANOSECONDS) >= 2400L);
     }
 
+    @Test
+    public void testMultipleRequests() throws Exception
+    {
+        final String queueName = "amqpTestMultipleRequests";
+
+        try
+        {
+            getChannel().queueDeclare(queueName, true, false, false, Collections.<String, Object> emptyMap());
+
+            final String requestedUrl = "amqp://" + AmqpConstants.DEFAULT_EXCHANGE_ALIAS + "/amqp-queue."
+                                        + queueName + "?connector=amqpAutoAckLocalhostConnector";
+
+            final byte[] body1 = RandomStringUtils.randomAlphanumeric(20).getBytes();
+            final String correlationId1 = publishMessageWithAmqpToDefaultExchange(body1, queueName);
+            final byte[] body2 = RandomStringUtils.randomAlphanumeric(20).getBytes();
+            final String correlationId2 = publishMessageWithAmqpToDefaultExchange(body2, queueName);
+
+            MuleMessage receivedMessage = new MuleClient(muleContext).request(requestedUrl,
+                getTestTimeoutSecs() * 1000L);
+
+            assertValidReceivedMessage(correlationId1, body1, receivedMessage);
+
+            receivedMessage = new MuleClient(muleContext).request(requestedUrl, getTestTimeoutSecs() * 1000L);
+            assertValidReceivedMessage(correlationId2, body2, receivedMessage);
+
+            receivedMessage = new MuleClient(muleContext).request(requestedUrl, 2500L);
+            assertNull(receivedMessage);
+        }
+        finally
+        {
+            getChannel().queueDelete(queueName);
+        }
+    }
+
     private MuleMessage dispatchTestMessageAndAssertValidReceivedMessage(final String flowName,
                                                                          final String connectorName)
-        throws Exception, IOException, InterruptedException, ExecutionException, TimeoutException
+        throws Exception
     {
         final byte[] body = RandomStringUtils.randomAlphanumeric(20).getBytes();
         final String correlationId = publishMessageWithAmqp(body, flowName);

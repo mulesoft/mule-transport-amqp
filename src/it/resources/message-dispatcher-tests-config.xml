@@ -33,11 +33,7 @@
     <flow name="amqpExistingExchangeService">
         <vm:inbound-endpoint path="amqpExistingExchangeService.in">
             <!-- Carry a custom inbound property to the outbound scope so it is preserved in the rest of the message processing flow -->
-            <message-properties-transformer
-                scope="outbound">
-                <add-message-property key="customHeader"
-                    value="#[message.inboundProperties.customHeader]" />
-            </message-properties-transformer>
+            <copy-properties propertyName="customHeader" />
         </vm:inbound-endpoint>
         <!-- Dispatch to an existing exchange -->
         <amqp:outbound-endpoint exchangeName="amqpExistingExchangeService-exchange"
@@ -47,11 +43,7 @@
     <flow name="amqpRedeclaredExistingExchangeService">
         <vm:inbound-endpoint path="amqpRedeclaredExistingExchangeService.in">
             <!-- Carry a custom inbound property to the outbound scope so it is preserved in the rest of the message processing flow -->
-            <message-properties-transformer
-                scope="outbound">
-                <add-message-property key="customHeader"
-                    value="#[message.inboundProperties.customHeader]" />
-            </message-properties-transformer>
+            <copy-properties propertyName="customHeader" />
         </vm:inbound-endpoint>
         <!-- Dispatch to an existing exchange re-declared in Mule to ensure presence -->
         <amqp:outbound-endpoint exchangeName="amqpRedeclaredExistingExchangeService-exchange"
@@ -83,11 +75,7 @@
     <flow name="amqpLegacyDefaultExchangeService">
         <vm:inbound-endpoint path="amqpLegacyDefaultExchangeService.in">
             <!-- Carry a custom inbound property to the outbound scope so it is preserved in the rest of the message processing flow -->
-            <message-properties-transformer
-                scope="outbound">
-                <add-message-property key="customHeader"
-                    value="#[message.inboundProperties.customHeader]" />
-            </message-properties-transformer>
+            <copy-properties propertyName="customHeader" />
         </vm:inbound-endpoint>
         <!-- Dispatch to the default exchange  -->
         <amqp:outbound-endpoint exchangeName=""
@@ -101,11 +89,7 @@
     <flow name="amqpLegacyGlobalDefaultExchangeService">
         <vm:inbound-endpoint path="amqpLegacyGlobalDefaultExchangeService.in">
             <!-- Carry a custom inbound property to the outbound scope so it is preserved in the rest of the message processing flow -->
-            <message-properties-transformer
-                scope="outbound">
-                <add-message-property key="customHeader"
-                    value="#[message.inboundProperties.customHeader]" />
-            </message-properties-transformer>
+            <copy-properties propertyName="customHeader" />
         </vm:inbound-endpoint>
         <!-- Dispatch to the default exchange  -->
         <outbound-endpoint ref="amqpLegacyGlobalDefaultExchangeEndpoint" />
@@ -114,11 +98,7 @@
     <flow name="amqpDefaultExchangeService">
         <vm:inbound-endpoint path="amqpDefaultExchangeService.in">
             <!-- Carry a custom inbound property to the outbound scope so it is preserved in the rest of the message processing flow -->
-            <message-properties-transformer
-                scope="outbound">
-                <add-message-property key="customHeader"
-                    value="#[message.inboundProperties.customHeader]" />
-            </message-properties-transformer>
+            <copy-properties propertyName="customHeader" />
         </vm:inbound-endpoint>
         <!-- Dispatch to the default exchange  -->
         <amqp:outbound-endpoint exchangeName="AMQP.DEFAULT.EXCHANGE"
@@ -132,11 +112,7 @@
     <flow name="amqpGlobalDefaultExchangeService">
         <vm:inbound-endpoint path="amqpGlobalDefaultExchangeService.in">
             <!-- Carry a custom inbound property to the outbound scope so it is preserved in the rest of the message processing flow -->
-            <message-properties-transformer
-                scope="outbound">
-                <add-message-property key="customHeader"
-                    value="#[message.inboundProperties.customHeader]" />
-            </message-properties-transformer>
+            <copy-properties propertyName="customHeader" />
         </vm:inbound-endpoint>
         <!-- Dispatch to the default exchange  -->
         <outbound-endpoint ref="amqpGlobalDefaultExchangeEndpoint" />
@@ -146,11 +122,7 @@
     <flow name="amqpMessageLevelOverrideService">
         <vm:inbound-endpoint path="amqpMessageLevelOverrideService.in">
             <!-- Carry a custom inbound property to the outbound scope so it is preserved in the rest of the message processing flow -->
-            <message-properties-transformer
-                scope="outbound">
-                <add-message-property key="customHeader"
-                    value="#[message.inboundProperties.customHeader]" />
-            </message-properties-transformer>
+            <copy-properties propertyName="customHeader" />
             <!-- Define message level overrides for exchange and routing key -->
             <set-property propertyName="exchange"
                 value="amqpMessageLevelOverrideService-exchange" />
@@ -164,11 +136,7 @@
     <flow name="amqpMelOutboundEndpointService">
         <vm:inbound-endpoint path="amqpMelOutboundEndpointService.in">
             <!-- Carry a custom inbound property to the outbound scope so it is preserved in the rest of the message processing flow -->
-            <message-properties-transformer
-                scope="outbound">
-                <add-message-property key="customHeader"
-                    value="#[message.inboundProperties.customHeader]" />
-            </message-properties-transformer>
+            <copy-properties propertyName="customHeader" />
             <!-- Define flow variables to test MEL in endpoint -->
             <set-variable variableName="myExchangeName"
                 value="amqpMelOutboundEndpointService-exchange" />
@@ -211,11 +179,7 @@
     <flow name="amqpMandatoryDeliverySuccess">
         <vm:inbound-endpoint path="amqpMandatoryDeliverySuccess.in">
             <!-- Carry a custom inbound property to the outbound scope so it is preserved in the rest of the message processing flow -->
-            <message-properties-transformer
-                scope="outbound">
-                <add-message-property key="customHeader"
-                    value="#[message.inboundProperties.customHeader]" />
-            </message-properties-transformer>
+            <copy-properties propertyName="customHeader" />
         </vm:inbound-endpoint>
         <!-- A queue is bound to this exchange so this should succeed -->
         <amqp:outbound-endpoint exchangeName="amqpMandatoryDeliverySuccess-exchange"
@@ -227,11 +191,7 @@
         <vm:inbound-endpoint path="amqpRequestResponseService.in"
             exchange-pattern="request-response">
             <!-- Carry a custom inbound property to the outbound scope so it is preserved in the rest of the message processing flow -->
-            <message-properties-transformer
-                scope="outbound">
-                <add-message-property key="customHeader"
-                    value="#[message.inboundProperties.customHeader]" />
-            </message-properties-transformer>
+            <copy-properties propertyName="customHeader" />
             <response>
                 <message-properties-transformer
                     scope="outbound">
@@ -254,11 +214,7 @@
             queueExclusive="false" queueAutoDelete="true" connector-ref="amqpConnector"
             exchange-pattern="request-response">
             <!-- Carry a custom inbound property to the outbound scope so it is preserved in the rest of the message processing flow -->
-            <message-properties-transformer
-                scope="outbound">
-                <add-message-property key="customHeader"
-                    value="#[message.inboundProperties.customHeader]" />
-            </message-properties-transformer>
+            <copy-properties propertyName="customHeader" />
         </amqp:inbound-endpoint>
         <test:component appendString="-response" />
     </flow>

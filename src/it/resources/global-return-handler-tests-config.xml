@@ -19,11 +19,7 @@
     <vm:inbound-endpoint path="amqpMandatoryDeliveryWithGlobalHandlerSuccess.in">
       <!-- Carry a custom inbound property to the outbound scope so it is 
         preserved in the rest of the message processing flow -->
-      <message-properties-transformer
-        scope="outbound">
-        <add-message-property key="customHeader"
-          value="#[header:INBOUND:customHeader]" />
-      </message-properties-transformer>
+      <copy-properties propertyName="customHeader" />
     </vm:inbound-endpoint>
     <!-- A queue is bound to this exchange so this should succeed -->
     <amqp:outbound-endpoint exchangeName="amqpMandatoryDeliveryWithGlobalHandlerSuccess-exchange" />

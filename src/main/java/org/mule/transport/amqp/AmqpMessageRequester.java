@@ -58,7 +58,7 @@ public class AmqpMessageRequester extends AbstractMessageRequester
     {
         final Channel channel = getChannel();
 
-        final AmqpMessage amqpMessage = amqpConnector.consume(channel, getQueueName(),
+        final AmqpMessage amqpMessage = amqpConnector.consumeMessage(channel, getQueueName(),
             amqpConnector.getAckMode().isAutoAck(), timeout);
 
         if (amqpMessage == null) return null;
