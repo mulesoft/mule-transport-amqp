@@ -18,6 +18,7 @@ import org.mule.DefaultMuleMessage;
 import org.mule.api.MuleContext;
 import org.mule.api.config.MuleProperties;
 import org.mule.transport.AbstractMuleMessageFactory;
+import org.mule.util.StringUtils;
 
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Envelope;
@@ -55,13 +56,13 @@ public class AmqpMuleMessageFactory extends AbstractMuleMessageFactory
 
         // add user defined headers both as regular inbound headers and as a single map (for easy
         // processing)
-        final Map<String, Object> messageHeaders = new HashMap<String, Object>();
+        final Map<String, Object> userHeaders = new HashMap<String, Object>();
         if (amqpMessage.getProperties().getHeaders() != null)
         {
-            addHeaders(amqpMessage.getProperties().getHeaders(), messageHeaders);
+            addHeaders(amqpMessage.getProperties().getHeaders(), inboundProperties);
+            addNonMuleHeaders(amqpMessage.getProperties().getHeaders(), userHeaders);
         }
-        muleMessage.addInboundProperties(messageHeaders);
-        inboundProperties.put(AmqpConstants.ALL_HEADERS, messageHeaders);
+        inboundProperties.put(AmqpConstants.ALL_USER_HEADERS, userHeaders);
 
         muleMessage.addInboundProperties(inboundProperties);
     }
@@ -115,6 +116,18 @@ public class AmqpMuleMessageFactory extends AbstractMuleMessageFactory
         for (final Entry<String, Object> header : headers.entrySet())
         {
             putIfNonNull(header.getKey(), header.getValue(), messageProperties);
+        }
+    }
+
+    private void addNonMuleHeaders(final Map<String, Object> headers,
+                                   final Map<String, Object> messageProperties)
+    {
+        for (final Entry<String, Object> header : headers.entrySet())
+        {
+            if (!StringUtils.startsWith(header.getKey(), MuleProperties.PROPERTY_PREFIX))
+            {
+                putIfNonNull(header.getKey(), header.getValue(), messageProperties);
+            }
         }
     }
 

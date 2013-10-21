@@ -73,7 +73,7 @@ public abstract class AmqpConstants
     public static final String TYPE = "type";
     public static final String USER_ID = "user-id";
 
-    public static final String ALL_HEADERS = AmqpConnector.AMQP + ".headers";
+    public static final String ALL_USER_HEADERS = AmqpConnector.AMQP + ".headers";
 
     private static final String[] AMQP_ENVELOPE_PROPERTY_NAMES_ARRAY = new String[]{DELIVERY_TAG, EXCHANGE,
         REDELIVER, ROUTING_KEY};
@@ -100,7 +100,7 @@ public abstract class AmqpConstants
     public static final String RETURN_EXCHANGE = RETURN_CONTEXT_PREFIX + EXCHANGE;
     public static final String RETURN_ROUTING_KEY = RETURN_CONTEXT_PREFIX + ROUTING_KEY;
 
-    private static final String[] AMQP_TRANSPORT_TECHNICAL_PROPERTY_NAMES_ARRAY = new String[]{ALL_HEADERS,
+    private static final String[] AMQP_TRANSPORT_TECHNICAL_PROPERTY_NAMES_ARRAY = new String[]{ALL_USER_HEADERS,
         CONSUMER_TAG, CHANNEL, AMQP_DELIVERY_TAG, RETURN_LISTENER, RETURN_REPLY_CODE, RETURN_REPLY_TEXT,
         RETURN_EXCHANGE, RETURN_ROUTING_KEY};
 
