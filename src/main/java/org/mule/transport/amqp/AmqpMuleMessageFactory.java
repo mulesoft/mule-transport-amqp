@@ -48,73 +48,79 @@ public class AmqpMuleMessageFactory extends AbstractMuleMessageFactory
     {
         final AmqpMessage amqpMessage = (AmqpMessage) transportMessage;
 
-        final Map<String, Object> messageProperties = new HashMap<String, Object>();
-        putIfNonNull(messageProperties, AmqpConstants.CONSUMER_TAG, amqpMessage.getConsumerTag());
-        addEnvelopeProperties(messageProperties, amqpMessage.getEnvelope());
-        addBasicProperties(muleMessage, messageProperties, amqpMessage.getProperties());
+        final Map<String, Object> inboundProperties = new HashMap<String, Object>();
+        putIfNonNull(AmqpConstants.CONSUMER_TAG, amqpMessage.getConsumerTag(), inboundProperties);
+        addEnvelopeProperties(amqpMessage.getEnvelope(), inboundProperties);
+        addBasicProperties(amqpMessage.getProperties(), muleMessage, inboundProperties);
+
+        // add user defined headers both as regular inbound headers and as a single map (for easy
+        // processing)
+        final Map<String, Object> messageHeaders = new HashMap<String, Object>();
         if (amqpMessage.getProperties().getHeaders() != null)
         {
-            addHeaders(messageProperties, amqpMessage.getProperties().getHeaders());
+            addHeaders(amqpMessage.getProperties().getHeaders(), messageHeaders);
         }
+        muleMessage.addInboundProperties(messageHeaders);
+        inboundProperties.put(AmqpConstants.ALL_HEADERS, messageHeaders);
 
-        muleMessage.addInboundProperties(messageProperties);
+        muleMessage.addInboundProperties(inboundProperties);
     }
 
-    private void addEnvelopeProperties(final Map<String, Object> messageProperties, final Envelope envelope)
+    private void addEnvelopeProperties(final Envelope envelope, final Map<String, Object> messageProperties)
     {
         if (envelope == null) return;
 
-        putIfNonNull(messageProperties, AmqpConstants.DELIVERY_TAG, envelope.getDeliveryTag());
-        putIfNonNull(messageProperties, AmqpConstants.REDELIVER, envelope.isRedeliver());
-        putIfNonNull(messageProperties, AmqpConstants.EXCHANGE, envelope.getExchange());
-        putIfNonNull(messageProperties, AmqpConstants.ROUTING_KEY, envelope.getRoutingKey());
+        putIfNonNull(AmqpConstants.DELIVERY_TAG, envelope.getDeliveryTag(), messageProperties);
+        putIfNonNull(AmqpConstants.REDELIVER, envelope.isRedeliver(), messageProperties);
+        putIfNonNull(AmqpConstants.EXCHANGE, envelope.getExchange(), messageProperties);
+        putIfNonNull(AmqpConstants.ROUTING_KEY, envelope.getRoutingKey(), messageProperties);
     }
 
-    private void addBasicProperties(final DefaultMuleMessage muleMessage,
-                                    final Map<String, Object> messageProperties,
-                                    final BasicProperties amqpProperties)
+    private void addBasicProperties(final BasicProperties amqpProperties,
+                                    final DefaultMuleMessage muleMessage,
+                                    final Map<String, Object> messageProperties)
     {
         if (amqpProperties == null) return;
 
-        putIfNonNull(messageProperties, AmqpConstants.APP_ID, amqpProperties.getAppId());
-        putIfNonNull(messageProperties, AmqpConstants.CONTENT_ENCODING, amqpProperties.getContentEncoding());
-        putIfNonNull(messageProperties, AmqpConstants.CONTENT_TYPE, amqpProperties.getContentType());
+        putIfNonNull(AmqpConstants.APP_ID, amqpProperties.getAppId(), messageProperties);
+        putIfNonNull(AmqpConstants.CONTENT_ENCODING, amqpProperties.getContentEncoding(), messageProperties);
+        putIfNonNull(AmqpConstants.CONTENT_TYPE, amqpProperties.getContentType(), messageProperties);
 
         final String correlationId = amqpProperties.getCorrelationId();
-        putIfNonNull(messageProperties, AmqpConstants.CORRELATION_ID, correlationId);
-        putIfNonNull(messageProperties, MuleProperties.MULE_CORRELATION_ID_PROPERTY, correlationId);
+        putIfNonNull(AmqpConstants.CORRELATION_ID, correlationId, messageProperties);
+        putIfNonNull(MuleProperties.MULE_CORRELATION_ID_PROPERTY, correlationId, messageProperties);
         muleMessage.setCorrelationId(correlationId);
 
-        putIfNonNull(messageProperties, AmqpConstants.DELIVERY_MODE, amqpProperties.getDeliveryMode());
-        putIfNonNull(messageProperties, AmqpConstants.EXPIRATION, amqpProperties.getExpiration());
+        putIfNonNull(AmqpConstants.DELIVERY_MODE, amqpProperties.getDeliveryMode(), messageProperties);
+        putIfNonNull(AmqpConstants.EXPIRATION, amqpProperties.getExpiration(), messageProperties);
 
         final String messageId = amqpProperties.getMessageId();
-        putIfNonNull(messageProperties, AmqpConstants.MESSAGE_ID, messageId);
-        putIfNonNull(messageProperties, MuleProperties.MULE_MESSAGE_ID_PROPERTY, messageId);
+        putIfNonNull(AmqpConstants.MESSAGE_ID, messageId, messageProperties);
+        putIfNonNull(MuleProperties.MULE_MESSAGE_ID_PROPERTY, messageId, messageProperties);
         muleMessage.setUniqueId(messageId);
 
-        putIfNonNull(messageProperties, AmqpConstants.PRIORITY, amqpProperties.getPriority());
+        putIfNonNull(AmqpConstants.PRIORITY, amqpProperties.getPriority(), messageProperties);
 
         final String replyTo = amqpProperties.getReplyTo();
-        putIfNonNull(messageProperties, AmqpConstants.REPLY_TO, replyTo);
+        putIfNonNull(AmqpConstants.REPLY_TO, replyTo, messageProperties);
         muleMessage.setReplyTo(replyTo);
 
-        putIfNonNull(messageProperties, AmqpConstants.TIMESTAMP, amqpProperties.getTimestamp());
-        putIfNonNull(messageProperties, AmqpConstants.TYPE, amqpProperties.getType());
-        putIfNonNull(messageProperties, AmqpConstants.USER_ID, amqpProperties.getUserId());
+        putIfNonNull(AmqpConstants.TIMESTAMP, amqpProperties.getTimestamp(), messageProperties);
+        putIfNonNull(AmqpConstants.TYPE, amqpProperties.getType(), messageProperties);
+        putIfNonNull(AmqpConstants.USER_ID, amqpProperties.getUserId(), messageProperties);
     }
 
-    private void addHeaders(final Map<String, Object> messageProperties, final Map<String, Object> headers)
+    private void addHeaders(final Map<String, Object> headers, final Map<String, Object> messageProperties)
     {
         for (final Entry<String, Object> header : headers.entrySet())
         {
-            putIfNonNull(messageProperties, header.getKey(), header.getValue());
+            putIfNonNull(header.getKey(), header.getValue(), messageProperties);
         }
     }
 
-    private void putIfNonNull(final Map<String, Object> messageProperties,
-                              final String key,
-                              final Object value)
+    private void putIfNonNull(final String key,
+                              final Object value,
+                              final Map<String, Object> messageProperties)
     {
         if (value == null)
         {

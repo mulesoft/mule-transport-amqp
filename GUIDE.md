@@ -60,21 +60,21 @@ Here is the list of properties supported by the transport:
 -->
 <table>
 <tr><th>Basic Properties</th><th>Envelope Properties</th><th>Technical Properties</th></tr>
-<tr><td>app-id</td><td>delivery-tag</td><td>consumer-tag</td></tr>
-<tr><td>content-encoding</td><td>exchange</td><td>amqp.channel</td></tr>
-<tr><td>content-type</td><td>redelivered</td><td>amqp.delivery-tag</td></tr>
-<tr><td>correlation-id</td><td>routing-key</td><td>amqp.return.listener</td></tr>
-<tr><td>delivery_mode</td><td></td><td>amqp.return.reply-code</td></tr>
-<tr><td>expiration</td><td></td><td>amqp.return.reply-text</td></tr>
-<tr><td>message-id</td><td></td><td>amqp.return.exchange</td></tr>
-<tr><td>priority</td><td></td><td>amqp.return.routing-key</td></tr>
-<tr><td>reply-to</td><td></td><td></td></tr>
+<tr><td>app-id</td><td>delivery-tag</td><td>amqp.headers</td></tr>
+<tr><td>content-encoding</td><td>exchange</td><td>consumer-tag</td></tr>
+<tr><td>content-type</td><td>redelivered</td><td>amqp.channel</td></tr>
+<tr><td>correlation-id</td><td>routing-key</td><td>amqp.delivery-tag</td></tr>
+<tr><td>delivery_mode</td><td></td><td>amqp.return.listener</td></tr>
+<tr><td>expiration</td><td></td><td>amqp.return.reply-code</td></tr>
+<tr><td>message-id</td><td></td><td>amqp.return.reply-text</td></tr>
+<tr><td>priority</td><td></td><td>amqp.return.exchange</td></tr>
+<tr><td>reply-to</td><td></td><td>amqp.return.routing-key</td></tr>
 <tr><td>timestamp</td><td></td><td></td></tr>
 <tr><td>type</td><td></td><td></td></tr>
 <tr><td>user-id</td><td></td><td></td></tr>
 </table>
 
-On top of that all custom headers defined in the AMQP basic properties are added as standard Mule properties.  
+On top of that all custom headers defined in the AMQP basic properties, which are available in a map under the `amqp.headers` inbound property, are added as standard inbound properties.
 
 Configuration Reference
 -----------------------

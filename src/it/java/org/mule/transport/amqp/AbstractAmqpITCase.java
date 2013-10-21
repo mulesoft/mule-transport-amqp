@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -297,5 +298,10 @@ public abstract class AbstractAmqpITCase extends FunctionalTestCase
         assertEquals(correlationId, receivedMessage.getCorrelationId());
         assertEquals(correlationId, receivedMessage.getInboundProperty(AmqpConstants.CORRELATION_ID));
         assertEquals(123L, receivedMessage.getInboundProperty("customHeader"));
+
+        final Map<String, Object> allHeaders = receivedMessage.getInboundProperty("amqp.headers");
+        assertNotNull(allHeaders);
+        assertEquals(1, allHeaders.size());
+        assertEquals(123L, allHeaders.get("customHeader"));
     }
 }
