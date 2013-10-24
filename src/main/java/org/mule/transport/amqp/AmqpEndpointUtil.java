@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mule.api.MuleEvent;
 import org.mule.api.endpoint.ImmutableEndpoint;
+import org.mule.api.endpoint.OutboundEndpoint;
 import org.mule.api.expression.ExpressionManager;
 import org.mule.util.StringUtils;
 
@@ -145,8 +146,7 @@ public abstract class AmqpEndpointUtil
                                              final ImmutableEndpoint endpoint,
                                              final boolean activeDeclarationsOnly) throws IOException
     {
-        final String endpointAddress = endpoint.getAddress();
-        final String exchangeName = getExchangeName(endpointAddress, endpoint.getConnector().getProtocol());
+        final String exchangeName = getExchangeName(endpoint);
 
         if (isDefaultExchange(exchangeName))
         {
@@ -210,7 +210,25 @@ public abstract class AmqpEndpointUtil
         return StringUtils.defaultString((String) endpoint.getProperty(ROUTING_KEY));
     }
 
-    public static String getRoutingKey(final ImmutableEndpoint endpoint, final MuleEvent muleEvent)
+    public static String getRoutingKey(final MuleEvent muleEvent, final OutboundEndpoint outboundEndpoint)
+    {
+        final String exchange = getExchangeName(outboundEndpoint);
+        String routingKey = getDynamicRoutingKey(outboundEndpoint, muleEvent);
+
+        // if dispatching to default exchange and routing key has been omitted use the
+        // queueName as routing key
+        if ((isDefaultExchange(exchange)) && (StringUtils.isBlank(routingKey)))
+        {
+            final String queueName = getQueueName(outboundEndpoint.getAddress());
+            if (StringUtils.isNotBlank(queueName))
+            {
+                routingKey = queueName;
+            }
+        }
+        return routingKey;
+    }
+
+    private static String getDynamicRoutingKey(final ImmutableEndpoint endpoint, final MuleEvent muleEvent)
     {
         final String eventRoutingKey = muleEvent.getMessage().getOutboundProperty(AmqpConstants.ROUTING_KEY,
             StringUtils.defaultString((String) endpoint.getProperty(ROUTING_KEY)));
@@ -231,6 +249,21 @@ public abstract class AmqpEndpointUtil
         return StringUtils.defaultString(StringUtils.substringAfter(trimQuery(endpointAddress), QUEUE_PREFIX));
     }
 
+    public static String getExchangeName(final ImmutableEndpoint endpoint,
+                                         final MuleEvent muleEvent,
+                                         final String defaultExchangeName)
+    {
+        final String exchangeName = muleEvent.getMessage().getOutboundProperty(AmqpConstants.EXCHANGE,
+            defaultExchangeName);
+
+        return AmqpEndpointUtil.isDefaultExchange(exchangeName) ? StringUtils.EMPTY : exchangeName;
+    }
+
+    public static String getExchangeName(final ImmutableEndpoint endpoint)
+    {
+        return getExchangeName(endpoint.getAddress(), endpoint.getConnector().getProtocol());
+    }
+
     public static String getExchangeName(final String endpointAddress, final String protocol)
     {
         final String trimmedQuery = trimQuery(endpointAddress);
@@ -238,12 +271,7 @@ public abstract class AmqpEndpointUtil
             StringUtils.substringBetween(trimmedQuery, protocol + "://", "/" + QUEUE_PREFIX),
             StringUtils.substringAfter(trimmedQuery, protocol + "://"));
 
-        if (exchangeName.startsWith(QUEUE_PREFIX))
-        {
-            return StringUtils.EMPTY;
-        }
-
-        return exchangeName;
+        return exchangeName.startsWith(QUEUE_PREFIX) ? StringUtils.EMPTY : exchangeName;
     }
 
     private static String trimQuery(final String address)

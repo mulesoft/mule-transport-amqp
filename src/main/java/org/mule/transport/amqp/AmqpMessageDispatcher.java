@@ -24,6 +24,7 @@ import org.mule.processor.DelegateTransaction;
 import org.mule.transaction.IllegalTransactionStateException;
 import org.mule.transaction.TransactionCoordination;
 import org.mule.transport.AbstractMessageDispatcher;
+import org.mule.transport.ConnectException;
 import org.mule.transport.amqp.AmqpConnector.OutboundConnection;
 import org.mule.util.StringUtils;
 
@@ -38,7 +39,7 @@ import com.rabbitmq.client.ReturnListener;
 public class AmqpMessageDispatcher extends AbstractMessageDispatcher
 {
     protected final AmqpConnector amqpConnector;
-    protected OutboundConnection outboundConnection;
+    protected volatile OutboundConnection outboundConnection;
 
     protected enum OutboundAction
     {
@@ -94,6 +95,11 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
         }
     }
 
+    protected void internalDoConnect(final MuleEvent event) throws ConnectException
+    {
+        outboundConnection = amqpConnector.connect(this, event);
+    }
+
     @Override
     protected void doDisconnect() throws MuleException
     {
@@ -128,11 +134,26 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
     protected AmqpMessage doOutboundAction(final MuleEvent event, final OutboundAction outboundAction)
         throws Exception
     {
-        // no need to protected this for thread safety because only one thread at a time can
+        // no need to protect this for thread safety because only one thread at a time can
         // traverse a dispatcher instance
         if (outboundConnection == null)
         {
-            outboundConnection = amqpConnector.connect(this, event);
+            internalDoConnect(event);
+        }
+        else
+        {
+            if (!outboundConnection.canDispatch(event, getEndpoint()))
+            {
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Outbound connection: "
+                                 + outboundConnection
+                                 + " can't handle current event. Refreshing it before performing outbound action.");
+                }
+
+                doDisconnect();
+                internalDoConnect(event);
+            }
         }
 
         final MuleMessage message = event.getMessage();
@@ -145,12 +166,6 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
         }
 
         final Channel eventChannel = getEventChannel();
-
-        String eventExchange = message.getOutboundProperty(AmqpConstants.EXCHANGE, getExchange());
-        if (AmqpEndpointUtil.isDefaultExchange(eventExchange))
-        {
-            eventExchange = "";
-        }
 
         final AmqpMessage amqpMessage = (AmqpMessage) message.getPayload();
 
@@ -167,16 +182,17 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
 
         addReturnListenerIfNeeded(event, eventChannel);
 
-        final String routingKey = getRoutingKey();
+        final String eventExchange = AmqpEndpointUtil.getExchangeName(endpoint, event, getExchange());
+        final String eventRoutingKey = getRoutingKey();
 
-        final AmqpMessage result = outboundAction.run(amqpConnector, eventChannel, eventExchange, routingKey,
-            amqpMessage, getTimeOutForEvent(event));
+        final AmqpMessage result = outboundAction.run(amqpConnector, eventChannel, eventExchange,
+            eventRoutingKey, amqpMessage, getTimeOutForEvent(event));
 
         if (logger.isDebugEnabled())
         {
             logger.debug(String.format(
                 "Successfully performed %s(channel: %s, exchange: %s, routing key: %s) for: %s and received: %s",
-                outboundAction, eventChannel, eventExchange, routingKey, event, result));
+                outboundAction, eventChannel, eventExchange, eventRoutingKey, event, result));
         }
 
         return result;
