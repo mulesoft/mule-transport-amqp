@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang.StringUtils;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mule.api.MuleMessage;
 import org.mule.api.transport.PropertyScope;
@@ -64,8 +66,23 @@ public class AmqpMuleMessageFactoryTestCase extends AbstractMuleContextTestCase
         final MuleMessage muleMessage = amqpMuleMessageFactory.create(testMessage, "utf-8");
 
         assertEquals(testMessage, muleMessage.getPayload());
+        Assert.assertFalse(StringUtils.isEmpty(muleMessage.getUniqueId()));
 
         checkInboundProperties(testMessage, muleMessage);
+    }
+    
+    @SuppressWarnings("deprecation")
+	@Test
+    public void testMessageIdWhenNullAmqpProperties() throws Exception {
+    	final AmqpMessage testMessage = getTestMessage();
+    	testMessage.getProperties().setMessageId(null);
+    	
+    	Assert.assertNull(testMessage.getProperties().getMessageId());
+    	
+        final AmqpMuleMessageFactory amqpMuleMessageFactory = new AmqpMuleMessageFactory(muleContext);
+        final MuleMessage muleMessage = amqpMuleMessageFactory.create(testMessage, "utf-8");
+        
+        Assert.assertFalse(StringUtils.isEmpty(muleMessage.getUniqueId()));
     }
 
     public static void checkInboundProperties(final AmqpMessage amqpMessage, final MuleMessage muleMessage)
