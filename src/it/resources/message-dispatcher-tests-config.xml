@@ -134,17 +134,18 @@
     </flow>
 
     <flow name="amqpMelOutboundEndpointService">
-        <vm:inbound-endpoint path="amqpMelOutboundEndpointService.in">
-            <!-- Carry a custom inbound property to the outbound scope so it is preserved in the rest of the message processing flow -->
-            <copy-properties propertyName="customHeader" />
-            <!-- Define flow variables to test MEL in endpoint -->
-            <set-variable variableName="myExchangeName"
-                value="amqpMelOutboundEndpointService-exchange" />
-            <set-variable variableName="myRoutingKey"
-                value="amqpMelOutboundEndpointService-queue" />
-        </vm:inbound-endpoint>
+        <vm:inbound-endpoint path="amqpMelOutboundEndpointService.in" />
+
+        <!-- Carry a custom inbound property to the outbound scope so it is preserved in the rest of the message processing flow -->
+        <copy-properties propertyName="customHeader" />
+
+        <!-- Define flow variable to test MEL in endpoint -->
+        <set-variable variableName="myExchangeName"
+            value="amqpMelOutboundEndpointService-exchange" />
+
         <amqp:outbound-endpoint exchangeName="#[myExchangeName]"
-            routingKey="#[myRoutingKey]" connector-ref="activeOnlyAmqpConnector" />
+            routingKey="#[message.inboundProperties.myRoutingKey]"
+            connector-ref="activeOnlyAmqpConnector" />
     </flow>
 
     <flow name="amqpMandatoryDeliveryFailureNoHandler">

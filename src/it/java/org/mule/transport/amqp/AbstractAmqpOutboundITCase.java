@@ -15,11 +15,15 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.mule.api.MuleException;
 import org.mule.module.client.MuleClient;
 import org.mule.util.UUID;
 
+import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 
 public abstract class AbstractAmqpOutboundITCase extends AbstractAmqpITCase
@@ -31,19 +35,52 @@ public abstract class AbstractAmqpOutboundITCase extends AbstractAmqpITCase
 
     protected void dispatchTestMessageAndAssertValidReceivedMessage(final String flowName) throws Exception
     {
-        final String customHeaderValue = UUID.getUUID();
-        final String payload = RandomStringUtils.randomAlphanumeric(20);
-        new MuleClient(muleContext).dispatch("vm://" + flowName + ".in", payload,
-            Collections.singletonMap("customHeader", customHeaderValue));
+        dispatchTestMessageAndAssertValidReceivedMessage(flowName, Collections.<String, String> emptyMap());
+    }
 
+    protected void dispatchTestMessageAndAssertValidReceivedMessage(final String flowName,
+                                                                    final Map<String, String> properties)
+        throws Exception
+    {
+        final String payload = RandomStringUtils.randomAlphanumeric(20);
+        final String customHeaderValue = dispatchTestMessage(flowName, properties, payload);
+
+        fetchAndValidateAmqpDeliveredMessage(flowName, payload, customHeaderValue);
+    }
+
+    protected void fetchAndValidateAmqpDeliveredMessage(final String flowName,
+                                                final String expectedPayload,
+                                                final String expectedCustomHeaderValue)
+        throws IOException, InterruptedException
+    {
         final Delivery dispatchedMessage = consumeMessageWithAmqp(getQueueName(flowName),
             getTestTimeoutSecs() * 1000L);
 
         assertNotNull(dispatchedMessage);
-        assertEquals(payload, new String(dispatchedMessage.getBody()));
-        assertEquals(customHeaderValue, dispatchedMessage.getProperties()
-            .getHeaders()
-            .get("customHeader")
-            .toString());
+
+        validateAmqpDeliveredMessage(expectedPayload, expectedCustomHeaderValue, dispatchedMessage.getBody(),
+            dispatchedMessage.getProperties());
+    }
+
+    protected void validateAmqpDeliveredMessage(final String expectedPayload,
+                                                 final String expectedCustomHeaderValue,
+                                                 final byte[] body,
+                                                 final BasicProperties basicProperties)
+    {
+        assertEquals(expectedPayload, new String(body));
+        assertEquals(expectedCustomHeaderValue, basicProperties.getHeaders().get("customHeader").toString());
+    }
+
+    protected String dispatchTestMessage(final String flowName,
+                                         final Map<String, String> properties,
+                                         final String payload) throws MuleException
+    {
+        final Map<String, String> actualProperties = new HashMap<String, String>(properties);
+
+        final String customHeaderValue = UUID.getUUID();
+        actualProperties.put("customHeader", customHeaderValue);
+
+        new MuleClient(muleContext).dispatch("vm://" + flowName + ".in", payload, actualProperties);
+        return customHeaderValue;
     }
 }

@@ -102,7 +102,21 @@ public class AmqpMessageDispatcherITCase extends AbstractAmqpOutboundITCase
     @Test
     public void testMelOutboundEndpointService() throws Exception
     {
-        dispatchTestMessageAndAssertValidReceivedMessage("amqpMelOutboundEndpointService");
+        final String flowName = "amqpMelOutboundEndpointService";
+
+        final String payload1 = "payload1::" + RandomStringUtils.randomAlphanumeric(20);
+        final String customHeaderValue1 = dispatchTestMessage(flowName,
+            Collections.singletonMap("myRoutingKey", getQueueName(flowName)), payload1);
+
+        final String payload2 = "payload2::" + RandomStringUtils.randomAlphanumeric(20);
+        dispatchTestMessage(flowName, Collections.singletonMap("myRoutingKey", "_somewhere_else_"), payload2);
+
+        final String payload3 = "payload3::" + RandomStringUtils.randomAlphanumeric(20);
+        final String customHeaderValue3 = dispatchTestMessage(flowName,
+            Collections.singletonMap("myRoutingKey", getQueueName(flowName)), payload3);
+
+        fetchAndValidateAmqpDeliveredMessage(flowName, payload1, customHeaderValue1);
+        fetchAndValidateAmqpDeliveredMessage(flowName, payload3, customHeaderValue3);
     }
 
     @Test

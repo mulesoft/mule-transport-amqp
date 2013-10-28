@@ -40,6 +40,7 @@ import com.rabbitmq.client.AMQP.Queue.DeclareOk;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.GetResponse;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownListener;
@@ -281,6 +282,11 @@ public abstract class AbstractAmqpITCase extends FunctionalTestCase
         getChannel().basicPublish("", routingKey, props, body);
         logger.info("Published " + props + " / " + new String(body) + " to default exchange"
                     + " with routing key " + routingKey);
+    }
+
+    protected GetResponse getMessageWithAmqp(final String queue) throws IOException
+    {
+        return getChannel().basicGet(queue, true);
     }
 
     protected Delivery consumeMessageWithAmqp(final String queue, final long timeout)
