@@ -162,6 +162,16 @@ public abstract class AbstractAmqpITCase extends FunctionalTestCase
         return futureReceivedMessage;
     }
 
+    protected void setupDirectExchangeAndQueue(final String flowName) throws IOException
+    {
+        final String exchange = getExchangeName(flowName);
+        getChannel().exchangeDeclare(exchange, "direct");
+
+        final String queue = setupQueue(flowName);
+        getChannel().queueBind(queue, exchange, queue);
+        getChannel().queuePurge(queue);
+    }
+
     protected void setupExchangeAndQueue(final String flowName) throws IOException
     {
         final String exchange = setupExchange(flowName);
@@ -282,6 +292,26 @@ public abstract class AbstractAmqpITCase extends FunctionalTestCase
         getChannel().basicPublish("", routingKey, props, body);
         logger.info("Published " + props + " / " + new String(body) + " to default exchange"
                     + " with routing key " + routingKey);
+    }
+
+    protected GetResponse waitUntilGetMessageWithAmqp(final String queue, final long timeout)
+        throws IOException, InterruptedException
+    {
+        final long startTime = System.currentTimeMillis();
+
+        while (System.currentTimeMillis() - startTime < timeout)
+        {
+            final GetResponse getResponse = getMessageWithAmqp(queue);
+            if (getResponse != null)
+            {
+                return getResponse;
+            }
+
+            Thread.yield();
+            Thread.sleep(250L);
+        }
+
+        return null;
     }
 
     protected GetResponse getMessageWithAmqp(final String queue) throws IOException

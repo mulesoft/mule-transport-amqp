@@ -12,9 +12,11 @@ package org.mule.transport.amqp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +27,8 @@ import org.mule.api.MuleMessage;
 import org.mule.module.client.MuleClient;
 import org.mule.transport.amqp.AmqpReturnHandler.LoggingReturnListener;
 import org.mule.util.UUID;
+
+import com.rabbitmq.client.GetResponse;
 
 public class AmqpMessageDispatcherITCase extends AbstractAmqpOutboundITCase
 {
@@ -39,7 +43,7 @@ public class AmqpMessageDispatcherITCase extends AbstractAmqpOutboundITCase
         deleteExchange("amqpOutBoundQueue");
         deleteQueue("amqpOutBoundQueue");
         setupExchangeAndQueue("amqpMessageLevelOverrideService");
-        setupExchangeAndQueue("amqpMelOutboundEndpointService");
+        setupDirectExchangeAndQueue("amqpMelOutboundEndpointService");
         setupExchange("amqpMandatoryDeliveryFailureNoHandler");
         setupExchange("amqpMandatoryDeliveryFailureWithHandler");
         setupExchangeAndQueue("amqpMandatoryDeliverySuccess");
@@ -103,20 +107,43 @@ public class AmqpMessageDispatcherITCase extends AbstractAmqpOutboundITCase
     public void testMelOutboundEndpointService() throws Exception
     {
         final String flowName = "amqpMelOutboundEndpointService";
+        final String queueName = getQueueName(flowName);
 
         final String payload1 = "payload1::" + RandomStringUtils.randomAlphanumeric(20);
         final String customHeaderValue1 = dispatchTestMessage(flowName,
-            Collections.singletonMap("myRoutingKey", getQueueName(flowName)), payload1);
+            Collections.singletonMap("myRoutingKey", queueName), payload1);
 
         final String payload2 = "payload2::" + RandomStringUtils.randomAlphanumeric(20);
         dispatchTestMessage(flowName, Collections.singletonMap("myRoutingKey", "_somewhere_else_"), payload2);
 
         final String payload3 = "payload3::" + RandomStringUtils.randomAlphanumeric(20);
         final String customHeaderValue3 = dispatchTestMessage(flowName,
-            Collections.singletonMap("myRoutingKey", getQueueName(flowName)), payload3);
+            Collections.singletonMap("myRoutingKey", queueName), payload3);
 
-        fetchAndValidateAmqpDeliveredMessage(flowName, payload1, customHeaderValue1);
-        fetchAndValidateAmqpDeliveredMessage(flowName, payload3, customHeaderValue3);
+        // we're getting more than one message from the same queue so
+        // fetchAndValidateAmqpDeliveredMessage can't be used in its current implementation as it
+        // consumes all the messages but only returns one
+        for (int i = 0; i < 2; i++)
+        {
+            final GetResponse getResponse = waitUntilGetMessageWithAmqp(queueName,
+                getTestTimeoutSecs() * 1000L);
+            assertNotNull(getResponse);
+
+            if (Arrays.equals(payload1.getBytes(), getResponse.getBody()))
+            {
+                validateAmqpDeliveredMessage(payload1, customHeaderValue1, getResponse.getBody(),
+                    getResponse.getProps());
+            }
+            else
+            {
+                validateAmqpDeliveredMessage(payload3, customHeaderValue3, getResponse.getBody(),
+                    getResponse.getProps());
+            }
+
+        }
+
+        final GetResponse getNoFurtherResponse = waitUntilGetMessageWithAmqp(queueName, 1000L);
+        assertNull(getNoFurtherResponse);
     }
 
     @Test
