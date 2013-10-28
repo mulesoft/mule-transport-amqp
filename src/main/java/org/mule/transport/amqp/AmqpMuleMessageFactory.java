@@ -96,11 +96,10 @@ public class AmqpMuleMessageFactory extends AbstractMuleMessageFactory
         putIfNonNull(AmqpConstants.DELIVERY_MODE, amqpProperties.getDeliveryMode(), messageProperties);
         putIfNonNull(AmqpConstants.EXPIRATION, amqpProperties.getExpiration(), messageProperties);
 
-        String messageId = amqpProperties.getMessageId();
+        final String messageId = amqpProperties.getMessageId();
         putIfNonNull(AmqpConstants.MESSAGE_ID, messageId, messageProperties);
         putIfNonNull(MuleProperties.MULE_MESSAGE_ID_PROPERTY, messageId, messageProperties);
-        messageId = messageId == null ? UUID.getUUID() : messageId;
-        muleMessage.setUniqueId(messageId);
+        muleMessage.setUniqueId(messageId == null ? UUID.getUUID() : messageId);
 
         putIfNonNull(AmqpConstants.PRIORITY, amqpProperties.getPriority(), messageProperties);
 
