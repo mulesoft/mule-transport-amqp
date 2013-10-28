@@ -290,12 +290,23 @@ public class AmqpConnector extends AbstractConnector
 
         public String getExchange()
         {
-            return exchange;
+            return AmqpEndpointUtil.isDefaultExchange(exchange) ? StringUtils.EMPTY : exchange;
         }
 
         public String getRoutingKey()
         {
             return routingKey;
+        }
+
+        public boolean canDispatch(final MuleEvent muleEvent, final OutboundEndpoint outboundEndpoint)
+        {
+            final String eventExchange = AmqpEndpointUtil.getExchangeName(outboundEndpoint, muleEvent,
+                StringUtils.EMPTY);
+            final String eventRoutingKey = AmqpEndpointUtil.getRoutingKey(muleEvent, outboundEndpoint);
+            System.err.printf("%n%s=%s%n%s=%s%n%n", getExchange(), eventExchange, getRoutingKey(),
+                eventRoutingKey);
+            return StringUtils.equals(getExchange(), eventExchange)
+                   && StringUtils.equals(getRoutingKey(), eventRoutingKey);
         }
     }
 
@@ -635,22 +646,10 @@ public class AmqpConnector extends AbstractConnector
             {
                 public OutboundConnection run(final ConnectorConnection connectorConnection) throws Exception
                 {
-
                     final String exchange = AmqpEndpointUtil.getOrCreateExchange(
                         connectorConnection.getChannel(), outboundEndpoint, activeDeclarationsOnly);
 
-                    String routingKey = AmqpEndpointUtil.getRoutingKey(outboundEndpoint, muleEvent);
-
-                    // if dispatching to default exchange and routing key has been omitted use the
-                    // queueName as routing key
-                    if ((AmqpEndpointUtil.isDefaultExchange(exchange)) && (StringUtils.isBlank(routingKey)))
-                    {
-                        final String queueName = AmqpEndpointUtil.getQueueName(outboundEndpoint.getAddress());
-                        if (StringUtils.isNotBlank(queueName))
-                        {
-                            routingKey = queueName;
-                        }
-                    }
+                    final String routingKey = AmqpEndpointUtil.getRoutingKey(muleEvent, outboundEndpoint);
 
                     if (StringUtils.isNotEmpty(AmqpEndpointUtil.getQueueName(outboundEndpoint.getAddress()))
                         || outboundEndpoint.getProperties().containsKey(AmqpEndpointUtil.QUEUE_DURABLE)
@@ -661,10 +660,8 @@ public class AmqpConnector extends AbstractConnector
                             activeDeclarationsOnly, exchange, routingKey);
                     }
 
-                    final OutboundConnection oc = new OutboundConnection(
-                        connectorConnection.getAmqpConnector(), exchange, routingKey);
-
-                    return oc;
+                    return new OutboundConnection(connectorConnection.getAmqpConnector(), exchange,
+                        routingKey);
                 }
             });
         }
