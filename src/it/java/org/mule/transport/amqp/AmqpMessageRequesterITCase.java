@@ -90,6 +90,7 @@ public class AmqpMessageRequesterITCase extends AbstractAmqpITCase
             final String requestedUrl = "amqp://" + AmqpConstants.DEFAULT_EXCHANGE_ALIAS + "/amqp-queue."
                                         + queueName + "?connector=amqpAutoAckLocalhostConnector";
 
+            // try with messages already waiting
             final byte[] body1 = RandomStringUtils.randomAlphanumeric(20).getBytes();
             final String correlationId1 = publishMessageWithAmqpToDefaultExchange(body1, queueName);
             final byte[] body2 = RandomStringUtils.randomAlphanumeric(20).getBytes();
@@ -103,7 +104,18 @@ public class AmqpMessageRequesterITCase extends AbstractAmqpITCase
             receivedMessage = new MuleClient(muleContext).request(requestedUrl, getTestTimeoutSecs() * 1000L);
             assertValidReceivedMessage(correlationId2, body2, receivedMessage);
 
+            // now try with a new message
+            final byte[] body3 = RandomStringUtils.randomAlphanumeric(20).getBytes();
+            final String correlationId3 = publishMessageWithAmqpToDefaultExchange(body3, queueName);
+
+            receivedMessage = new MuleClient(muleContext).request(requestedUrl, getTestTimeoutSecs() * 1000L);
+            assertValidReceivedMessage(correlationId3, body3, receivedMessage);
+
+            // try with no message, with and without wait
             receivedMessage = new MuleClient(muleContext).request(requestedUrl, 2500L);
+            assertNull(receivedMessage);
+
+            receivedMessage = new MuleClient(muleContext).request(requestedUrl, 0L);
             assertNull(receivedMessage);
         }
         finally

@@ -57,6 +57,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Envelope;
+import com.rabbitmq.client.GetResponse;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ReturnListener;
@@ -678,11 +679,31 @@ public class AmqpConnector extends AbstractConnector
                                       final boolean autoAck,
                                       final long timeout) throws IOException, InterruptedException
     {
+        final long startTime = System.currentTimeMillis();
+
+        // try first with a basic get to potentially quickly retrieve a pending message
+        final GetResponse getResponse = channel.basicGet(queue, autoAck);
+
+        // if timeout is zero or if a message has been fetched don't go any further
+        if ((timeout == 0) || (getResponse != null))
+        {
+            return getResponse == null ? null : new AmqpMessage(null, getResponse.getEnvelope(),
+                getResponse.getProps(), getResponse.getBody());
+        }
+
+        // account for the time taken to perform the basic get
+        final long elapsedTime = System.currentTimeMillis() - startTime;
+        final long actualTimeOut = timeout - elapsedTime;
+        if (actualTimeOut < 0)
+        {
+            return null;
+        }
+
         final QueueingConsumer consumer = new SingleMessageQueueingConsumer(channel);
 
         // false -> no AMQP-level autoAck with the SingleMessageQueueingConsumer
         final String consumerTag = channel.basicConsume(queue, false, consumer);
-        final Delivery delivery = consumer.nextDelivery(timeout);
+        final Delivery delivery = consumer.nextDelivery(actualTimeOut);
         channel.basicCancel(consumerTag);
 
         if (delivery == null)
