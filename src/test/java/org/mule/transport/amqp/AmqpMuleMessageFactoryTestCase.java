@@ -11,13 +11,14 @@
 package org.mule.transport.amqp;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mule.api.MuleMessage;
 import org.mule.api.transport.PropertyScope;
@@ -30,6 +31,11 @@ import com.rabbitmq.client.Envelope;
 public class AmqpMuleMessageFactoryTestCase extends AbstractMuleContextTestCase
 {
     public static AmqpMessage getTestMessage()
+    {
+        return getTestMessage("messageId");
+    }
+
+    public static AmqpMessage getTestMessage(final String messageId)
     {
         final byte[] body = "payload".getBytes();
 
@@ -44,7 +50,7 @@ public class AmqpMuleMessageFactoryTestCase extends AbstractMuleContextTestCase
             .correlationId("cid-951753")
             .deliveryMode(2)
             .expiration("expiration")
-            .messageId("messageId")
+            .messageId(messageId)
             .priority(5)
             .replyTo("replyTo")
             .timestamp(new Date(100000L))
@@ -66,23 +72,22 @@ public class AmqpMuleMessageFactoryTestCase extends AbstractMuleContextTestCase
         final MuleMessage muleMessage = amqpMuleMessageFactory.create(testMessage, "utf-8");
 
         assertEquals(testMessage, muleMessage.getPayload());
-        Assert.assertFalse(StringUtils.isEmpty(muleMessage.getUniqueId()));
+        assertFalse(StringUtils.isEmpty(muleMessage.getUniqueId()));
 
         checkInboundProperties(testMessage, muleMessage);
     }
-    
-    @SuppressWarnings("deprecation")
-	@Test
-    public void testMessageIdWhenNullAmqpProperties() throws Exception {
-    	final AmqpMessage testMessage = getTestMessage();
-    	testMessage.getProperties().setMessageId(null);
-    	
-    	Assert.assertNull(testMessage.getProperties().getMessageId());
-    	
+
+    @Test
+    public void testMessageIdWhenNullAmqpProperties() throws Exception
+    {
+        final AmqpMessage testMessage = getTestMessage(null);
+
+        assertNull(testMessage.getProperties().getMessageId());
+
         final AmqpMuleMessageFactory amqpMuleMessageFactory = new AmqpMuleMessageFactory(muleContext);
         final MuleMessage muleMessage = amqpMuleMessageFactory.create(testMessage, "utf-8");
-        
-        Assert.assertFalse(StringUtils.isEmpty(muleMessage.getUniqueId()));
+
+        assertFalse(StringUtils.isEmpty(muleMessage.getUniqueId()));
     }
 
     public static void checkInboundProperties(final AmqpMessage amqpMessage, final MuleMessage muleMessage)
