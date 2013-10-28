@@ -10,8 +10,6 @@
 
 package org.mule.transport.amqp;
 
-import java.io.IOException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mule.api.DefaultMuleException;
@@ -59,10 +57,10 @@ public class AmqpMessageAcknowledger extends AbstractChannelMessageProcessor
         {
             channel.basicAck(deliveryTag, multiple);
         }
-        catch (final IOException ioe)
+        catch (final Exception e)
         {
             throw new DefaultMuleException("Failed to ack message w/deliveryTag: " + deliveryTag
-                                           + " on channel: " + channel, ioe);
+                                           + " on channel: " + channel, e);
         }
 
         if (LOG.isDebugEnabled())

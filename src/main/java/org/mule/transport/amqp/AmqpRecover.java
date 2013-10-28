@@ -10,8 +10,6 @@
 
 package org.mule.transport.amqp;
 
-import java.io.IOException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mule.api.DefaultMuleException;
@@ -55,9 +53,9 @@ public class AmqpRecover extends AbstractChannelMessageProcessor
         {
             channel.basicRecover(requeue);
         }
-        catch (final IOException ioe)
+        catch (final Exception e)
         {
-            throw new DefaultMuleException("Failed to recover channel: " + channel, ioe);
+            throw new DefaultMuleException("Failed to recover channel: " + channel, e);
         }
 
         if (LOG.isDebugEnabled())
