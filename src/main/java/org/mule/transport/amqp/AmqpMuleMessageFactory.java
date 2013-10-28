@@ -19,6 +19,7 @@ import org.mule.api.MuleContext;
 import org.mule.api.config.MuleProperties;
 import org.mule.transport.AbstractMuleMessageFactory;
 import org.mule.util.StringUtils;
+import org.mule.util.UUID;
 
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Envelope;
@@ -95,9 +96,10 @@ public class AmqpMuleMessageFactory extends AbstractMuleMessageFactory
         putIfNonNull(AmqpConstants.DELIVERY_MODE, amqpProperties.getDeliveryMode(), messageProperties);
         putIfNonNull(AmqpConstants.EXPIRATION, amqpProperties.getExpiration(), messageProperties);
 
-        final String messageId = amqpProperties.getMessageId();
+        String messageId = amqpProperties.getMessageId();
         putIfNonNull(AmqpConstants.MESSAGE_ID, messageId, messageProperties);
         putIfNonNull(MuleProperties.MULE_MESSAGE_ID_PROPERTY, messageId, messageProperties);
+        messageId = messageId == null ? UUID.getUUID() : messageId;
         muleMessage.setUniqueId(messageId);
 
         putIfNonNull(AmqpConstants.PRIORITY, amqpProperties.getPriority(), messageProperties);
