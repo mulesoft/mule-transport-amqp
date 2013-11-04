@@ -101,7 +101,6 @@ public class AmqpTransaction extends AbstractSingleResourceTransaction
 
         try
         {
-            channel.txRollback();
             switch (recoverStrategy)
             {
                 case NONE :
