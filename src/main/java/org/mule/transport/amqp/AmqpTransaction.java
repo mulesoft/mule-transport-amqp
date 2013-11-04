@@ -69,13 +69,20 @@ public class AmqpTransaction extends AbstractSingleResourceTransaction
             return;
         }
 
+        final Channel channel = getTransactedChannel();
+
         try
         {
-            getTransactedChannel().txCommit();
+            channel.txCommit();
         }
         catch (final IOException ioe)
         {
             throw new TransactionException(CoreMessages.transactionCommitFailed(), ioe);
+        }
+
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Committed AMQP transaction on channel: " + channel);
         }
     }
 
@@ -118,6 +125,11 @@ public class AmqpTransaction extends AbstractSingleResourceTransaction
         {
             logger.warn("Failed to recover channel " + channel + " after rollback (recoverStrategy is "
                         + recoverStrategy + ")");
+        }
+
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Rolled back AMQP transaction (" + recoverStrategy + ") on channel: " + channel);
         }
     }
 

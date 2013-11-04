@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" xmlns:test="http://www.mulesoft.org/schema/mule/test"
+    xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
     xsi:schemaLocation="
        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
        http://www.mulesoft.org/schema/mule/amqp http://www.mulesoft.org/schema/mule/amqp/current/mule-amqp.xsd
+       http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
        http://www.mulesoft.org/schema/mule/test http://www.mulesoft.org/schema/mule/test/current/mule-test.xsd">
 
     <amqp:connector name="amqpManualAckLocalhostConnector"
@@ -21,5 +23,33 @@
         <catch-exception-strategy>
             <amqp:reject-message requeue="true" />
         </catch-exception-strategy>
+    </flow>
+
+
+    <flow name="amqpTransactedRedeliveryWithRollbackExceptionStrategy">
+        <amqp:inbound-endpoint
+            queueName="amqpTransactedRedeliveryWithRollbackExceptionStrategy-queue">
+            <amqp:transaction action="ALWAYS_BEGIN"
+                recoverStrategy="REQUEUE" />
+        </amqp:inbound-endpoint>
+
+        <null-component />
+
+        <rollback-exception-strategy
+            maxRedeliveryAttempts="5">
+            <vm:outbound-endpoint
+                path="amqpTransactedRedeliveryWithRollbackExceptionStrategy.rollback"
+                exchange-pattern="one-way">
+                <vm:transaction action="NONE" />
+            </vm:outbound-endpoint>
+
+            <on-redelivery-attempts-exceeded>
+                <vm:outbound-endpoint
+                    path="amqpTransactedRedeliveryWithRollbackExceptionStrategy.exceeded"
+                    exchange-pattern="one-way">
+                    <vm:transaction action="NONE" />
+                </vm:outbound-endpoint>
+            </on-redelivery-attempts-exceeded>
+        </rollback-exception-strategy>
     </flow>
 </mule>
