@@ -23,6 +23,7 @@ import org.mule.api.MuleMessage;
 import org.mule.api.endpoint.OutboundEndpoint;
 import org.mule.config.i18n.MessageFactory;
 import org.mule.transport.DefaultReplyToHandler;
+import org.mule.util.StringUtils;
 
 public class AmqpReplyToHandler extends DefaultReplyToHandler
 {
@@ -41,6 +42,10 @@ public class AmqpReplyToHandler extends DefaultReplyToHandler
         throws MuleException
     {
         final String replyToQueueName = (String) replyTo;
+        if (StringUtils.isBlank(replyToQueueName))
+        {
+            return;
+        }
 
         // target the default (ie. "") exchange with a routing key equals to the
         // queue replied to
