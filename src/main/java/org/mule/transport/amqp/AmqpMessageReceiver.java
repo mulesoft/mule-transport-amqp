@@ -38,6 +38,7 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
+import com.rabbitmq.client.ShutdownSignalException;
 
 /**
  * The <code>AmqpMessageReceiver</code> subscribes to a queue and dispatches received messages to
@@ -46,8 +47,8 @@ import com.rabbitmq.client.Envelope;
 public class AmqpMessageReceiver extends AbstractMessageReceiver
 {
     protected final AmqpConnector amqpConnector;
-    protected InboundConnection inboundConnection;
-    protected String consumerTag;
+    protected volatile InboundConnection inboundConnection;
+    protected volatile String consumerTag;
 
     public AmqpMessageReceiver(final Connector connector,
                                final FlowConstruct flowConstruct,
@@ -69,11 +70,6 @@ public class AmqpMessageReceiver extends AbstractMessageReceiver
 
         try
         {
-            if (inboundConnection == null)
-            {
-                doConnect();
-            }
-
             if (endpoint.getTransactionConfig().isTransacted())
             {
                 getChannel().txSelect();
@@ -97,6 +93,7 @@ public class AmqpMessageReceiver extends AbstractMessageReceiver
     public void doStop()
     {
         Channel channel = null;
+
         try
         {
             channel = getChannel();
@@ -105,18 +102,22 @@ public class AmqpMessageReceiver extends AbstractMessageReceiver
                 return;
             }
 
-            if (logger.isDebugEnabled())
+            if (consumerTag != null)
             {
-                logger.debug("Cancelling subscription of: " + consumerTag + " on channel: " + channel);
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Cancelling subscription of: " + consumerTag + " on channel: " + channel);
+                }
+
+                channel.basicCancel(consumerTag);
+
+                logger.info("Cancelled subscription of: " + consumerTag + " on channel: " + channel);
             }
 
-            channel.basicCancel(consumerTag);
-
-            logger.info("Cancelled subscription of: " + consumerTag + " on channel: " + channel);
-
             if (logger.isDebugEnabled())
             {
-                logger.debug("Disconnecting: queue: " + getQueueName() + " from channel: " + channel);
+                logger.debug("Disconnecting receiver for queue: " + getQueueName() + " from channel: "
+                             + channel);
             }
 
             amqpConnector.closeChannel(channel);
@@ -130,6 +131,25 @@ public class AmqpMessageReceiver extends AbstractMessageReceiver
         finally
         {
             inboundConnection = null;
+        }
+    }
+
+    protected void restart(final boolean cancelSubscription)
+    {
+        if (!cancelSubscription)
+        {
+            // the subscription is considered already dead and won't be cancelled properly
+            consumerTag = null;
+        }
+
+        try
+        {
+            doStop();
+            doStart();
+        }
+        catch (final Exception e)
+        {
+            logger.error("Failed to restart: " + this, e);
         }
     }
 
@@ -170,6 +190,24 @@ public class AmqpMessageReceiver extends AbstractMessageReceiver
         public AmqpConsumer(final Channel channel)
         {
             super(channel);
+        }
+
+        @Override
+        public void handleCancel(final String consumerTag) throws IOException
+        {
+            logger.warn("Received external cancellation of consumer tag: " + consumerTag
+                        + ", the message receiver will try to restart.");
+
+            restart(false);
+        }
+
+        @Override
+        public void handleShutdownSignal(final String consumerTag, final ShutdownSignalException sig)
+        {
+            logger.warn("Received shutdown signal for consumer tag: " + consumerTag
+                        + ", the message receiver will try to restart.", sig);
+
+            restart(false);
         }
 
         @Override
