@@ -249,12 +249,10 @@ public abstract class AmqpEndpointUtil
         return StringUtils.defaultString(StringUtils.substringAfter(trimQuery(endpointAddress), QUEUE_PREFIX));
     }
 
-    public static String getExchangeName(final ImmutableEndpoint endpoint,
-                                         final MuleEvent muleEvent,
-                                         final String defaultExchangeName)
+    public static String getExchangeName(final ImmutableEndpoint endpoint, final MuleEvent muleEvent)
     {
         final String exchangeName = muleEvent.getMessage().getOutboundProperty(AmqpConstants.EXCHANGE,
-            defaultExchangeName);
+            getExchangeName(endpoint));
 
         return AmqpEndpointUtil.isDefaultExchange(exchangeName) ? StringUtils.EMPTY : exchangeName;
     }

@@ -182,7 +182,7 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
 
         addReturnListenerIfNeeded(event, eventChannel);
 
-        final String eventExchange = AmqpEndpointUtil.getExchangeName(endpoint, event, getExchange());
+        final String eventExchange = AmqpEndpointUtil.getExchangeName(endpoint, event);
         final String eventRoutingKey = getRoutingKey();
 
         final AmqpMessage result = outboundAction.run(amqpConnector, eventChannel, eventExchange,
