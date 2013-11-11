@@ -16,7 +16,7 @@
     <url>http://www.muleforge.org/projects/AMQP</url>
 
     <properties>
-        <rabbitmq.amqp-client.version>3.2.0</rabbitmq.amqp-client.version>
+        <rabbitmq.amqp-client.version>3.2.1</rabbitmq.amqp-client.version>
         <!-- Tools properties -->
         <vmtype>org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType</vmtype>
         <jdk5Name>JavaSE-1.6</jdk5Name>
