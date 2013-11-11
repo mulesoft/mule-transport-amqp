@@ -264,6 +264,11 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
                 final Channel channel = amqpConnector.createChannel();
                 channel.txSelect();
                 transaction.bindResource(channel.getConnection(), channel);
+
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Created transacted channel for delegate transaction " + transaction);
+                }
                 return channel;
             }
             else

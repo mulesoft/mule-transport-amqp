@@ -14,14 +14,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.resource.spi.work.WorkException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mule.MessageExchangePattern;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
-import org.mule.api.MuleRuntimeException;
 import org.mule.api.construct.FlowConstruct;
 import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.api.lifecycle.CreateException;
@@ -79,7 +76,9 @@ public class AmqpMessageReceiver extends AbstractMessageReceiver
                 getClientConsumerTag(), amqpConnector.isNoLocal(), amqpConnector.isExclusiveConsumers(),
                 null, new AmqpConsumer(getChannel()));
 
-            logger.info("Started subscription: " + consumerTag + " on channel: " + getChannel());
+            logger.info("Started subscription: " + consumerTag + " on "
+                        + (endpoint.getTransactionConfig().isTransacted() ? "transacted " : "") + "channel: "
+                        + getChannel());
         }
         catch (final Exception e)
         {
@@ -174,14 +173,11 @@ public class AmqpMessageReceiver extends AbstractMessageReceiver
 
         try
         {
-            // deliver message in a different thread to free the Amqp Connector's
-            // thread
-            getWorkManager().scheduleWork(work);
+            work.processMessages();
         }
-        catch (final WorkException we)
+        catch (final Exception e)
         {
-            throw new MuleRuntimeException(MessageFactory.createStaticMessage("Failed to deliver: "
-                                                                              + amqpMessage), we);
+            getConnector().getMuleContext().getExceptionListener().handleException(e);
         }
     }
 
