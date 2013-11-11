@@ -245,7 +245,16 @@ public class AmqpMessageReceiver extends AbstractMessageReceiver
         @Override
         protected void bindTransaction(final Transaction tx) throws TransactionException
         {
-            tx.bindResource(channel.getConnection(), channel);
+            if (channel != null)
+            {
+                tx.bindResource(channel.getConnection(), channel);
+            }
+            else
+            {
+                throw new TransactionException(
+                    MessageFactory.createStaticMessage("Channel is null so can't bind transaction: " + tx
+                                                       + " to message:" + amqpMessage));
+            }
         }
 
         @Override
