@@ -12,22 +12,38 @@ package org.mule.transport.amqp;
 
 import static org.junit.Assert.assertEquals;
 
+import java.net.URI;
+
 import org.junit.Test;
 import org.mule.api.endpoint.EndpointURI;
-import org.mule.endpoint.MuleEndpointURI;
 import org.mule.tck.junit4.AbstractMuleContextTestCase;
 
 public class AmqpEndpointTestCase extends AbstractMuleContextTestCase
 {
     @Test
-    public void testValidEndpointURI() throws Exception
+    public void testEndpointWithExchangeAndQueue() throws Exception
     {
-        final EndpointURI url = new MuleEndpointURI("amqp://target-exchange/target-queue", muleContext);
-        assertEquals("amqp", url.getScheme());
+        final EndpointURI uri = new AmqpUrlEndpointURIBuilder().build(new URI(
+            "amqp://target-exchange/target-queue"), muleContext);
+
+        assertEquals("amqp", uri.getScheme());
+        assertEquals("amqp://target-exchange/target-queue", uri.getAddress());
         // using the host as resource name could be an issue because exchange and
         // queue names accept characters that are
         // invalid in host names: ^[a-zA-Z0-9-_.:]*$
-        assertEquals("target-exchange", url.getHost());
-        assertEquals("/target-queue", url.getPath());
+        assertEquals("target-exchange", uri.getHost());
+        assertEquals("/target-queue", uri.getPath());
+    }
+
+    @Test
+    public void testEndpointWithQueue() throws Exception
+    {
+        final EndpointURI uri = new AmqpUrlEndpointURIBuilder().build(
+            new URI("amqp://amqp-queue.other.queue"), muleContext);
+
+        assertEquals("amqp", uri.getScheme());
+        assertEquals("amqp://amqp-queue.other.queue", uri.getAddress());
+        assertEquals("amqp-queue.other.queue", uri.getHost());
+        assertEquals("", uri.getPath());
     }
 }
