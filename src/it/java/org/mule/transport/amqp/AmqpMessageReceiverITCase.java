@@ -117,8 +117,7 @@ public class AmqpMessageReceiverITCase extends AbstractAmqpInboundITCase
     {
         dispatchTestMessageAndAssertValidReceivedMessage("amqpManualRecoverService");
         // check the message has been successfully pushed back to the queue
-        // assertNotNull(consumeMessageWithAmqp(getQueueName("amqpManualRecoverService"),
-        // getTestTimeoutSecs()));
+        assertNotNull(consumeMessageWithAmqp(getQueueName("amqpManualRecoverService"), getTestTimeoutSecs()));
     }
 
     @Test
