@@ -346,14 +346,14 @@ public class AmqpConnector extends AbstractConnector
             try
             {
                 final Channel channel = ((ConnectorConnection) obj).getChannel();
-                if (channel != null)
+                if ((channel != null) && (channel.isOpen()))
                 {
                     channel.close();
                 }
             }
             catch (final Exception e)
             {
-                amqpConnector.logger.info("Ignored exception when destroying ConnectorConnection:", e);
+                amqpConnector.logger.info("Ignored exception when destroying ConnectorConnection:" + obj, e);
             }
         }
     }
@@ -770,6 +770,11 @@ public class AmqpConnector extends AbstractConnector
     public void closeChannel(final Channel channel) throws ConnectException
     {
         if (channel == null)
+        {
+            return;
+        }
+
+        if (!channel.isOpen())
         {
             return;
         }
