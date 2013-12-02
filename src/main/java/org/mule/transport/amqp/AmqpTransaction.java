@@ -10,6 +10,8 @@
 
 package org.mule.transport.amqp;
 
+import static org.mule.transport.amqp.AmqpTransaction.RecoverStrategy.NONE;
+
 import java.io.IOException;
 
 import org.apache.commons.lang.Validate;
@@ -45,7 +47,7 @@ public class AmqpTransaction extends AbstractSingleResourceTransaction
     @Override
     public void bindResource(final Object key, final Object resource) throws TransactionException
     {
-        if (!(resource instanceof Channel))
+        if (!(resource instanceof Channel || resource instanceof CloseableChannelWrapper))
         {
             throw new IllegalTransactionStateException(
                 CoreMessages.transactionCanOnlyBindToResources(Channel.class.getName()));
@@ -74,15 +76,19 @@ public class AmqpTransaction extends AbstractSingleResourceTransaction
         try
         {
             channel.txCommit();
+
+            if (logger.isDebugEnabled())
+            {
+                logger.debug("Committed AMQP transaction on channel: " + channel);
+            }
         }
         catch (final IOException ioe)
         {
             throw new TransactionException(CoreMessages.transactionCommitFailed(), ioe);
         }
-
-        if (logger.isDebugEnabled())
+        finally
         {
-            logger.debug("Committed AMQP transaction on channel: " + channel);
+            closeChannelIfNeeded(channel);
         }
     }
 
@@ -99,13 +105,31 @@ public class AmqpTransaction extends AbstractSingleResourceTransaction
 
         try
         {
-            channel.txRollback();
-        }
-        catch (final IOException ioe)
-        {
-            throw new TransactionException(CoreMessages.transactionRollbackFailed(), ioe);
-        }
+            try
+            {
+                channel.txRollback();
 
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Rolled back AMQP transaction (" + recoverStrategy + ") on channel: "
+                                 + channel);
+                }
+            }
+            catch (final IOException ioe)
+            {
+                throw new TransactionException(CoreMessages.transactionRollbackFailed(), ioe);
+            }
+
+            applyRecoverStrategy(channel);
+        }
+        finally
+        {
+            closeChannelIfNeeded(channel);
+        }
+    }
+
+    protected void applyRecoverStrategy(final Channel channel)
+    {
         try
         {
             switch (recoverStrategy)
@@ -120,21 +144,48 @@ public class AmqpTransaction extends AbstractSingleResourceTransaction
                     channel.basicRecover(true);
                     break;
             }
+
+            if ((recoverStrategy != NONE) && (logger.isDebugEnabled()))
+            {
+                logger.debug("Applied " + recoverStrategy + " recover strategy on channel: " + channel);
+            }
         }
         catch (final IOException ioe)
         {
             logger.warn("Failed to recover channel " + channel + " after rollback (recoverStrategy is "
                         + recoverStrategy + ")");
         }
-
-        if (logger.isDebugEnabled())
-        {
-            logger.debug("Rolled back AMQP transaction (" + recoverStrategy + ") on channel: " + channel);
-        }
     }
 
     public Channel getTransactedChannel()
     {
-        return (Channel) resource;
+        return resource instanceof CloseableChannelWrapper
+                                                          ? ((CloseableChannelWrapper) resource).getChannel()
+                                                          : (Channel) resource;
+    }
+
+    protected boolean shouldCloseChannel()
+    {
+        return resource instanceof CloseableChannelWrapper;
+    }
+
+    protected void closeChannelIfNeeded(final Channel channel)
+    {
+        if (shouldCloseChannel())
+        {
+            if (logger.isDebugEnabled())
+            {
+                logger.debug("Closing transacted channel: " + channel);
+            }
+
+            try
+            {
+                channel.close();
+            }
+            catch (final IOException ioe)
+            {
+                logger.error("Failed to close transacted channel: " + channel, ioe);
+            }
+        }
     }
 }

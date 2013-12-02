@@ -16,15 +16,18 @@ import org.mule.transport.amqp.AmqpTransactionFactory;
 
 import com.rabbitmq.client.Connection;
 
-public class AmqpTransactionFactoryRegistor implements MuleContextAware, Initialisable {
+public class AmqpTransactionFactoryRegistor implements MuleContextAware, Initialisable
+{
+    private MuleContext muleContext;
 
-	private MuleContext muleContext;
-	
-	public void initialise() throws InitialisationException {
-		muleContext.getTransactionFactoryManager().registerTransactionFactory(Connection.class, new AmqpTransactionFactory());
-	}
+    public void initialise() throws InitialisationException
+    {
+        muleContext.getTransactionFactoryManager().registerTransactionFactory(Connection.class,
+            new AmqpTransactionFactory());
+    }
 
-	public void setMuleContext(MuleContext context) {
-		this.muleContext = context;
-	}
+    public void setMuleContext(final MuleContext context)
+    {
+        this.muleContext = context;
+    }
 }
