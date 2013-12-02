@@ -26,7 +26,6 @@ import org.mule.transaction.TransactionCoordination;
 import org.mule.transport.AbstractMessageDispatcher;
 import org.mule.transport.ConnectException;
 import org.mule.transport.amqp.AmqpConnector.OutboundConnection;
-import org.mule.util.StringUtils;
 
 import com.rabbitmq.client.AMQP.Queue.DeclareOk;
 import com.rabbitmq.client.Channel;
@@ -95,6 +94,11 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
         }
     }
 
+    /**
+     * Connecting an outbound AMQP endpoint does more than just connecting a channel: it can also
+     * potentially declare an exchange, a queue and bind the latter to the former. Since exchange
+     * and queue name can be dynamic, we can only perform the connection when an event is in flight.
+     */
     protected void internalDoConnect(final MuleEvent event) throws ConnectException
     {
         outboundConnection = amqpConnector.connect(this, event);
@@ -109,7 +113,7 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
 
             if (logger.isDebugEnabled())
             {
-                logger.debug("Disconnecting: exchange: " + getExchange() + " from channel: " + channel);
+                logger.debug("Disconnecting: " + outboundConnection);
             }
 
             outboundConnection = null;
@@ -183,7 +187,7 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
         addReturnListenerIfNeeded(event, eventChannel);
 
         final String eventExchange = AmqpEndpointUtil.getExchangeName(endpoint, event);
-        final String eventRoutingKey = getRoutingKey();
+        final String eventRoutingKey = AmqpEndpointUtil.getRoutingKey(endpoint, event);
 
         final AmqpMessage result = outboundAction.run(amqpConnector, eventChannel, eventExchange,
             eventRoutingKey, amqpMessage, getTimeOutForEvent(event));
@@ -283,15 +287,5 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
         }
 
         return outboundConnection == null ? null : outboundConnection.getChannel();
-    }
-
-    protected String getExchange()
-    {
-        return outboundConnection == null ? StringUtils.EMPTY : outboundConnection.getExchange();
-    }
-
-    protected String getRoutingKey()
-    {
-        return outboundConnection == null ? StringUtils.EMPTY : outboundConnection.getRoutingKey();
     }
 }
