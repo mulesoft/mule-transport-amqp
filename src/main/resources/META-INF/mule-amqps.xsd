@@ -7,11 +7,11 @@
 
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:import namespace="http://www.mulesoft.org/schema/mule/core"
-        schemaLocation="http://www.mulesoft.org/schema/mule/core/3.4/mule.xsd" />
+        schemaLocation="http://www.mulesoft.org/schema/mule/core/3.3/mule.xsd" />
     <xsd:import namespace="http://www.mulesoft.org/schema/mule/amqp"
-        schemaLocation="http://www.mulesoft.org/schema/mule/amqp/3.4/mule-amqp.xsd" />
+        schemaLocation="http://www.mulesoft.org/schema/mule/amqp/3.3/mule-amqp.xsd" />
     <xsd:import namespace="http://www.mulesoft.org/schema/mule/schemadoc"
-        schemaLocation="http://www.mulesoft.org/schema/mule/schemadoc/3.4/mule-schemadoc.xsd" />
+        schemaLocation="http://www.mulesoft.org/schema/mule/schemadoc/3.3/mule-schemadoc.xsd" />
 
     <xsd:annotation>
         <xsd:documentation>Connects to AMQP brokers over SSL/TLS.
