@@ -20,7 +20,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mule.api.MuleEvent;
 import org.mule.api.endpoint.ImmutableEndpoint;
-import org.mule.api.endpoint.OutboundEndpoint;
 import org.mule.api.expression.ExpressionManager;
 import org.mule.util.StringUtils;
 
@@ -210,16 +209,16 @@ public abstract class AmqpEndpointUtil
         return StringUtils.defaultString((String) endpoint.getProperty(ROUTING_KEY));
     }
 
-    public static String getRoutingKey(final MuleEvent muleEvent, final OutboundEndpoint outboundEndpoint)
+    public static String getRoutingKey(final ImmutableEndpoint endpoint, final MuleEvent muleEvent)
     {
-        final String exchange = getExchangeName(outboundEndpoint);
-        String routingKey = getDynamicRoutingKey(outboundEndpoint, muleEvent);
+        final String exchange = getExchangeName(endpoint);
+        String routingKey = getDynamicRoutingKey(endpoint, muleEvent);
 
         // if dispatching to default exchange and routing key has been omitted use the
         // queueName as routing key
         if ((isDefaultExchange(exchange)) && (StringUtils.isBlank(routingKey)))
         {
-            final String queueName = getQueueName(outboundEndpoint.getAddress());
+            final String queueName = getQueueName(endpoint.getAddress());
             if (StringUtils.isNotBlank(queueName))
             {
                 routingKey = queueName;

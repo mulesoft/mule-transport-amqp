@@ -302,7 +302,7 @@ public class AmqpConnector extends AbstractConnector
         public boolean canDispatch(final MuleEvent muleEvent, final OutboundEndpoint outboundEndpoint)
         {
             final String eventExchange = AmqpEndpointUtil.getExchangeName(outboundEndpoint, muleEvent);
-            final String eventRoutingKey = AmqpEndpointUtil.getRoutingKey(muleEvent, outboundEndpoint);
+            final String eventRoutingKey = AmqpEndpointUtil.getRoutingKey(outboundEndpoint, muleEvent);
             return StringUtils.equals(getExchange(), eventExchange)
                    && StringUtils.equals(getRoutingKey(), eventRoutingKey);
         }
@@ -647,7 +647,7 @@ public class AmqpConnector extends AbstractConnector
                     final String exchange = AmqpEndpointUtil.getOrCreateExchange(
                         connectorConnection.getChannel(), outboundEndpoint, activeDeclarationsOnly);
 
-                    final String routingKey = AmqpEndpointUtil.getRoutingKey(muleEvent, outboundEndpoint);
+                    final String routingKey = AmqpEndpointUtil.getRoutingKey(outboundEndpoint, muleEvent);
 
                     if (StringUtils.isNotEmpty(AmqpEndpointUtil.getQueueName(outboundEndpoint.getAddress()))
                         || outboundEndpoint.getProperties().containsKey(AmqpEndpointUtil.QUEUE_DURABLE)

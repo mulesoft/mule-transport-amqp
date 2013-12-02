@@ -26,7 +26,6 @@ import org.mule.transaction.TransactionCoordination;
 import org.mule.transport.AbstractMessageDispatcher;
 import org.mule.transport.ConnectException;
 import org.mule.transport.amqp.AmqpConnector.OutboundConnection;
-import org.mule.util.StringUtils;
 
 import com.rabbitmq.client.AMQP.Queue.DeclareOk;
 import com.rabbitmq.client.Channel;
@@ -95,6 +94,11 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
         }
     }
 
+    /**
+     * Connecting an outbound AMQP endpoint does more than just connecting a channel: it can also
+     * potentially declare an exchange, a queue and bind the latter to the former. Since exchange
+     * and queue name can be dynamic, we can only perform the connection when an event is in flight.
+     */
     protected void internalDoConnect(final MuleEvent event) throws ConnectException
     {
         outboundConnection = amqpConnector.connect(this, event);
@@ -109,7 +113,7 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
 
             if (logger.isDebugEnabled())
             {
-                logger.debug("Disconnecting: exchange: " + getExchange() + " from channel: " + channel);
+                logger.debug("Disconnecting: " + outboundConnection);
             }
 
             outboundConnection = null;
@@ -134,27 +138,7 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
     protected AmqpMessage doOutboundAction(final MuleEvent event, final OutboundAction outboundAction)
         throws Exception
     {
-        // no need to protect this for thread safety because only one thread at a time can
-        // traverse a dispatcher instance
-        if (outboundConnection == null)
-        {
-            internalDoConnect(event);
-        }
-        else
-        {
-            if (!outboundConnection.canDispatch(event, getEndpoint()))
-            {
-                if (logger.isDebugEnabled())
-                {
-                    logger.debug("Outbound connection: "
-                                 + outboundConnection
-                                 + " can't handle current event. Refreshing it before performing outbound action.");
-                }
-
-                doDisconnect();
-                internalDoConnect(event);
-            }
-        }
+        ensureOutboundConnectionCanHandleEvent(event);
 
         final MuleMessage message = event.getMessage();
 
@@ -183,7 +167,7 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
         addReturnListenerIfNeeded(event, eventChannel);
 
         final String eventExchange = AmqpEndpointUtil.getExchangeName(endpoint, event);
-        final String eventRoutingKey = getRoutingKey();
+        final String eventRoutingKey = AmqpEndpointUtil.getRoutingKey(endpoint, event);
 
         final AmqpMessage result = outboundAction.run(amqpConnector, eventChannel, eventExchange,
             eventRoutingKey, amqpMessage, getTimeOutForEvent(event));
@@ -196,6 +180,31 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
         }
 
         return result;
+    }
+
+    private void ensureOutboundConnectionCanHandleEvent(final MuleEvent event) throws MuleException
+    {
+        // no need to protect this for thread safety because only one thread at a time can
+        // traverse a dispatcher instance
+        if (outboundConnection == null)
+        {
+            internalDoConnect(event);
+        }
+        else
+        {
+            if (!outboundConnection.canDispatch(event, getEndpoint()))
+            {
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Outbound connection: "
+                                 + outboundConnection
+                                 + " can't handle current event. Refreshing it before performing outbound action.");
+                }
+
+                doDisconnect();
+                internalDoConnect(event);
+            }
+        }
     }
 
     private int getTimeOutForEvent(final MuleEvent muleEvent)
@@ -256,19 +265,30 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
             {
                 if (mustUseChannelFromTransaction || mayUseChannelFromTransaction)
                 {
+                    if (logger.isDebugEnabled())
+                    {
+                        logger.debug("Using transacted channel from current transaction: " + transaction);
+                    }
+
                     return ((AmqpTransaction) transaction).getTransactedChannel();
                 }
             }
             else if (transaction instanceof DelegateTransaction)
             {
+                // we can't use the current dispatcher channel because it may get closed (if the
+                // dispatcher instance is destroyed) while the transaction block is not done with...
                 final Channel channel = amqpConnector.createChannel();
                 channel.txSelect();
-                transaction.bindResource(channel.getConnection(), channel);
+                // we wrap the channel so the transaction will know it can safely close it an
+                // commit/rollback
+                transaction.bindResource(channel.getConnection(), new CloseableChannelWrapper(
+                    channel));
 
                 if (logger.isDebugEnabled())
                 {
-                    logger.debug("Created transacted channel for delegate transaction " + transaction);
+                    logger.debug("Created transacted channel for delegate transaction: " + transaction);
                 }
+
                 return channel;
             }
             else
@@ -282,16 +302,6 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
             }
         }
 
-        return outboundConnection == null ? null : outboundConnection.getChannel();
-    }
-
-    protected String getExchange()
-    {
-        return outboundConnection == null ? StringUtils.EMPTY : outboundConnection.getExchange();
-    }
-
-    protected String getRoutingKey()
-    {
-        return outboundConnection == null ? StringUtils.EMPTY : outboundConnection.getRoutingKey();
+        return outboundConnection.getChannel();
     }
 }
