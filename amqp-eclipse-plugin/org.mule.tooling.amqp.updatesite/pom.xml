@@ -9,14 +9,14 @@
     <parent>
         <artifactId>mule-transport-amqp-plugin-parent</artifactId>
         <groupId>org.mule.transports</groupId>
-        <version>3.4.0</version>
+        <version>3.3.1</version>
     </parent>
 
     <properties>
-        <mule.version>3.4.0</mule.version>
+        <mule.version>3.3.1</mule.version>
         <category>Community</category>
         <licensePath>LICENSE.md</licensePath>
-        <mule.devkit.version>3.4.0</mule.devkit.version>
+        <mule.devkit.version>3.3.1</mule.devkit.version>
     </properties>
 
     <build>

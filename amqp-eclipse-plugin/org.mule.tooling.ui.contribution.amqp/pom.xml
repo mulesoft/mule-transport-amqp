@@ -6,7 +6,7 @@
     <parent>
         <artifactId>mule-transport-amqp-plugin-parent</artifactId>
         <groupId>org.mule.transports</groupId>
-        <version>3.4.0</version>
+        <version>3.3.1</version>
     </parent>
 
     <artifactId>mule-transport-amqp-contribution</artifactId>
@@ -15,9 +15,8 @@
     <properties>
         <home.dir>.</home.dir>
         <lib.dir>lib</lib.dir>
-        <mule.version>3.4.0</mule.version>
-        <!--<amqp.version>3.4.0-SNAPSHOT</amqp.version>-->
-        <amqp.version>3.4.0</amqp.version>
+        <mule.version>3.3.1</mule.version>
+        <amqp.version>3.3.1</amqp.version>
     </properties>
     <build>
         <plugins>
