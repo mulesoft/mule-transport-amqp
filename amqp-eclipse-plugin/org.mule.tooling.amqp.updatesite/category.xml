@@ -5,7 +5,7 @@
     </feature>
    <category-def name="mule-transport-amqp-contribution" label="Community">
       <description>
-			Mule AMQP Transport
+			Community
       </description>
    </category-def>
 </site>
