@@ -128,8 +128,11 @@ public abstract class AmqpEndpointUtil
             return;
         }
 
-        // bind queue to exchange
-        channel.queueBind(queueName, exchangeName, routingKey);
+				// bind queue to exchange
+				String[] routingKeyArray = routingKey.split(",");
+				for (int i = 0; i < routingKeyArray.length; i++) {
+					channel.queueBind(queueName, exchangeName, routingKeyArray[i].trim());
+				}
 
         LOG.info("Bound queue: " + queueName + " to exchange: " + exchangeName + " with routing key: "
                  + routingKey);
