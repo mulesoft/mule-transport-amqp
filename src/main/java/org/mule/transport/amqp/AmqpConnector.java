@@ -10,17 +10,6 @@
 
 package org.mule.transport.amqp;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.pool.BasePoolableObjectFactory;
-import org.apache.commons.pool.impl.StackObjectPool;
 import org.mule.api.DefaultMuleException;
 import org.mule.api.MuleContext;
 import org.mule.api.MuleEvent;
@@ -63,6 +52,18 @@ import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ReturnListener;
 import com.rabbitmq.client.ShutdownListener;
 import com.rabbitmq.client.ShutdownSignalException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.pool.BasePoolableObjectFactory;
+import org.apache.commons.pool.impl.StackObjectPool;
 
 /**
  * Connects to a particular virtual host on a particular AMQP broker.
@@ -701,7 +702,6 @@ public class AmqpConnector extends AbstractConnector
         // false -> no AMQP-level autoAck with the SingleMessageQueueingConsumer
         final String consumerTag = channel.basicConsume(queue, false, consumer);
         final Delivery delivery = consumer.nextDelivery(actualTimeOut);
-        channel.basicCancel(consumerTag);
 
         if (delivery == null)
         {
