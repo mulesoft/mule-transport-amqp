@@ -102,6 +102,15 @@
                         </xsd:documentation>
                     </xsd:annotation>
                 </xsd:attribute>
+                <xsd:attribute name="requestedHeartbeat" type="mule:substitutableInt"
+                    default="0">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            The requested AMQP heartbeat interval in seconds.
+                            Default value is 0 which means no heartbeats.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
                 <xsd:attribute name="deliveryMode" default="PERSISTENT">
                     <xsd:annotation>
                         <xsd:documentation>
