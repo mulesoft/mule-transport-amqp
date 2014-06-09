@@ -10,8 +10,6 @@
 
 package org.mule.transport.amqp;
 
-import java.io.IOException;
-
 import org.mule.api.MuleEvent;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
@@ -25,11 +23,14 @@ import org.mule.transaction.IllegalTransactionStateException;
 import org.mule.transaction.TransactionCoordination;
 import org.mule.transport.AbstractMessageDispatcher;
 import org.mule.transport.ConnectException;
+import org.mule.transport.NullPayload;
 import org.mule.transport.amqp.AmqpConnector.OutboundConnection;
 
 import com.rabbitmq.client.AMQP.Queue.DeclareOk;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ReturnListener;
+
+import java.io.IOException;
 
 /**
  * The <code>AmqpMessageDispatcher</code> takes care of sending messages from Mule to an AMQP
@@ -70,6 +71,8 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
                 final DeclareOk declareOk = channel.queueDeclare();
                 final String temporaryReplyToQueue = declareOk.getQueue();
                 amqpMessage.setReplyTo(temporaryReplyToQueue);
+
+
 
                 DISPATCH.run(amqpConnector, channel, exchange, routingKey, amqpMessage, timeout);
                 return amqpConnector.consumeMessage(channel, temporaryReplyToQueue, true, timeout);
@@ -131,7 +134,15 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
     public MuleMessage doSend(final MuleEvent event) throws Exception
     {
         final MuleMessage resultMessage = createMuleMessage(doOutboundAction(event, OutboundAction.SEND));
-        resultMessage.applyTransformers(event, amqpConnector.getReceiveTransformer());
+
+        if (resultMessage.getPayload() instanceof NullPayload) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(String.format("Did not get response on endpoint %s after %dms. Will return null response", endpoint.getName(), getTimeOutForEvent(event)));
+            }
+        } else {
+            resultMessage.applyTransformers(event, amqpConnector.getReceiveTransformer());
+        }
+
         return resultMessage;
     }
 
