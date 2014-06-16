@@ -103,11 +103,11 @@ public class AmqpConnector extends AbstractConnector
      * advantage of using the consume semantics, including non-blocking time-out, without polling as
      * using basic get would do.
      */
-    protected static final class SingleMessageQueueingConsumer extends QueueingConsumer
+    private static final class SingleMessageQueueingConsumer extends QueueingConsumer
     {
         private final AtomicBoolean received;
 
-        protected SingleMessageQueueingConsumer(final Channel channel)
+        private SingleMessageQueueingConsumer(final Channel channel)
         {
             super(channel);
             received = new AtomicBoolean();

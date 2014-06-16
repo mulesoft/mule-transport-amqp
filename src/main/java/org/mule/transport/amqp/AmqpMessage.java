@@ -10,17 +10,16 @@
 
 package org.mule.transport.amqp;
 
-import org.mule.transport.amqp.AmqpConstants.DeliveryMode;
-
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.AMQP.BasicProperties;
-import com.rabbitmq.client.Envelope;
-
 import java.util.Arrays;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.mule.transport.amqp.AmqpConstants.DeliveryMode;
+
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.AMQP.BasicProperties;
+import com.rabbitmq.client.Envelope;
 
 public class AmqpMessage
 {
@@ -68,11 +67,6 @@ public class AmqpMessage
     public void setReplyTo(final String replyTo)
     {
         this.properties = properties.builder().replyTo(replyTo).build();
-    }
-
-    public String getReplyTo()
-    {
-        return properties.getReplyTo();
     }
 
     public byte[] getBody()

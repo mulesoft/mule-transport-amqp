@@ -10,6 +10,11 @@
 
 package org.mule.transport.amqp;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mule.DefaultMuleEvent;
 import org.mule.api.MessagingException;
 import org.mule.api.MuleEvent;
@@ -19,12 +24,6 @@ import org.mule.api.endpoint.OutboundEndpoint;
 import org.mule.config.i18n.MessageFactory;
 import org.mule.transport.DefaultReplyToHandler;
 import org.mule.util.StringUtils;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class AmqpReplyToHandler extends DefaultReplyToHandler
 {
@@ -55,39 +54,22 @@ public class AmqpReplyToHandler extends DefaultReplyToHandler
                             + "&connector=" + urlEncode(event, amqpConnector.getName()));
 
         final AmqpMessageDispatcher dispatcher = new AmqpMessageDispatcher(outboundEndpoint);
-
-        AmqpMessage amqpMessage = (AmqpMessage) returnMessage.getPayload();
-        // don't start a response loop
-        amqpMessage.setReplyTo(null);
-
         final DefaultMuleEvent replyEvent = new DefaultMuleEvent(returnMessage, event);
+        dispatcher.process(replyEvent);
 
         try
         {
-            dispatcher.process(replyEvent);
-            if (LOG.isDebugEnabled())
-            {
-                LOG.debug(String.format("Successfully replied to %s: %s", replyToQueueName, replyEvent));
-            }
+            dispatcher.disconnect();
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
-            if (LOG.isDebugEnabled())
-            {
-                LOG.debug(String.format("Could not reply to %s", replyToQueueName), e);
-            }
-        }
-        finally {
-            try
-            {
-                dispatcher.disconnect();
-            }
-            catch (final Exception e)
-            {
-                LOG.warn("Failed to disconnect message dispatcher: " + dispatcher, e);
-            }
+            LOG.warn("Failed to disconnect message dispatcher: " + dispatcher, e);
         }
 
+        if (logger.isDebugEnabled())
+        {
+            logger.debug(String.format("Successfully replied to %s: %s", replyToQueueName, replyEvent));
+        }
     }
 
     protected String urlEncode(final MuleEvent event, final String stringToEncode) throws MessagingException

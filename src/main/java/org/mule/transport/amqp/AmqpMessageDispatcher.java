@@ -32,17 +32,12 @@ import com.rabbitmq.client.ReturnListener;
 
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * The <code>AmqpMessageDispatcher</code> takes care of sending messages from Mule to an AMQP
  * broker. It supports synchronous sending by the means of private temporary reply queues.
  */
 public class AmqpMessageDispatcher extends AbstractMessageDispatcher
 {
-    private static final Logger logger = LoggerFactory.getLogger(AmqpMessageDispatcher.class);
-
     protected final AmqpConnector amqpConnector;
     protected volatile OutboundConnection outboundConnection;
 
@@ -52,8 +47,6 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
         {
             @Override
             public AmqpMessage run(final AmqpConnector amqpConnector,
-                                   MuleEvent event,
-                                   MuleMessage message,
                                    final Channel channel,
                                    final String exchange,
                                    final String routingKey,
@@ -61,20 +54,7 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
                                    final long timeout) throws IOException
             {
                 channel.basicPublish(exchange, routingKey, amqpConnector.isMandatory(),
-                                     amqpConnector.isImmediate(), amqpMessage.getProperties(), amqpMessage.getBody());
-
-                String replyTo = amqpMessage.getReplyTo();
-                if (replyTo != null)
-                {
-                    try
-                    {
-                        amqpConnector.getReplyToHandler(null).processReplyTo(event, message, replyTo);
-                    }
-                    catch (MuleException e)
-                    {
-                        logger.warn("Found exception trying to reply on callback queue " + replyTo, e);
-                    }
-                }
+                    amqpConnector.isImmediate(), amqpMessage.getProperties(), amqpMessage.getBody());
                 return null;
             }
         },
@@ -82,8 +62,6 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
         {
             @Override
             public AmqpMessage run(final AmqpConnector amqpConnector,
-                                   MuleEvent event,
-                                   MuleMessage message,
                                    final Channel channel,
                                    final String exchange,
                                    final String routingKey,
@@ -94,21 +72,14 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
                 final String temporaryReplyToQueue = declareOk.getQueue();
                 amqpMessage.setReplyTo(temporaryReplyToQueue);
 
-                try
-                {
-                    DISPATCH.run(amqpConnector, event, message, channel, exchange, routingKey, amqpMessage, timeout);
-                    return amqpConnector.consumeMessage(channel, temporaryReplyToQueue, true, timeout);
-                }
-                finally
-                {
-                    channel.queueDelete(temporaryReplyToQueue);
-                }
+
+
+                DISPATCH.run(amqpConnector, channel, exchange, routingKey, amqpMessage, timeout);
+                return amqpConnector.consumeMessage(channel, temporaryReplyToQueue, true, timeout);
             }
         };
 
         public abstract AmqpMessage run(final AmqpConnector amqpConnector,
-                                        MuleEvent event,
-                                        MuleMessage message,
                                         Channel channel,
                                         String exchange,
                                         String routingKey,
@@ -162,7 +133,6 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
     @Override
     public MuleMessage doSend(final MuleEvent event) throws Exception
     {
-
         final MuleMessage resultMessage = createMuleMessage(doOutboundAction(event, OutboundAction.SEND));
 
         if (resultMessage.getPayload() instanceof NullPayload) {
@@ -210,7 +180,7 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
         final String eventExchange = AmqpEndpointUtil.getExchangeName(endpoint, event);
         final String eventRoutingKey = AmqpEndpointUtil.getRoutingKey(endpoint, event);
 
-        final AmqpMessage result = outboundAction.run(amqpConnector, event, message, eventChannel, eventExchange,
+        final AmqpMessage result = outboundAction.run(amqpConnector, eventChannel, eventExchange,
             eventRoutingKey, amqpMessage, getTimeOutForEvent(event));
 
         if (logger.isDebugEnabled())
