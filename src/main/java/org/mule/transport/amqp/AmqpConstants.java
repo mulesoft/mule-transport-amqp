@@ -10,13 +10,13 @@
 
 package org.mule.transport.amqp;
 
+import org.mule.util.ArrayUtils;
+
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.mule.util.ArrayUtils;
 
 public abstract class AmqpConstants
 {
@@ -72,6 +72,7 @@ public abstract class AmqpConstants
     public static final String TIMESTAMP = "timestamp";
     public static final String TYPE = "type";
     public static final String USER_ID = "user-id";
+    public static final String NEXT_PUBLISH_SEQ_NO = "nextPublishSequenceNo";
 
     public static final String ALL_USER_HEADERS = AmqpConnector.AMQP + ".headers";
 

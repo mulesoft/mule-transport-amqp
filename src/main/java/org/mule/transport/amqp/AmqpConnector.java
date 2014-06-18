@@ -92,6 +92,7 @@ public class AmqpConnector extends AbstractConnector
     private int prefetchCount;
     private boolean noLocal;
     private boolean exclusiveConsumers;
+    private boolean requestBrokerConfirms = false;
 
     private ConnectionFactory connectionFactory;
     private Connection connection;
@@ -989,5 +990,15 @@ public class AmqpConnector extends AbstractConnector
     public ConnectionFactory getConnectionFactory()
     {
         return this.connectionFactory;
+    }
+
+    public void setRequestBrokerConfirms(boolean requestBrokerConfirms)
+    {
+        this.requestBrokerConfirms = requestBrokerConfirms;
+    }
+
+    public boolean isRequestBrokerConfirms()
+    {
+        return requestBrokerConfirms;
     }
 }

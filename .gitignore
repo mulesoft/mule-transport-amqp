@@ -6,3 +6,8 @@
 target
 Ddo*
 ddo*
+*.iml
+*.ipr
+*.iws
+/.idea/
+.DS_Store

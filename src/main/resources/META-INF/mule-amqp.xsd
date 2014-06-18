@@ -116,6 +116,14 @@
                         </xsd:restriction>
                     </xsd:simpleType>
                 </xsd:attribute>
+                <xsd:attribute name="requestBrokerConfirms" default="false" type="xsd:boolean">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            If true, the connector will require the broker to confirm acknoledgement
+                            of messages.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
                 <xsd:attribute name="priority" default="0">
                     <xsd:annotation>
                         <xsd:documentation>

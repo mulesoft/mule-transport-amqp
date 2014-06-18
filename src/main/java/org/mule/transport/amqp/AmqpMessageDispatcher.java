@@ -31,6 +31,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ReturnListener;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The <code>AmqpMessageDispatcher</code> takes care of sending messages from Mule to an AMQP
@@ -38,46 +39,55 @@ import java.io.IOException;
  */
 public class AmqpMessageDispatcher extends AbstractMessageDispatcher
 {
+
     protected final AmqpConnector amqpConnector;
     protected volatile OutboundConnection outboundConnection;
+    private AmqpConfirmsManager confirmsManager;
 
     protected enum OutboundAction
     {
         DISPATCH
-        {
-            @Override
-            public AmqpMessage run(final AmqpConnector amqpConnector,
-                                   final Channel channel,
-                                   final String exchange,
-                                   final String routingKey,
-                                   final AmqpMessage amqpMessage,
-                                   final long timeout) throws IOException
-            {
-                channel.basicPublish(exchange, routingKey, amqpConnector.isMandatory(),
-                    amqpConnector.isImmediate(), amqpMessage.getProperties(), amqpMessage.getBody());
-                return null;
-            }
-        },
+                {
+                    @Override
+                    public AmqpMessage run(final AmqpConnector amqpConnector,
+                                           final Channel channel,
+                                           final String exchange,
+                                           final String routingKey,
+                                           final AmqpMessage amqpMessage,
+                                           final long timeout) throws IOException
+                    {
+                        channel.basicPublish(exchange, routingKey, amqpConnector.isMandatory(),
+                                             amqpConnector.isImmediate(), amqpMessage.getProperties(), amqpMessage.getBody());
+
+                        return null;
+                    }
+                },
         SEND
-        {
-            @Override
-            public AmqpMessage run(final AmqpConnector amqpConnector,
-                                   final Channel channel,
-                                   final String exchange,
-                                   final String routingKey,
-                                   final AmqpMessage amqpMessage,
-                                   final long timeout) throws IOException, InterruptedException
-            {
-                final DeclareOk declareOk = channel.queueDeclare();
-                final String temporaryReplyToQueue = declareOk.getQueue();
-                amqpMessage.setReplyTo(temporaryReplyToQueue);
+                {
+                    @Override
+                    public AmqpMessage run(final AmqpConnector amqpConnector,
+                                           final Channel channel,
+                                           final String exchange,
+                                           final String routingKey,
+                                           final AmqpMessage amqpMessage,
+                                           final long timeout) throws IOException, InterruptedException
+                    {
+                        final DeclareOk declareOk = channel.queueDeclare();
+                        final String temporaryReplyToQueue = declareOk.getQueue();
+                        amqpMessage.setReplyTo(temporaryReplyToQueue);
 
 
-
-                DISPATCH.run(amqpConnector, channel, exchange, routingKey, amqpMessage, timeout);
-                return amqpConnector.consumeMessage(channel, temporaryReplyToQueue, true, timeout);
-            }
-        };
+                        DISPATCH.run(amqpConnector, channel, exchange, routingKey, amqpMessage, timeout);
+                        try
+                        {
+                            return amqpConnector.consumeMessage(channel, temporaryReplyToQueue, true, timeout);
+                        }
+                        finally
+                        {
+                            channel.queueDelete(temporaryReplyToQueue);
+                        }
+                    }
+                };
 
         public abstract AmqpMessage run(final AmqpConnector amqpConnector,
                                         Channel channel,
@@ -85,16 +95,21 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
                                         String routingKey,
                                         AmqpMessage amqpMessage,
                                         final long timeout) throws IOException, InterruptedException;
-    };
+    }
+
+    ;
 
     public AmqpMessageDispatcher(final OutboundEndpoint endpoint)
     {
         super(endpoint);
         amqpConnector = (AmqpConnector) endpoint.getConnector();
+
         if (logger.isDebugEnabled())
         {
             logger.debug("Instantiated: " + this);
         }
+
+        confirmsManager = new DefaultAmqpConfirmsManager(amqpConnector);
     }
 
     /**
@@ -135,11 +150,15 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
     {
         final MuleMessage resultMessage = createMuleMessage(doOutboundAction(event, OutboundAction.SEND));
 
-        if (resultMessage.getPayload() instanceof NullPayload) {
-            if (logger.isDebugEnabled()) {
+        if (resultMessage == null || resultMessage.getPayload() instanceof NullPayload)
+        {
+            if (logger.isDebugEnabled())
+            {
                 logger.debug(String.format("Did not get response on endpoint %s after %dms. Will return null response", endpoint.getName(), getTimeOutForEvent(event)));
             }
-        } else {
+        }
+        else
+        {
             resultMessage.applyTransformers(event, amqpConnector.getReceiveTransformer());
         }
 
@@ -147,7 +166,7 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
     }
 
     protected AmqpMessage doOutboundAction(final MuleEvent event, final OutboundAction outboundAction)
-        throws Exception
+            throws Exception
     {
         ensureOutboundConnectionCanHandleEvent(event);
 
@@ -156,8 +175,8 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
         if (!(message.getPayload() instanceof AmqpMessage))
         {
             throw new DispatchException(
-                MessageFactory.createStaticMessage("Message payload is not an instance of: "
-                                                   + AmqpMessage.class.getName()), event, getEndpoint());
+                    MessageFactory.createStaticMessage("Message payload is not an instance of: "
+                                                       + AmqpMessage.class.getName()), event, getEndpoint());
         }
 
         final Channel eventChannel = getEventChannel();
@@ -177,17 +196,50 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
 
         addReturnListenerIfNeeded(event, eventChannel);
 
+        try
+        {
+            confirmsManager.requestConfirm(eventChannel, event);
+        }
+        catch (Exception e)
+        {
+            throw new DispatchException(
+                    MessageFactory.createStaticMessage("Broker failed to agree on confirming messages"
+                                                       + AmqpMessage.class.getName()), event, getEndpoint(), e);
+        }
+
         final String eventExchange = AmqpEndpointUtil.getExchangeName(endpoint, event);
         final String eventRoutingKey = AmqpEndpointUtil.getRoutingKey(endpoint, event);
+        final long timeout = getTimeOutForEvent(event);
 
-        final AmqpMessage result = outboundAction.run(amqpConnector, eventChannel, eventExchange,
-            eventRoutingKey, amqpMessage, getTimeOutForEvent(event));
+        AmqpMessage result;
+
+        try
+        {
+            result = outboundAction.run(amqpConnector, eventChannel, eventExchange,
+                                        eventRoutingKey, amqpMessage, timeout);
+
+            if (!confirmsManager.awaitConfirm(eventChannel, event, timeout, TimeUnit.MILLISECONDS))
+            {
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug(String.format("Broker failed to acknowledge delivery of message after %dms.\n%s", timeout, amqpMessage));
+                }
+
+                throw new DispatchException(
+                        MessageFactory.createStaticMessage("Broker failed to acknowledge delivery of message"), event, getEndpoint());
+            }
+        }
+        finally
+        {
+            confirmsManager.forget(event);
+        }
+
 
         if (logger.isDebugEnabled())
         {
             logger.debug(String.format(
-                "Successfully performed %s(channel: %s, exchange: %s, routing key: %s) for: %s and received: %s",
-                outboundAction, eventChannel, eventExchange, eventRoutingKey, event, result));
+                    "Successfully performed %s(channel: %s, exchange: %s, routing key: %s) for: %s and received: %s",
+                    outboundAction, eventChannel, eventExchange, eventRoutingKey, event, result));
         }
 
         return result;
@@ -238,7 +290,7 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
     protected void addReturnListenerIfNeeded(final MuleEvent event, final Channel channel)
     {
         final ReturnListener returnListener = event.getMessage().getInvocationProperty(
-            AmqpConstants.RETURN_LISTENER);
+                AmqpConstants.RETURN_LISTENER);
 
         if (returnListener == null)
         {
@@ -293,7 +345,7 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
                 // we wrap the channel so the transaction will know it can safely close it an
                 // commit/rollback
                 transaction.bindResource(channel.getConnection(), new CloseableChannelWrapper(
-                    channel));
+                        channel));
 
                 if (logger.isDebugEnabled())
                 {
@@ -307,8 +359,8 @@ public class AmqpMessageDispatcher extends AbstractMessageDispatcher
                 if (mustUseChannelFromTransaction)
                 {
                     throw new IllegalTransactionStateException(
-                        MessageFactory.createStaticMessage("No active AMQP transaction found for endpoint: "
-                                                           + endpoint));
+                            MessageFactory.createStaticMessage("No active AMQP transaction found for endpoint: "
+                                                               + endpoint));
                 }
             }
         }
