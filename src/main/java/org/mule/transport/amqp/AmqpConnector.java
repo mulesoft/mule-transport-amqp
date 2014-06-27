@@ -76,6 +76,7 @@ public class AmqpConnector extends AbstractConnector
 
     private String host;
     private int port = ConnectionFactory.DEFAULT_AMQP_PORT;
+    private int requestedHeartbeat = ConnectionFactory.DEFAULT_HEARTBEAT;
     private String[] fallbackAddresses;
     private String virtualHost;
     private String username;
@@ -387,6 +388,7 @@ public class AmqpConnector extends AbstractConnector
             connectionFactory.setVirtualHost(virtualHost);
             connectionFactory.setUsername(username);
             connectionFactory.setPassword(password);
+            connectionFactory.setRequestedHeartbeat(requestedHeartbeat);
         }
         else
         {
@@ -402,6 +404,7 @@ public class AmqpConnector extends AbstractConnector
             setPassword(connectionFactory.getPassword());
             setHost(connectionFactory.getHost());
             setPort(connectionFactory.getPort());
+            setRequestedHeartbeat(connectionFactory.getRequestedHeartbeat());
         }
     }
 
@@ -1000,5 +1003,15 @@ public class AmqpConnector extends AbstractConnector
     public boolean isRequestBrokerConfirms()
     {
         return requestBrokerConfirms;
+    }
+
+    public int getRequestedHeartbeat()
+    {
+        return requestedHeartbeat;
+    }
+
+    public void setRequestedHeartbeat(final int requestedHeartbeat)
+    {
+        this.requestedHeartbeat = requestedHeartbeat;
     }
 }

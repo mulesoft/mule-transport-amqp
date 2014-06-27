@@ -42,9 +42,12 @@ public class AmqpConnectorTestCase extends AbstractConnectorTestCase
     @Test
     public void testProperties() throws Exception
     {
+        int requestHeartBeat = 1234;
         final AmqpConnector amqpConnector = (AmqpConnector) getConnector();
         amqpConnector.setAckMode(AckMode.MULE_AUTO);
+        amqpConnector.setRequestedHeartbeat(requestHeartBeat);
         Assert.assertEquals(AckMode.MULE_AUTO, amqpConnector.getAckMode());
+        Assert.assertEquals(requestHeartBeat, amqpConnector.getRequestedHeartbeat());
     }
 
     @Override
