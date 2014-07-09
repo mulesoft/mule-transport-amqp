@@ -43,7 +43,7 @@
         <xsd:complexContent>
             <xsd:extension base="amqp:amqpConnectorType">
                 <xsd:sequence minOccurs="0" maxOccurs="1">
-                    <xsd:element minOccurs="1" maxOccurs="1"
+                    <xsd:element minOccurs="0" maxOccurs="1"
                         name="ssl-key-store" type="mule:tlsKeyStoreType">
                         <xsd:annotation>
                             <xsd:documentation>
@@ -65,7 +65,7 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:element>
-                    <xsd:element minOccurs="1" maxOccurs="1"
+                    <xsd:element minOccurs="0" maxOccurs="1"
                         name="ssl-trust-store" type="mule:tlsServerTrustStoreType">
                         <xsd:annotation>
                             <xsd:documentation>

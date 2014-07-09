@@ -72,7 +72,14 @@ public class AmqpsConnector extends AmqpConnector
             {
                 try
                 {
-                    tls.initialise(false, null);
+                    if (tls.getKeyStore() != null)
+                    {
+                        tls.initialise(false, null);
+                    }
+                    else
+                    {
+                        tls.initialise(true, null);
+                    }
                 }
                 catch (final CreateException e)
                 {
