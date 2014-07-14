@@ -705,22 +705,24 @@ public class AmqpConnector extends AbstractConnector
 
         // false -> no AMQP-level autoAck with the SingleMessageQueueingConsumer
         final String consumerTag = channel.basicConsume(queue, false, consumer);
-        final Delivery delivery = consumer.nextDelivery(actualTimeOut);
+        try {
+            final Delivery delivery = consumer.nextDelivery(actualTimeOut);
 
-        if (delivery == null)
-        {
-            return null;
-        }
-        else
-        {
-            if (autoAck)
-            {
-                // ack only if auto-ack was requested, otherwise it's up to the caller to ack
-                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+            if (delivery == null) {
+                return null;
+            } else {
+                if (autoAck) {
+                    // ack only if auto-ack was requested, otherwise it's up to the caller to ack
+                    channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                }
+
+                return new AmqpMessage(consumerTag, delivery.getEnvelope(), delivery.getProperties(),
+                        delivery.getBody());
             }
-
-            return new AmqpMessage(consumerTag, delivery.getEnvelope(), delivery.getProperties(),
-                delivery.getBody());
+        }
+        finally
+        {
+            channel.basicCancel(consumerTag);
         }
     }
 
