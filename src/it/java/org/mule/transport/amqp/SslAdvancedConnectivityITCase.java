@@ -10,6 +10,8 @@
 
 package org.mule.transport.amqp;
 
+import org.junit.Test;
+
 import java.io.IOException;
 
 public class SslAdvancedConnectivityITCase extends AbstractSslConnectivityITCase
@@ -23,5 +25,11 @@ public class SslAdvancedConnectivityITCase extends AbstractSslConnectivityITCase
     protected String getConfigResources()
     {
         return "ssl-advanced-tests-config.xml";
+    }
+
+    @Test
+    public void sslDispatchingAndReceivingWithoutKeystore() throws Exception
+    {
+        dispatchAndReceiveAMQPS("sslReceiverWithoutKeystore", "vm://sslDispatcherWithoutKeystore.in");
     }
 }

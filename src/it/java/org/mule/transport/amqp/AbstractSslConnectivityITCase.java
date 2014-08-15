@@ -10,19 +10,19 @@
 
 package org.mule.transport.amqp;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assume.assumeTrue;
-
-import java.io.IOException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mule.api.MuleMessage;
+
+import java.io.IOException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 public abstract class AbstractSslConnectivityITCase extends AbstractAmqpITCase
 {
@@ -40,11 +40,17 @@ public abstract class AbstractSslConnectivityITCase extends AbstractAmqpITCase
     @Test
     public void sslDispatchingAndReceiving() throws Exception
     {
-        final Future<MuleMessage> futureMuleMessage = setupFunctionTestComponentForFlow("sslReceiver");
+        dispatchAndReceiveAMQPS("sslReceiver", "vm://sslDispatcher.in");
+    }
+
+    protected void dispatchAndReceiveAMQPS(String flowName, String vmDispatcher)
+        throws Exception
+    {
+        final Future<MuleMessage> futureMuleMessage = setupFunctionTestComponentForFlow(flowName);
 
         final String testPayload = RandomStringUtils.randomAlphanumeric(20);
 
-        muleContext.getClient().dispatch("vm://sslDispatcher.in", testPayload, null);
+        muleContext.getClient().dispatch(vmDispatcher, testPayload, null);
 
         final MuleMessage muleMessage = futureMuleMessage.get(getTestTimeoutSecs(), TimeUnit.SECONDS);
 

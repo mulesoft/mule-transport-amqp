@@ -17,11 +17,23 @@
             algorithm="SunX509" storePassword="rabbitstore" />
     </amqps:connector>
 
+    <amqps:connector name="amqpsTlsKeyStoresWithoutKeystore" virtualHost="mule-test"
+        username="mule" password="elum">
+        <amqps:ssl-trust-store path="trustStore.jks" type="JKS"
+            algorithm="SunX509" storePassword="rabbitstore" />
+    </amqps:connector>
+
     <!-- Declare an exchange, a queue, bind the latter to the former -->
     <amqps:endpoint name="amqpsFullGlobalEndpoint" exchangeName="target-exchange"
         exchangeType="fanout" exchangeAutoDelete="true" exchangeDurable="false"
         queueName="target-queue" queueDurable="false" queueExclusive="false"
-        queueAutoDelete="true" routingKey="sslAdvancedTests" />
+        queueAutoDelete="true" routingKey="sslAdvancedTests" connector-ref="amqpsTlsKeyStores"/>
+
+    <amqps:endpoint name="amqpsFullGlobalEndpointWithoutKeystore"
+        exchangeName="target-without-keystore-exchange" exchangeType="fanout"
+        exchangeAutoDelete="true" exchangeDurable="false" queueName="target-without-keystore-queue"
+        queueDurable="false" queueExclusive="false" queueAutoDelete="true"
+        routingKey="sslAdvancedTestsWithoutKeystore" connector-ref="amqpsTlsKeyStoresWithoutKeystore"/>
 
     <flow name="sslDispatcher">
         <vm:inbound-endpoint path="sslDispatcher.in" />
@@ -30,6 +42,16 @@
 
     <flow name="sslReceiver">
         <amqps:inbound-endpoint ref="amqpsFullGlobalEndpoint" />
+        <test:component />
+    </flow>
+
+    <flow name="sslDispatcherWithoutKeystore">
+        <vm:inbound-endpoint path="sslDispatcherWithoutKeystore.in" />
+        <amqps:outbound-endpoint ref="amqpsFullGlobalEndpointWithoutKeystore" />
+    </flow>
+
+    <flow name="sslReceiverWithoutKeystore">
+        <amqps:inbound-endpoint ref="amqpsFullGlobalEndpointWithoutKeystore" />
         <test:component />
     </flow>
 </mule>
