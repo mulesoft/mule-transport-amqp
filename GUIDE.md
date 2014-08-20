@@ -237,6 +237,13 @@ It is possible to create several connectors connected to the same broker for the
         </p>
     </td>
   </tr>
+    <tr>
+    <td rowspan="1" class="confluenceTd">numberOfConsumers</td><td style="text-align: center" class="confluenceTd">integer</td><td style="text-align: center" class="confluenceTd">no</td><td style="text-align: center" class="confluenceTd">4</td><td class="confluenceTd">
+      <p>
+          The number of concurrent consumer threads that will be used to receive AMQP messages.
+        </p>
+    </td>
+  </tr>
   <tr>
     <td rowspan="1" class="confluenceTd">activeDeclarationsOnly</td><td style="text-align: center" class="confluenceTd">boolean</td><td style="text-align: center" class="confluenceTd">no</td><td style="text-align: center" class="confluenceTd">false</td><td class="confluenceTd">
       <p>
@@ -280,7 +287,7 @@ Endpoint attributes are interpreted differently if they are used on inbound or o
   <tr>
     <td rowspan="1" class="confluenceTd">routingKey</td><td style="text-align: center" class="confluenceTd">string</td><td style="text-align: center" class="confluenceTd">no</td><td style="text-align: center" class="confluenceTd"></td><td class="confluenceTd">
       <p>
-      The routing key to use when binding a queue or publishing a message.
+      Comma-separated routing keys to use when binding a queue or publishing a message.
     </p>
     </td>
   </tr>
