@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<mule-project xmlns="http://www.mulesoft.com/tooling/project" runtimeId="">
-    <name>AMQP-Transport-Studio-Demo</name>
-    <description>Demo project for the AMQP Transport in Mule Studio</description>
-</mule-project>

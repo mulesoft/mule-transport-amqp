@@ -26,6 +26,7 @@
 				<integer step="1" min="0" javaType="int" required="false" defaultValue="0" description="The maximum number of messages that the server will deliver, 0 if unlimited" caption="Prefetch Count" name="prefetchCount" />
 				<boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="true" description="Defines if the connector should only do active exchange and queue declarations or can also perform passive declarations to enforce their existence" caption="Active Declarations Only" name="activeDeclarationsOnly" />
 				<boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="true" description="Set to true if the connector should only create exclusive consumers" caption="Exclusive Consumers" name="exclusiveConsumers" />
+				<integer step="1" min="0" javaType="int" required="false" defaultValue="4" description="Set number of concurrent consumers threads that will be used to receive AMQP messages" caption="Number of Consumers" name="numberOfConsumers" />
 				<boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="true" description="This flag tells the server how to react if the message cannot be routed to a queue consumer immediately. If this flag is set to true, the server will throw an exception for any undeliverable message. If this flag is false, the server will queue the message, but with no guarantee that it will ever be consumed" caption="Immediate" name="immediate" />
 				<boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="true" description="This flag tells the server how to react if the message cannot be routed to a queue. If this flag is set to true, the server will throw an exception for any unroutable message. If this flag is false, the server silently drops the message" caption="Mandatory" name="mandatory" />
 				<boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="true" description="If the no-local field is set the server will not send messages to the connection that published them" caption="No Local" name="noLocal" />
@@ -44,7 +45,7 @@
 				<string name="queueName" xsdType="string" caption="Queue Name" alwaysFill="false" description="The queue name to consume from. Leave blank or omit for using a new private exclusive server-named queue" />
 			</group>
 			<group caption="Property Attributes" id="propertyAttributes">
-				<string name="routingKey" xsdType="string" caption="Routing Key" alwaysFill="false" description="The routing key to use when binding a queue or publishing a message" />
+				<string name="routingKey" xsdType="string" caption="Routing Key" alwaysFill="false" description="Comma-separated routing keys to use when binding a queue or publishing a message" />
 				<string name="consumerTag" xsdType="string" caption="Consumer Tag" alwaysFill="false" description="A client-generated consumer tag to establish context" />
 				<enum name="exchangeType" caption="Exchange Type" alwaysFill="false" description="The type of exchange to be declared">
 					<option value="fanout" />
