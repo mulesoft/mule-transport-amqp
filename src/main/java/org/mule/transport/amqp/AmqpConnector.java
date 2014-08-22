@@ -104,6 +104,8 @@ public class AmqpConnector extends AbstractConnector
      * extra message received. <b>It must be used with a non auto-ack consumer</b>. It has the
      * advantage of using the consume semantics, including non-blocking time-out, without polling as
      * using basic get would do.
+     *
+     * Consumer cancellation is up to the user.
      */
     private static final class SingleMessageQueueingConsumer extends QueueingConsumer
     {
@@ -131,7 +133,6 @@ public class AmqpConnector extends AbstractConnector
             {
                 received.set(true);
                 super.handleDelivery(consumerTag, envelope, properties, body);
-                getChannel().basicCancel(consumerTag);
             }
         }
     }
@@ -722,7 +723,21 @@ public class AmqpConnector extends AbstractConnector
         }
         finally
         {
-            channel.basicCancel(consumerTag);
+            try
+            {
+                channel.basicCancel(consumerTag);
+            }
+            catch(IOException e)
+            {
+                /**
+                 * The broker could decide to cancel a subscription on certain situations
+                 */
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Subscription to channel with consumerTag " + StringUtils.defaultString(consumerTag) +
+                            " could not be closed.", e);
+                }
+            }
         }
     }
 
