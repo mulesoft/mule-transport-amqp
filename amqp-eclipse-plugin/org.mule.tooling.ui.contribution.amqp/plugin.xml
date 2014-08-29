@@ -15,7 +15,7 @@
             icon="icons/small/amqp-endpoint-24x16.png"
             name="AMQP"
             path="amqp.xml"
-            version="3.4.3">
+            version="3.4.4">
       </externalContribution>
         <module
                 description="Core endpoints and patterns for Mule Tooling"
