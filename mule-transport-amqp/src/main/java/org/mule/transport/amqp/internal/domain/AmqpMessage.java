@@ -63,6 +63,11 @@ public class AmqpMessage
         this.properties = properties.builder().priority(priority).build();
     }
 
+    public String getReplyTo()
+    {
+        return this.properties.getReplyTo();
+    }
+
     public void setReplyTo(final String replyTo)
     {
         this.properties = properties.builder().replyTo(replyTo).build();
