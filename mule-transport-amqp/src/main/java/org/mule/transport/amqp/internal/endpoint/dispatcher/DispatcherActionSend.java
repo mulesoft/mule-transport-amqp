@@ -14,6 +14,7 @@ import com.rabbitmq.client.Channel;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 import org.mule.transport.amqp.internal.domain.AmqpMessage;
 import org.mule.transport.amqp.internal.client.MessageConsumer;
+import org.mule.util.StringUtils;
 
 import java.io.IOException;
 
@@ -30,11 +31,17 @@ public class DispatcherActionSend extends DispatcherAction
                            final AmqpMessage amqpMessage,
                            final long timeout) throws IOException, InterruptedException
     {
-        final AMQP.Queue.DeclareOk declareOk = channel.queueDeclare();
-        final String temporaryReplyToQueue = declareOk.getQueue();
-        amqpMessage.setReplyTo(temporaryReplyToQueue);
+        String replyTo = amqpMessage.getReplyTo();
+        if (StringUtils.isEmpty(replyTo))
+        {
+            final AMQP.Queue.DeclareOk declareOk = channel.queueDeclare();
+            replyTo = declareOk.getQueue();
+            amqpMessage.setReplyTo(replyTo);
+        }
 
         dispatcher.run(amqpConnector, channel, exchange, routingKey, amqpMessage, timeout);
-        return messageConsumer.consumeMessage(channel, temporaryReplyToQueue, true, timeout);
+
+        return messageConsumer.consumeMessage(channel, replyTo, true, timeout);
     }
+
 }

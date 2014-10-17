@@ -42,6 +42,9 @@ public class ReplyToHandler extends DefaultReplyToHandler
     public void processReplyTo(final MuleEvent event, final MuleMessage returnMessage, final Object replyTo)
         throws MuleException
     {
+
+
+
         final String replyToQueueName = (String) replyTo;
         if (StringUtils.isBlank(replyToQueueName))
         {
