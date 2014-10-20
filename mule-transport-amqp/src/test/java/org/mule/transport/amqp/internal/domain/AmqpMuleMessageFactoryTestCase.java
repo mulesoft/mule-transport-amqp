@@ -49,6 +49,7 @@ public class AmqpMuleMessageFactoryTestCase extends AbstractMuleContextTestCase
             .contentEncoding("utf-16")
             .contentType("application/vnd+mule.xml")
             .correlationId("cid-951753")
+            .clusterId("myClusterId")
             .deliveryMode(2)
             .expiration("expiration")
             .messageId(messageId)
@@ -113,6 +114,8 @@ public class AmqpMuleMessageFactoryTestCase extends AbstractMuleContextTestCase
             muleMessage.getProperty(AmqpConnector.CONTENT_ENCODING, PropertyScope.INBOUND));
         assertEquals(amqpProperties.getContentType(),
             muleMessage.getProperty(AmqpConnector.CONTENT_TYPE, PropertyScope.INBOUND));
+        assertEquals(amqpProperties.getClusterId(),
+                muleMessage.getProperty(AmqpConnector.CLUSTER_ID, PropertyScope.INBOUND));
         assertEquals(amqpProperties.getCorrelationId(),
             muleMessage.getProperty(AmqpConnector.CORRELATION_ID, PropertyScope.INBOUND));
         assertEquals(amqpProperties.getCorrelationId(), muleMessage.getCorrelationId());

@@ -33,7 +33,8 @@ public class ObjectToAmqpMessage extends AbstractAmqpMessageToObject
     private static final String[] AMQP_BASIC_PROPERTY_NAMES_ARRAY = new String[]{AmqpConnector.APP_ID,
             AmqpConnector.CONTENT_ENCODING, AmqpConnector.CONTENT_TYPE, AmqpConnector.CORRELATION_ID,
             AmqpConnector.DELIVERY_MODE, AmqpConnector.EXPIRATION, AmqpConnector.MESSAGE_ID, AmqpConnector.PRIORITY,
-            AmqpConnector.REPLY_TO, AmqpConnector.TIMESTAMP, AmqpConnector.TYPE, AmqpConnector.USER_ID};
+            AmqpConnector.REPLY_TO, AmqpConnector.TIMESTAMP, AmqpConnector.TYPE, AmqpConnector.USER_ID,
+            AmqpConnector.CLUSTER_ID};
 
     private static final String[] AMQP_TRANSPORT_TECHNICAL_PROPERTY_NAMES_ARRAY = new String[]{
             AmqpConnector.ALL_USER_HEADERS, AmqpConnector.CONSUMER_TAG, AmqpConnector.CHANNEL,
@@ -75,6 +76,7 @@ public class ObjectToAmqpMessage extends AbstractAmqpMessageToObject
         final boolean redelivered = getProperty(message, AmqpConnector.REDELIVER, false);
         final String exchange = getProperty(message, AmqpConnector.EXCHANGE);
         final String routingKey = getProperty(message, AmqpConnector.ROUTING_KEY);
+        final String clusterId = getProperty(message, AmqpConnector.CLUSTER_ID);
         final Envelope envelope = new Envelope(deliveryTag, redelivered, exchange, routingKey);
 
         final AMQP.BasicProperties.Builder bob = new AMQP.BasicProperties.Builder();
@@ -84,6 +86,7 @@ public class ObjectToAmqpMessage extends AbstractAmqpMessageToObject
             .contentType(this.<String> getProperty(message, AmqpConnector.CONTENT_TYPE))
             .correlationId(
                 this.<String> getProperty(message, AmqpConnector.CORRELATION_ID, message.getCorrelationId()))
+            .clusterId(this.<String> getProperty(message, AmqpConnector.CLUSTER_ID, clusterId))
             .deliveryMode(this.<Integer> getProperty(message, AmqpConnector.DELIVERY_MODE))
             .expiration(this.<String> getProperty(message, AmqpConnector.EXPIRATION))
             .messageId(this.<String> getProperty(message, AmqpConnector.MESSAGE_ID, message.getUniqueId()))

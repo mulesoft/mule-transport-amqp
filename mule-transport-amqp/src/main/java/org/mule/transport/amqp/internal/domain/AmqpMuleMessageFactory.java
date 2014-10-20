@@ -105,6 +105,9 @@ public class AmqpMuleMessageFactory extends AbstractMuleMessageFactory
         putIfNonNull(MuleProperties.MULE_MESSAGE_ID_PROPERTY, messageId, messageProperties);
         muleMessage.setUniqueId(messageId == null ? UUID.getUUID() : messageId);
 
+        final String clusterId = amqpProperties.getClusterId();
+        putIfNonNull(AmqpConnector.CLUSTER_ID, clusterId, messageProperties);
+
         putIfNonNull(AmqpConnector.PRIORITY, amqpProperties.getPriority(), messageProperties);
 
         final String replyTo = amqpProperties.getReplyTo();
