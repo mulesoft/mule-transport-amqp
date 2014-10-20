@@ -87,6 +87,8 @@ public class AmqpConnector extends AbstractConnector
 
     public static final String MESSAGE_ID = "message-id";
 
+    public static final String CLUSTER_ID = "cluster-id";
+
     public static final String PRIORITY = "priority";
 
     public static final String REDELIVER = "redelivered";
