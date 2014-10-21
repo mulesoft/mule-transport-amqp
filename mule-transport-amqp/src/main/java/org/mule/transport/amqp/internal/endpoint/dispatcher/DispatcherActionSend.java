@@ -36,9 +36,9 @@ public class DispatcherActionSend extends DispatcherAction
         {
             final AMQP.Queue.DeclareOk declareOk = channel.queueDeclare();
             replyTo = declareOk.getQueue();
-            amqpMessage.setReplyTo(replyTo);
         }
 
+        amqpMessage.setReplyTo(replyTo);
         dispatcher.run(amqpConnector, channel, exchange, routingKey, amqpMessage, timeout);
 
         return messageConsumer.consumeMessage(channel, replyTo, true, timeout);
