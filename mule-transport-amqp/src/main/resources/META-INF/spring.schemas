@@ -1,4 +1,4 @@
-http\://www.mulesoft.org/schema/mule/amqp/3.4/mule-amqp.xsd=META-INF/mule-amqp.xsd
+http\://www.mulesoft.org/schema/mule/amqp/3.6/mule-amqp.xsd=META-INF/mule-amqp.xsd
 http\://www.mulesoft.org/schema/mule/amqp/current/mule-amqp.xsd=META-INF/mule-amqp.xsd
-http\://www.mulesoft.org/schema/mule/amqps/3.4/mule-amqps.xsd=META-INF/mule-amqps.xsd
+http\://www.mulesoft.org/schema/mule/amqps/3.6/mule-amqps.xsd=META-INF/mule-amqps.xsd
 http\://www.mulesoft.org/schema/mule/amqps/current/mule-amqps.xsd=META-INF/mule-amqps.xsd
