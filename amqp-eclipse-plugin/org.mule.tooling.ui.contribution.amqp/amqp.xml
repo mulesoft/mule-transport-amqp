@@ -3,21 +3,21 @@
 
 	<!-- GLOBAL ELEMENT CONFIGURATION DEFINITION -->
 	
-	<connector caption="AMQP Connector" localId="connector" icon="icons/small/amqp-endpoint-24x16.png" image="icons/large/amqp-endpoint-48x32.png" extends="http://www.mulesoft.org/schema/mule/core/connectorWithReconnectionType" description="">
-		<attribute-category caption="Protocol" description="Advanced AMQP Protocol properties">
+	<connector caption="AMQP-0-9 Connector" localId="connector" icon="icons/small/amqp-endpoint-24x16.png" image="icons/large/amqp-endpoint-48x32.png" extends="http://www.mulesoft.org/schema/mule/core/connectorWithReconnectionType" description="">
+		<attribute-category caption="Protocol" description="Advanced AMQP-0-9 Protocol properties">
 			<group caption="General" id="general">
-				<string javaType="java.lang.String" required="false" defaultValue="localhost" description="The main AMQP broker host to connect to" caption="Host" name="host" />
-				<integer step="1" min="0" javaType="int" required="false" defaultValue="5672" description="The port to use to connect to the main AMQP broker" caption="Port" name="port" />
+				<string javaType="java.lang.String" required="false" defaultValue="localhost" description="The main AMQP-0-9 broker host to connect to" caption="Host" name="host" />
+				<integer step="1" min="0" javaType="int" required="false" defaultValue="5672" description="The port to use to connect to the main AMQP-0-9 broker" caption="Port" name="port" />
 				<string javaType="java.lang.String" required="false" description="A comma-separated list of &quot;host:port&quot; or &quot;host&quot;, defining fallback brokers to attempt connection to, should the connection to main broker fail." caption="Fallback Addresses" name="fallbackAddresses" />
-				<string javaType="java.lang.String" required="false" defaultValue="/" description="The virtual host to connect to on the AMQP broker" caption="Virtual Host" name="virtualHost" />
-				<string javaType="java.lang.String" required="false" defaultValue="guest" description="The user name to use to connect to the AMQP broker" caption="Username" name="username" />
-				<string javaType="java.lang.String" required="false" defaultValue="guest" description="The password to use to connect to the AMQP broker" caption="Password" name="password" />
-				<enum allowsCustom="true" javaType="org.mule.modules.AmqpConstants.DeliveryMode" required="false" defaultValue="PERSISTENT" supportsExpressions="true" description="The delivery mode to use when publishing to the AMQP broker" caption="Delivery Mode" name="deliveryMode">
+				<string javaType="java.lang.String" required="false" defaultValue="/" description="The virtual host to connect to on the AMQP-0-9 broker" caption="Virtual Host" name="virtualHost" />
+				<string javaType="java.lang.String" required="false" defaultValue="guest" description="The user name to use to connect to the AMQP-0-9 broker" caption="Username" name="username" />
+				<string javaType="java.lang.String" required="false" defaultValue="guest" description="The password to use to connect to the AMQP-0-9 broker" caption="Password" name="password" />
+				<enum allowsCustom="true" javaType="org.mule.modules.AmqpConstants.DeliveryMode" required="false" defaultValue="PERSISTENT" supportsExpressions="true" description="The delivery mode to use when publishing to the AMQP-0-9 broker" caption="Delivery Mode" name="deliveryMode">
 					<option value="NON_PERSISTENT" />
 					<option value="PERSISTENT" />
 				</enum>
-				<string javaType="byte" required="false" defaultValue="0" description="The priority to use when publishing to the AMQP broker" caption="Priority" name="priority" />
-				<enum allowsCustom="true" javaType="org.mule.modules.AmqpConstants.AckMode" required="false" defaultValue="AMQP_AUTO" supportsExpressions="true" description="The acknowledgment mode to use when consuming from the AMQP broker" caption="Ack Mode" name="ackMode">
+				<string javaType="byte" required="false" defaultValue="0" description="The priority to use when publishing to the AMQP-0-9 broker" caption="Priority" name="priority" />
+				<enum allowsCustom="true" javaType="org.mule.modules.AmqpConstants.AckMode" required="false" defaultValue="AMQP_AUTO" supportsExpressions="true" description="The acknowledgment mode to use when consuming from the AMQP-0-9 broker" caption="Ack Mode" name="ackMode">
 					<option value="AMQP_AUTO" />
 					<option value="MANUAL" />
 					<option value="MULE_AUTO" />
@@ -26,11 +26,11 @@
 				<integer step="1" min="0" javaType="int" required="false" defaultValue="0" description="The maximum number of messages that the server will deliver, 0 if unlimited" caption="Prefetch Count" name="prefetchCount" />
 				<boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="true" description="Defines if the connector should only do active exchange and queue declarations or can also perform passive declarations to enforce their existence" caption="Active Declarations Only" name="activeDeclarationsOnly" />
 				<boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="true" description="Set to true if the connector should only create exclusive consumers" caption="Exclusive Consumers" name="exclusiveConsumers" />
-				<integer step="1" min="0" javaType="int" required="false" defaultValue="4" description="Set number of concurrent consumers threads that will be used to receive AMQP messages" caption="Number of Consumers" name="numberOfConsumers" />
+				<integer step="1" min="0" javaType="int" required="false" defaultValue="4" description="Set number of concurrent consumers threads that will be used to receive AMQP-0-9 messages" caption="Number of Consumers" name="numberOfConsumers" />
 				<boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="true" description="This flag tells the server how to react if the message cannot be routed to a queue consumer immediately. If this flag is set to true, the server will throw an exception for any undeliverable message. If this flag is false, the server will queue the message, but with no guarantee that it will ever be consumed" caption="Immediate" name="immediate" />
 				<boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="true" description="This flag tells the server how to react if the message cannot be routed to a queue. If this flag is set to true, the server will throw an exception for any unroutable message. If this flag is false, the server silently drops the message" caption="Mandatory" name="mandatory" />
 				<boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="true" description="If the no-local field is set the server will not send messages to the connection that published them" caption="No Local" name="noLocal" />
-				<string javaType="com.rabbitmq.client.ReturnListener" required="false" defaultValue="/" description="Reference to an endpoint to which AMQP returned message should be dispatched to" caption="Default Return Listener Reference" name="defaultReturnListener-ref" />
+				<string javaType="com.rabbitmq.client.ReturnListener" required="false" defaultValue="/" description="Reference to an endpoint to which AMQP-0-9 returned message should be dispatched to" caption="Default Return Listener Reference" name="defaultReturnListener-ref" />
 				<string javaType="org.mule.api.endpoint.EndpointBuilder" required="false" description="Reference to an endpoint builder to which be used to get the return listener endpoint" caption="Default Return Endpoint Builder Reference" name="defaultReturnEndpointBuilder-ref" />
 			</group>
 		</attribute-category>
@@ -38,7 +38,7 @@
 
 	<!-- ENDPOINT DEFINITION -->
 
-	<endpoint localId="endpoint" caption="AMQP" icon="icons/small/amqp-endpoint-24x16.png" image="icons/large/amqp-endpoint-48x32.png" extends="http://www.mulesoft.org/schema/mule/core/endPointType" defaultMep="RequestResponse" doNotInherit="ref,connector-ref,transformer-refs,responseTransformer-refs" description="The AMQP Endpoint allows Mule applications to send or receive messages to an AMQP Broker">
+	<endpoint localId="endpoint" caption="AMQP-0-9" icon="icons/small/amqp-endpoint-24x16.png" image="icons/large/amqp-endpoint-48x32.png" extends="http://www.mulesoft.org/schema/mule/core/endPointType" defaultMep="RequestResponse" doNotInherit="ref,connector-ref,transformer-refs,responseTransformer-refs" description="The AMQP-0-9 Endpoint allows Mule applications to send or receive messages to an AMQP-0-9 Broker">
 		<attribute-category caption="General" description="General properties">
 			<group caption="Address Attributes" id="addressAttributes">
 				<string name="exchangeName" xsdType="string" caption="Exchange Name" alwaysFill="false" description="The exchange to publish to or bind queues to. Leave blank or omit for the default exchange" />
@@ -69,7 +69,7 @@
 			</group>
 		</attribute-category>
 	</endpoint>
-	<global-endpoint localId="endpoint" caption="AMQP" icon="icons/small/amqp-endpoint-24x16.png" image="icons/large/amqp-endpoint-48x32.png" extends="http://www.mulesoft.org/schema/mule/amqp/endpoint" defaultMep="RequestResponse" description="The AMQP Endpoint allows Mule applications to send or receive messages over AMQP message brokers.">
+	<global-endpoint localId="endpoint" caption="AMQP-0-9" icon="icons/small/amqp-endpoint-24x16.png" image="icons/large/amqp-endpoint-48x32.png" extends="http://www.mulesoft.org/schema/mule/amqp/endpoint" defaultMep="RequestResponse" description="The AMQP-0-9 Endpoint allows Mule applications to send or receive messages over AMQP-0-9 message brokers.">
 		<attribute-category caption="General" description="General properties">
 			<group caption="Generic" id="endpointGeneric" topAnchor="$">
 				<name caption="Name" description="Endpoint name" name="name" required="true" />
@@ -79,34 +79,34 @@
 
 	<!-- TRANSFORMER DEFINITION -->
 
-	<transformer localId="amqpmessage-to-object-transformer" caption="AMQP Message to Object" extends="http://www.mulesoft.org/schema/mule/core/abstractTransformerTypeWithoutOwnContent" description="Pending description..." image="icons/large/Transformer-48x32.png" icon="icons/small/Transformer-24x16.png">
+	<transformer localId="amqpmessage-to-object-transformer" caption="AMQP-0-9 Message to Object" extends="http://www.mulesoft.org/schema/mule/core/abstractTransformerTypeWithoutOwnContent" description="Pending description..." image="icons/large/Transformer-48x32.png" icon="icons/small/Transformer-24x16.png">
 		<attribute-category caption="General" description="General properties">
 			<group caption="Generic" id="abstractTransformerGeneric" topAnchor="$">
 				<name name="name" caption="Name" topAnchor="$" description="Identifies the transformer so that other elements can reference it. This is required if the transformer is defined at the global level." xsdType="substitutableClass" />
 			</group>
-			<group caption="AMQP Settings" id="amqpSettings">
+			<group caption="AMQP-0-9 Settings" id="amqpSettings">
 				<integer javaType="int" required="false" defaultValue="1" description="" caption="Priority Weighting" name="priorityWeighting" />
 			</group>
 		</attribute-category>
 	</transformer>
-	<global-transformer localId="amqpmessage-to-object-transformer" caption="AMQPMessage to Object" extends="http://www.mulesoft.org/schema/mule/amqp/amqpmessage-to-object-transformer" description="Pending description..." image="icons/large/Transformer-48x32.png" icon="icons/small/Transformer-24x16.png">
+	<global-transformer localId="amqpmessage-to-object-transformer" caption="AMQP-0-9 Message to Object" extends="http://www.mulesoft.org/schema/mule/amqp/amqpmessage-to-object-transformer" description="Pending description..." image="icons/large/Transformer-48x32.png" icon="icons/small/Transformer-24x16.png">
 		<attribute-category caption="General" description="General properties">
 			<group caption="Generic" id="abstractTransformerGeneric" topAnchor="$">
 				<name name="name" caption="Name" topAnchor="$" description="Identifies the transformer so that other elements can reference it. This is required if the transformer is defined at the global level." xsdType="substitutableClass" />
 			</group>
-			<group caption="AMQP Settings" id="amqpSettings">
+			<group caption="AMQP-0-9 Settings" id="amqpSettings">
 				<integer javaType="int" required="false" defaultValue="1" description="" caption="Priority Weighting" name="priorityWeighting" />
 			</group>
 		</attribute-category>
 	</global-transformer>
-	<transformer localId="object-to-amqpmessage-transformer" caption="AMQP Object to AMQPMessage" extends="http://www.mulesoft.org/schema/mule/core/abstractTransformerTypeWithoutOwnContent" description="Pending description..." image="icons/large/Transformer-48x32.png" icon="icons/small/Transformer-24x16.png">
+	<transformer localId="object-to-amqpmessage-transformer" caption="Object to AMQP-0-9 Message" extends="http://www.mulesoft.org/schema/mule/core/abstractTransformerTypeWithoutOwnContent" description="Pending description..." image="icons/large/Transformer-48x32.png" icon="icons/small/Transformer-24x16.png">
 		<attribute-category caption="General" description="General properties">
 			<group caption="Generic" id="abstractTransformerGeneric" topAnchor="$">
 				<name name="name" caption="Name" topAnchor="$" description="Identifies the transformer so that other elements can reference it. This is required if the transformer is defined at the global level." xsdType="substitutableClass" />
 			</group>
 		</attribute-category>
 	</transformer>
-	<global-transformer localId="object-to-amqpmessage-transformer" caption="AMQP Message to Object" extends="http://www.mulesoft.org/schema/mule/amqp/object-to-amqpmessage-transformer" description="Pending description..." image="icons/large/Transformer-48x32.png" icon="icons/small/Transformer-24x16.png">
+	<global-transformer localId="object-to-amqpmessage-transformer" caption="AMQP-0-9 Message to Object" extends="http://www.mulesoft.org/schema/mule/amqp/object-to-amqpmessage-transformer" description="Pending description..." image="icons/large/Transformer-48x32.png" icon="icons/small/Transformer-24x16.png">
 		<attribute-category caption="General" description="General properties">
 			<group caption="Generic" id="abstractTransformerGeneric" topAnchor="$">
 				<name name="name" caption="Name" topAnchor="$" description="Identifies the transformer so that other elements can reference it. This is required if the transformer is defined at the global level." xsdType="substitutableClass" />
@@ -116,17 +116,17 @@
 
 	<!-- MESSAGE COMPONENTS DEFINITION -->
 
-	<component image="icons/large/amqp-component-48x32.png" caption="AMQP Acknowledge Message" icon="icons/small/amqp-component-24x16.png" localId="acknowledge-message" description="Acknowledges the AMQP message that is currently processed by Mule." extends="http://www.mulesoft.org/schema/mule/core/abstractComponentType" doNotInherit="http://www.mulesoft.org/schema/mule/core/abstract-interceptor,http://www.mulesoft.org/schema/mule/core/refInterceptorStackType">
+	<component image="icons/large/amqp-component-48x32.png" caption="AMQP-0-9 Acknowledge Message" icon="icons/small/amqp-component-24x16.png" localId="acknowledge-message" description="Acknowledges the AMQP-0-9 message that is currently processed by Mule." extends="http://www.mulesoft.org/schema/mule/core/abstractComponentType" doNotInherit="http://www.mulesoft.org/schema/mule/core/abstract-interceptor,http://www.mulesoft.org/schema/mule/core/refInterceptorStackType">
 		<attribute-category caption="General" description="General properties">
-			<boolean name="multiple" xsdType="boolean" caption="Exchange Durable" defaultValue="false" required="false" description="Set to true to acknowledge all messages up to and including the delivery tag of the AMQP message that is currently processed by Mule; false to acknowledge just the current message." />
+			<boolean name="multiple" xsdType="boolean" caption="Exchange Durable" defaultValue="false" required="false" description="Set to true to acknowledge all messages up to and including the delivery tag of the AMQP-0-9 message that is currently processed by Mule; false to acknowledge just the current message." />
 		</attribute-category>
 	</component>
-	<component image="icons/large/amqp-component-48x32.png" caption="AMQP Reject Message" icon="icons/small/amqp-component-24x16.png" localId="reject-message" description="Rejects the AMQP message that is currently processed by Mule." extends="http://www.mulesoft.org/schema/mule/core/abstractComponentType" doNotInherit="http://www.mulesoft.org/schema/mule/core/abstract-interceptor,http://www.mulesoft.org/schema/mule/core/refInterceptorStackType">
+	<component image="icons/large/amqp-component-48x32.png" caption="AMQP-0-9 Reject Message" icon="icons/small/amqp-component-24x16.png" localId="reject-message" description="Rejects the AMQP-0-9 message that is currently processed by Mule." extends="http://www.mulesoft.org/schema/mule/core/abstractComponentType" doNotInherit="http://www.mulesoft.org/schema/mule/core/abstract-interceptor,http://www.mulesoft.org/schema/mule/core/refInterceptorStackType">
 		<attribute-category caption="General" description="General properties">
 			<boolean name="requeue" xsdType="boolean" caption="Requeue" defaultValue="false" required="false" description="Set to true if the rejected message should be requeued rather than discarded/dead-lettered." />
 		</attribute-category>
 	</component>
-	<component image="icons/large/amqp-component-48x32.png" caption="AMQP Recover" icon="icons/small/amqp-component-24x16.png" localId="recover" description="Ask the broker to resend unacknowledged messages. In 0-8 basic.recover is asynchronous; in 0-9-1 it is synchronous." extends="http://www.mulesoft.org/schema/mule/core/abstractComponentType" doNotInherit="http://www.mulesoft.org/schema/mule/core/abstract-interceptor,http://www.mulesoft.org/schema/mule/core/refInterceptorStackType">
+	<component image="icons/large/amqp-component-48x32.png" caption="AMQP-0-9 Recover" icon="icons/small/amqp-component-24x16.png" localId="recover" description="Ask the broker to resend unacknowledged messages. In 0-8 basic.recover is asynchronous; in 0-9-1 it is synchronous." extends="http://www.mulesoft.org/schema/mule/core/abstractComponentType" doNotInherit="http://www.mulesoft.org/schema/mule/core/abstract-interceptor,http://www.mulesoft.org/schema/mule/core/refInterceptorStackType">
 		<attribute-category caption="General" description="General properties">
 			<boolean name="requeue" xsdType="boolean" caption="Requeue" defaultValue="false" required="false" description="If true, messages will be requeued and possibly delivered to a different consumer. If false, messages will be redelivered to the same consumer." />
 		</attribute-category>

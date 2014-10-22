@@ -13,7 +13,7 @@
             contributionNamespacePrefix="amqp"
             contributionType="connector"
             icon="icons/small/amqp-endpoint-24x16.png"
-            name="AMQP"
+            name="AMQP-0-9"
             path="amqp.xml"
             version="3.4.3">
       </externalContribution>
@@ -26,7 +26,7 @@
                expandByDefault="false"
                icon="icons/categories/EndpointsCategory-16x16.png"
                id="org.mule.tooling.ui.contribution.amqp"
-               name="Mule AMQP Transport"
+               name="Mule AMQP-0-9 Transport"
                paletteWeight="3000">
          </category>
      </module>
