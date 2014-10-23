@@ -77,43 +77,6 @@
 		</attribute-category>
 	</global-endpoint>
 
-	<!-- TRANSFORMER DEFINITION -->
-
-	<transformer localId="amqpmessage-to-object-transformer" caption="AMQP-0-9 Message to Object" extends="http://www.mulesoft.org/schema/mule/core/abstractTransformerTypeWithoutOwnContent" description="Pending description..." image="icons/large/Transformer-48x32.png" icon="icons/small/Transformer-24x16.png">
-		<attribute-category caption="General" description="General properties">
-			<group caption="Generic" id="abstractTransformerGeneric" topAnchor="$">
-				<name name="name" caption="Name" topAnchor="$" description="Identifies the transformer so that other elements can reference it. This is required if the transformer is defined at the global level." xsdType="substitutableClass" />
-			</group>
-			<group caption="AMQP-0-9 Settings" id="amqpSettings">
-				<integer javaType="int" required="false" defaultValue="1" description="" caption="Priority Weighting" name="priorityWeighting" />
-			</group>
-		</attribute-category>
-	</transformer>
-	<global-transformer localId="amqpmessage-to-object-transformer" caption="AMQP-0-9 Message to Object" extends="http://www.mulesoft.org/schema/mule/amqp/amqpmessage-to-object-transformer" description="Pending description..." image="icons/large/Transformer-48x32.png" icon="icons/small/Transformer-24x16.png">
-		<attribute-category caption="General" description="General properties">
-			<group caption="Generic" id="abstractTransformerGeneric" topAnchor="$">
-				<name name="name" caption="Name" topAnchor="$" description="Identifies the transformer so that other elements can reference it. This is required if the transformer is defined at the global level." xsdType="substitutableClass" />
-			</group>
-			<group caption="AMQP-0-9 Settings" id="amqpSettings">
-				<integer javaType="int" required="false" defaultValue="1" description="" caption="Priority Weighting" name="priorityWeighting" />
-			</group>
-		</attribute-category>
-	</global-transformer>
-	<transformer localId="object-to-amqpmessage-transformer" caption="Object to AMQP-0-9 Message" extends="http://www.mulesoft.org/schema/mule/core/abstractTransformerTypeWithoutOwnContent" description="Pending description..." image="icons/large/Transformer-48x32.png" icon="icons/small/Transformer-24x16.png">
-		<attribute-category caption="General" description="General properties">
-			<group caption="Generic" id="abstractTransformerGeneric" topAnchor="$">
-				<name name="name" caption="Name" topAnchor="$" description="Identifies the transformer so that other elements can reference it. This is required if the transformer is defined at the global level." xsdType="substitutableClass" />
-			</group>
-		</attribute-category>
-	</transformer>
-	<global-transformer localId="object-to-amqpmessage-transformer" caption="AMQP-0-9 Message to Object" extends="http://www.mulesoft.org/schema/mule/amqp/object-to-amqpmessage-transformer" description="Pending description..." image="icons/large/Transformer-48x32.png" icon="icons/small/Transformer-24x16.png">
-		<attribute-category caption="General" description="General properties">
-			<group caption="Generic" id="abstractTransformerGeneric" topAnchor="$">
-				<name name="name" caption="Name" topAnchor="$" description="Identifies the transformer so that other elements can reference it. This is required if the transformer is defined at the global level." xsdType="substitutableClass" />
-			</group>
-		</attribute-category>
-	</global-transformer>
-
 	<!-- MESSAGE COMPONENTS DEFINITION -->
 
 	<component image="icons/large/amqp-component-48x32.png" caption="AMQP-0-9 Acknowledge Message" icon="icons/small/amqp-component-24x16.png" localId="acknowledge-message" description="Acknowledges the AMQP-0-9 message that is currently processed by Mule." extends="http://www.mulesoft.org/schema/mule/core/abstractComponentType" doNotInherit="http://www.mulesoft.org/schema/mule/core/abstract-interceptor,http://www.mulesoft.org/schema/mule/core/refInterceptorStackType">
