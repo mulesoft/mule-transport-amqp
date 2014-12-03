@@ -62,11 +62,6 @@ public class AmqpConnector extends AbstractConnector
 {
     public static final String AMQP = "amqp";
 
-    /**
-     * Default number of consumer threads
-     */
-    public static final int DEFAULT_NUM_CONSUMER_THREADS = 4;
-
     // message properties names are consistent with AMQP spec
     // (cluster-id is deprecated and not supported here)
     public static final String APP_ID = "app-id";
@@ -151,7 +146,6 @@ public class AmqpConnector extends AbstractConnector
     private boolean noLocal;
     private boolean exclusiveConsumers;
     private boolean requestBrokerConfirms = false;
-    private int numberOfConsumers = DEFAULT_NUM_CONSUMER_THREADS;
 
     private ConnectionFactory connectionFactory;
     private Connection connection;
@@ -288,8 +282,7 @@ public class AmqpConnector extends AbstractConnector
             {
                 connectionFactory.setHost(brokerAddress.getHost());
                 connectionFactory.setPort(brokerAddress.getPort());
-                ExecutorService es = Executors.newFixedThreadPool(numberOfConsumers);
-                connection = connectionFactory.newConnection(es);
+                connection = connectionFactory.newConnection();
 
                 connection.addShutdownListener(new ShutdownListener()
                 {
@@ -673,13 +666,4 @@ public class AmqpConnector extends AbstractConnector
         return defaultReturnListener;
     }
 
-    public int getNumberOfConsumers()
-    {
-        return numberOfConsumers;
-    }
-
-    public void setNumberOfConsumers(int numberOfConsumers)
-    {
-        this.numberOfConsumers = numberOfConsumers;
-    }
 }
