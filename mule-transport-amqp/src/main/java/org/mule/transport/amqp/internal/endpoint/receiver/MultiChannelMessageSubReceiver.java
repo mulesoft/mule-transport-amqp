@@ -7,88 +7,92 @@
  * license, a copy of which has been included with this distribution in the
  * LICENSE.txt file.
  */
-
 package org.mule.transport.amqp.internal.endpoint.receiver;
 
+import com.rabbitmq.client.Channel;
 import org.mule.api.MuleException;
-import org.mule.api.construct.FlowConstruct;
 import org.mule.api.endpoint.ImmutableEndpoint;
-import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.api.lifecycle.CreateException;
 import org.mule.api.lifecycle.StartException;
-import org.mule.api.transport.Connector;
 import org.mule.config.i18n.MessageFactory;
 import org.mule.transport.AbstractMessageReceiver;
-import org.mule.transport.amqp.internal.client.UrlEndpointURIParser;
-import org.mule.transport.amqp.internal.connector.ChannelHandler;
-import org.mule.transport.amqp.internal.domain.AmqpMessage;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
-import org.mule.transport.amqp.internal.connector.connection.InboundConnection;
-
-import com.rabbitmq.client.Channel;
+import org.mule.transport.amqp.internal.client.ChannelHandler;
+import org.mule.transport.amqp.internal.endpoint.AmqpEndpointUtil;
 import org.mule.util.StringUtils;
 
 /**
- * The <code>MessageReceiver</code> subscribes to a queue and dispatches received messages to
- * Mule.
+ * In Mule an endpoint corresponds to a single receiver. It's up to the receiver to do multithreaded consumption and
+ * resource allocation, if needed. This class honors the <code>numberOfConcurrentTransactedReceivers</code> strictly
+ * and will create exactly this number of consumers.
  */
-public class MessageReceiver extends AbstractMessageReceiver
+public class MultiChannelMessageSubReceiver extends AbstractMessageReceiver
 {
     public static final String CONSUMER_TAG = "consumerTag";
 
+    protected final MultiChannelMessageReceiver parentReceiver;
     protected final AmqpConnector amqpConnector;
-    protected volatile InboundConnection inboundConnection;
+    protected final ImmutableEndpoint endpoint;
+    protected final AmqpEndpointUtil endpointUtil;
     protected volatile String consumerTag;
+    protected Channel channel;
+    protected String queueName;
 
-    public MessageReceiver(final Connector connector,
-                           final FlowConstruct flowConstruct,
-                           final InboundEndpoint endpoint) throws CreateException
+
+    public MultiChannelMessageSubReceiver(MultiChannelMessageReceiver parentReceiver) throws CreateException
     {
-        super(connector, flowConstruct, endpoint);
-        this.amqpConnector = (AmqpConnector) connector;
+        super(parentReceiver.getConnector(), parentReceiver.getFlowConstruct(), parentReceiver.getEndpoint());
+        this.parentReceiver = parentReceiver;
+        amqpConnector = (AmqpConnector) parentReceiver.getConnector();
+        endpoint = parentReceiver.getEndpoint();
+        endpointUtil = new AmqpEndpointUtil();
     }
 
     @Override
     public void doStart() throws MuleException
     {
-        inboundConnection = amqpConnector.connect(this);
-
-        if (logger.isDebugEnabled())
-        {
-            logger.debug("Connected queue: " + getQueueName() + " on channel: " + getChannel());
-        }
-
         try
         {
-            if (endpoint.getTransactionConfig().isTransacted())
+            logger.debug("Starting subreceiver on queue: " + getQueueName() + " on channel: " + getChannel());
+
+            channel = amqpConnector.getChannelHandler().getOrCreateChannel(endpoint);
+            parentReceiver.declareEndpoint(channel);
+
+            if (logger.isDebugEnabled())
             {
-                getChannel().txSelect();
+                logger.debug("Connected queue: " + getQueueName() + " on channel: " + getChannel());
             }
 
-            consumerTag = getChannel().basicConsume(getQueueName(), amqpConnector.getAckMode().isAutoAck(),
-                getClientConsumerTag(), amqpConnector.isNoLocal(), amqpConnector.isExclusiveConsumers(),
-                null, new MessageReceiverConsumer(this, getChannel()));
+            if (endpoint.getTransactionConfig().isTransacted())
+            {
+                channel.txSelect();
+            }
+
+            queueName = parentReceiver.getQueueOrCreateTemporaryQueue(channel);
+
+            consumerTag = channel.basicConsume(getQueueName(), amqpConnector.getAckMode().isAutoAck(),
+                    getClientConsumerTag(), amqpConnector.isNoLocal(), amqpConnector.isExclusiveConsumers(),
+                    null, new MessageReceiverConsumer(this, channel));
 
             logger.info("Started subscription: " + consumerTag + " on "
-                        + (endpoint.getTransactionConfig().isTransacted() ? "transacted " : "") + "channel: "
-                        + getChannel());
+                    + (endpoint.getTransactionConfig().isTransacted() ? "transacted " : "") + "channel: "
+                    + channel);
         }
         catch (final Exception e)
         {
             throw new StartException(
                     MessageFactory.createStaticMessage("Error when subscribing to queue: "
-                          + getQueueName() + " on channel: " + getChannel()), e, this);
+                            + getQueueName() + " on channel: " + channel), e, this);
         }
+        logger.debug("Started subreceiver on queue: " + getQueueName() + " on channel: " + getChannel());
     }
 
     @Override
     public void doStop()
     {
-        Channel channel = null;
-
+        logger.debug("Stopping subreceiver " + getQueueName() + " on channel: " + getChannel());
         try
         {
-            channel = getChannel();
             if (channel == null)
             {
                 return;
@@ -109,20 +113,21 @@ public class MessageReceiver extends AbstractMessageReceiver
             if (logger.isDebugEnabled())
             {
                 logger.debug("Disconnecting receiver for queue: " + getQueueName() + " from channel: "
-                             + channel);
+                        + channel);
             }
 
-            ChannelHandler.closeChannel(channel);
+            amqpConnector.getChannelHandler().closeChannel(channel);
         }
         catch (final Exception e)
         {
             logger.warn(
-                MessageFactory.createStaticMessage("Failed to cancel subscription: " + consumerTag
-                                                   + " on channel: " + channel), e);
+                    MessageFactory.createStaticMessage("Failed to cancel subscription: " + consumerTag
+                            + " on channel: " + channel), e);
         }
         finally
         {
-            inboundConnection = null;
+            logger.debug("Stopped subreceiver " + getQueueName() + " on channel: " + getChannel());
+
         }
     }
 
@@ -145,14 +150,14 @@ public class MessageReceiver extends AbstractMessageReceiver
         }
     }
 
-    protected Channel getChannel()
+    public Channel getChannel()
     {
-        return inboundConnection == null ? null : inboundConnection.getChannel();
+        return channel;
     }
 
     protected String getQueueName()
     {
-        return inboundConnection == null ? null : inboundConnection.getQueue();
+        return queueName;
     }
 
     protected String getClientConsumerTag()

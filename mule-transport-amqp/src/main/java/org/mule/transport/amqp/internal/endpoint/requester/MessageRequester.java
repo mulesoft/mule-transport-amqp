@@ -17,12 +17,12 @@ import org.mule.transport.AbstractMessageRequester;
 import org.mule.transport.ConnectException;
 import org.mule.transport.amqp.internal.client.MessageConsumer;
 import org.mule.transport.amqp.internal.client.MessagePropertiesHandler;
-import org.mule.transport.amqp.internal.connector.ChannelHandler;
+import org.mule.transport.amqp.internal.client.ChannelHandler;
 import org.mule.transport.amqp.internal.domain.AmqpMessage;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
-import org.mule.transport.amqp.internal.connector.connection.InboundConnection;
 
 import com.rabbitmq.client.Channel;
+import org.mule.transport.amqp.internal.endpoint.AmqpEndpointUtil;
 
 /**
  * The <code>MessageRequester</code> is used to consume individual messages from an AMQP broker.
@@ -31,44 +31,51 @@ public class MessageRequester extends AbstractMessageRequester
 {
     protected final AmqpConnector amqpConnector;
 
-    protected InboundConnection inboundConnection;
-
     protected MessageConsumer messageConsumer = new MessageConsumer();
 
     protected MessagePropertiesHandler messagePropertiesHandler = new MessagePropertiesHandler();
 
+    private AmqpEndpointUtil endpointUtil;
+
+    private InboundEndpoint endpoint;
+
+    private Channel channel;
 
     public MessageRequester(final InboundEndpoint endpoint)
     {
         super(endpoint);
+        this.endpoint = endpoint;
         amqpConnector = (AmqpConnector) endpoint.getConnector();
+        endpointUtil = new AmqpEndpointUtil();
     }
 
     @Override
     public void doConnect() throws ConnectException
     {
-        inboundConnection = amqpConnector.connect(this);
+        try
+        {
+            channel = amqpConnector.getChannelHandler().getOrCreateChannel(endpoint);
+        }
+        catch (Exception e)
+        {
+            throw new ConnectException(e, this);
+        }
     }
 
     @Override
     public void doDisconnect() throws MuleException
     {
-        final Channel channel = getChannel();
-
         if (logger.isDebugEnabled())
         {
             logger.debug("Disconnecting: queue: " + getQueueName() + " from channel: " + channel);
         }
 
-        inboundConnection = null;
-        ChannelHandler.closeChannel(channel);
+        amqpConnector.getChannelHandler().closeChannel(channel);
     }
 
     @Override
     protected MuleMessage doRequest(final long timeout) throws Exception
     {
-        final Channel channel = getChannel();
-
         final AmqpMessage amqpMessage = messageConsumer.consumeMessage(channel, getQueueName(),
                 amqpConnector.getAckMode().isAutoAck(), timeout);
 
@@ -76,19 +83,14 @@ public class MessageRequester extends AbstractMessageRequester
 
         final MuleMessage muleMessage = createMuleMessage(amqpMessage);
 
-        messagePropertiesHandler.addInvocationPropertiesIfNecessary(channel, amqpMessage, muleMessage, amqpConnector);
+        messagePropertiesHandler.addInvocationProperties(channel, amqpMessage, muleMessage, amqpConnector);
         messagePropertiesHandler.ackMessageIfNecessary(channel, amqpMessage, endpoint);
 
         return muleMessage;
     }
 
-    protected Channel getChannel()
-    {
-        return inboundConnection == null ? null : inboundConnection.getChannel();
-    }
-
     protected String getQueueName()
     {
-        return inboundConnection == null ? null : inboundConnection.getQueue();
+        return endpointUtil.getQueueName(getEndpoint().getAddress());
     }
 }

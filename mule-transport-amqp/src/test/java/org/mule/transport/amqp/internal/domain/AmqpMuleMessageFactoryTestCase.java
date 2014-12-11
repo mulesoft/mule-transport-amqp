@@ -95,48 +95,48 @@ public class AmqpMuleMessageFactoryTestCase extends AbstractMuleContextTestCase
     public static void checkInboundProperties(final AmqpMessage amqpMessage, final MuleMessage muleMessage)
     {
         assertEquals(amqpMessage.getConsumerTag(),
-            muleMessage.getProperty(AmqpConnector.CONSUMER_TAG, PropertyScope.INBOUND));
+            muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_CONSUMER_TAG, PropertyScope.INBOUND));
 
         final Envelope envelope = amqpMessage.getEnvelope();
         assertEquals(envelope.getDeliveryTag(),
-            muleMessage.getProperty(AmqpConnector.DELIVERY_TAG, PropertyScope.INBOUND));
+            muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_DELIVERY_TAG, PropertyScope.INBOUND));
         assertEquals(envelope.isRedeliver(),
-            muleMessage.getProperty(AmqpConnector.REDELIVER, PropertyScope.INBOUND));
+            muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_REDELIVER, PropertyScope.INBOUND));
         assertEquals(envelope.getExchange(),
             muleMessage.getProperty(AmqpConnector.EXCHANGE, PropertyScope.INBOUND));
         assertEquals(envelope.getRoutingKey(),
-            muleMessage.getProperty(AmqpConnector.ROUTING_KEY, PropertyScope.INBOUND));
+            muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_ROUTING_KEY, PropertyScope.INBOUND));
 
         final BasicProperties amqpProperties = amqpMessage.getProperties();
         assertEquals(amqpProperties.getAppId(),
-            muleMessage.getProperty(AmqpConnector.APP_ID, PropertyScope.INBOUND));
+            muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_APP_ID, PropertyScope.INBOUND));
         assertEquals(amqpProperties.getContentEncoding(),
-            muleMessage.getProperty(AmqpConnector.CONTENT_ENCODING, PropertyScope.INBOUND));
+            muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_CONTENT_ENCODING, PropertyScope.INBOUND));
         assertEquals(amqpProperties.getContentType(),
-            muleMessage.getProperty(AmqpConnector.CONTENT_TYPE, PropertyScope.INBOUND));
+            muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_CONTENT_TYPE, PropertyScope.INBOUND));
         assertEquals(amqpProperties.getClusterId(),
-                muleMessage.getProperty(AmqpConnector.CLUSTER_ID, PropertyScope.INBOUND));
+                muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_CLUSTER_ID, PropertyScope.INBOUND));
         assertEquals(amqpProperties.getCorrelationId(),
-            muleMessage.getProperty(AmqpConnector.CORRELATION_ID, PropertyScope.INBOUND));
+            muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_CORRELATION_ID, PropertyScope.INBOUND));
         assertEquals(amqpProperties.getCorrelationId(), muleMessage.getCorrelationId());
         assertEquals(amqpProperties.getDeliveryMode(),
-            muleMessage.getProperty(AmqpConnector.DELIVERY_MODE, PropertyScope.INBOUND));
+            muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_DELIVERY_MODE, PropertyScope.INBOUND));
         assertEquals(amqpProperties.getExpiration(),
-            muleMessage.getProperty(AmqpConnector.EXPIRATION, PropertyScope.INBOUND));
+            muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_EXPIRATION, PropertyScope.INBOUND));
         assertEquals(amqpProperties.getMessageId(),
-            muleMessage.getProperty(AmqpConnector.MESSAGE_ID, PropertyScope.INBOUND));
+            muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_MESSAGE_ID, PropertyScope.INBOUND));
         assertEquals(amqpProperties.getMessageId(), muleMessage.getUniqueId());
         assertEquals(amqpProperties.getPriority(),
-            muleMessage.getProperty(AmqpConnector.PRIORITY, PropertyScope.INBOUND));
+            muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_PRIORITY, PropertyScope.INBOUND));
         assertEquals(amqpProperties.getReplyTo(),
-            muleMessage.getProperty(AmqpConnector.REPLY_TO, PropertyScope.INBOUND));
+            muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_REPLY_TO, PropertyScope.INBOUND));
         assertEquals(amqpProperties.getReplyTo(), muleMessage.getReplyTo());
         assertEquals(amqpProperties.getTimestamp(),
-            muleMessage.getProperty(AmqpConnector.TIMESTAMP, PropertyScope.INBOUND));
+            muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_TIMESTAMP, PropertyScope.INBOUND));
         assertEquals(amqpProperties.getType(),
-            muleMessage.getProperty(AmqpConnector.TYPE, PropertyScope.INBOUND));
+            muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_TYPE, PropertyScope.INBOUND));
         assertEquals(amqpProperties.getUserId(),
-            muleMessage.getProperty(AmqpConnector.USER_ID, PropertyScope.INBOUND));
+            muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_USER_ID, PropertyScope.INBOUND));
 
         for (final Entry<String, Object> header : amqpProperties.getHeaders().entrySet())
         {

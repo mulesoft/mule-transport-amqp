@@ -20,9 +20,9 @@ public final class MessageReceiverConsumer extends DefaultConsumer
 {
     private static final Logger logger = LoggerFactory.getLogger(MessageReceiverConsumer.class);
 
-    private MessageReceiver messageReceiver;
+    private MultiChannelMessageSubReceiver messageReceiver;
 
-    public MessageReceiverConsumer(MessageReceiver messageReceiver, final Channel channel)
+    public MessageReceiverConsumer(MultiChannelMessageSubReceiver messageReceiver, final Channel channel)
     {
         super(channel);
         this.messageReceiver = messageReceiver;

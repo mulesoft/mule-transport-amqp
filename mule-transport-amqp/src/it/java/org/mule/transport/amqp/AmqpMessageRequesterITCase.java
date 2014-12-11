@@ -21,7 +21,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Test;
 import org.mule.api.MuleMessage;
 import org.mule.module.client.MuleClient;
-import org.mule.transport.amqp.internal.client.UrlEndpointURIParser;
+import org.mule.transport.amqp.internal.connector.AmqpConnector;
 import org.mule.transport.amqp.internal.processor.Acknowledger;
 
 public class AmqpMessageRequesterITCase extends AbstractAmqpITCase
@@ -63,7 +63,7 @@ public class AmqpMessageRequesterITCase extends AbstractAmqpITCase
         final MuleMessage receivedMessage = dispatchTestMessageAndAssertValidReceivedMessage(
             "amqpManualAckRequester", "amqpManualAckLocalhostConnector");
 
-        Acknowledger.ack(receivedMessage, false);
+        new Acknowledger().ack(receivedMessage, false);
     }
 
     @Test
@@ -89,7 +89,7 @@ public class AmqpMessageRequesterITCase extends AbstractAmqpITCase
         {
             getChannel().queueDeclare(queueName, true, false, false, Collections.<String, Object> emptyMap());
 
-            final String requestedUrl = "amqp://" + UrlEndpointURIParser.DEFAULT_EXCHANGE_ALIAS + "/amqp-queue."
+            final String requestedUrl = "amqp://" + AmqpConnector.ENDPOINT_DEFAULT_EXCHANGE_ALIAS + "/amqp-queue."
                                         + queueName + "?connector=amqpAutoAckLocalhostConnector";
 
             // try with messages already waiting

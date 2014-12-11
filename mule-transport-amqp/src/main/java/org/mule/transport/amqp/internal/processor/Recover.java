@@ -41,12 +41,12 @@ public class Recover extends AbstractChannelMessageProcessor
         this.requeue = requeue;
     }
 
-    public static void recover(final MuleEvent event, final boolean requeue) throws MuleException
+    public void recover(final MuleEvent event, final boolean requeue) throws MuleException
     {
         recover(event.getMessage(), requeue);
     }
 
-    public static void recover(final MuleMessage message, final boolean requeue) throws MuleException
+    public void recover(final MuleMessage message, final boolean requeue) throws MuleException
     {
         final Channel channel = getChannelOrFail(message, CHANNEL_ACTION);
 

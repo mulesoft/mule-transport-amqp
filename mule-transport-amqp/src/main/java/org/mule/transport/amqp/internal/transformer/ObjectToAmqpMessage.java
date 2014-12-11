@@ -27,17 +27,17 @@ import org.mule.util.ArrayUtils;
 
 public class ObjectToAmqpMessage extends AbstractAmqpMessageToObject
 {
-    private static final String[] AMQP_ENVELOPE_PROPERTY_NAMES_ARRAY = new String[]{AmqpConnector.DELIVERY_TAG,
-            AmqpConnector.EXCHANGE, AmqpConnector.REDELIVER, AmqpConnector.ROUTING_KEY};
+    private static final String[] AMQP_ENVELOPE_PROPERTY_NAMES_ARRAY = new String[]{AmqpConnector.MESSAGE_PROPERTY_DELIVERY_TAG,
+            AmqpConnector.EXCHANGE, AmqpConnector.MESSAGE_PROPERTY_REDELIVER, AmqpConnector.MESSAGE_PROPERTY_ROUTING_KEY};
 
-    private static final String[] AMQP_BASIC_PROPERTY_NAMES_ARRAY = new String[]{AmqpConnector.APP_ID,
-            AmqpConnector.CONTENT_ENCODING, AmqpConnector.CONTENT_TYPE, AmqpConnector.CORRELATION_ID,
-            AmqpConnector.DELIVERY_MODE, AmqpConnector.EXPIRATION, AmqpConnector.MESSAGE_ID, AmqpConnector.PRIORITY,
-            AmqpConnector.REPLY_TO, AmqpConnector.TIMESTAMP, AmqpConnector.TYPE, AmqpConnector.USER_ID,
-            AmqpConnector.CLUSTER_ID};
+    private static final String[] AMQP_BASIC_PROPERTY_NAMES_ARRAY = new String[]{AmqpConnector.MESSAGE_PROPERTY_APP_ID,
+            AmqpConnector.MESSAGE_PROPERTY_CONTENT_ENCODING, AmqpConnector.MESSAGE_PROPERTY_CONTENT_TYPE, AmqpConnector.MESSAGE_PROPERTY_CORRELATION_ID,
+            AmqpConnector.MESSAGE_PROPERTY_DELIVERY_MODE, AmqpConnector.MESSAGE_PROPERTY_EXPIRATION, AmqpConnector.MESSAGE_PROPERTY_MESSAGE_ID, AmqpConnector.MESSAGE_PROPERTY_PRIORITY,
+            AmqpConnector.MESSAGE_PROPERTY_REPLY_TO, AmqpConnector.MESSAGE_PROPERTY_TIMESTAMP, AmqpConnector.MESSAGE_PROPERTY_TYPE, AmqpConnector.MESSAGE_PROPERTY_USER_ID,
+            AmqpConnector.MESSAGE_PROPERTY_CLUSTER_ID};
 
     private static final String[] AMQP_TRANSPORT_TECHNICAL_PROPERTY_NAMES_ARRAY = new String[]{
-            AmqpConnector.ALL_USER_HEADERS, AmqpConnector.CONSUMER_TAG, AmqpConnector.CHANNEL,
+            AmqpConnector.ALL_USER_HEADERS, AmqpConnector.MESSAGE_PROPERTY_CONSUMER_TAG, AmqpConnector.MESSAGE_PROPERTY_CHANNEL,
             AmqpConnector.AMQP_DELIVERY_TAG, AmqpConnector.RETURN_LISTENER, AmqpConnector.RETURN_REPLY_CODE,
             AmqpConnector.RETURN_REPLY_TEXT, AmqpConnector.RETURN_EXCHANGE, AmqpConnector.RETURN_ROUTING_KEY};
 
@@ -70,32 +70,32 @@ public class ObjectToAmqpMessage extends AbstractAmqpMessageToObject
                 MessageFactory.createStaticMessage("Impossible to extract bytes out of: " + message), e);
         }
 
-        final String consumerTag = getProperty(message, AmqpConnector.CONSUMER_TAG);
+        final String consumerTag = getProperty(message, AmqpConnector.MESSAGE_PROPERTY_CONSUMER_TAG);
 
-        final long deliveryTag = getProperty(message, AmqpConnector.DELIVERY_TAG, 0L);
-        final boolean redelivered = getProperty(message, AmqpConnector.REDELIVER, false);
+        final long deliveryTag = getProperty(message, AmqpConnector.MESSAGE_PROPERTY_DELIVERY_TAG, 0L);
+        final boolean redelivered = getProperty(message, AmqpConnector.MESSAGE_PROPERTY_REDELIVER, false);
         final String exchange = getProperty(message, AmqpConnector.EXCHANGE);
-        final String routingKey = getProperty(message, AmqpConnector.ROUTING_KEY);
-        final String clusterId = getProperty(message, AmqpConnector.CLUSTER_ID);
+        final String routingKey = getProperty(message, AmqpConnector.MESSAGE_PROPERTY_ROUTING_KEY);
+        final String clusterId = getProperty(message, AmqpConnector.MESSAGE_PROPERTY_CLUSTER_ID);
         final Envelope envelope = new Envelope(deliveryTag, redelivered, exchange, routingKey);
 
         final AMQP.BasicProperties.Builder bob = new AMQP.BasicProperties.Builder();
-        bob.appId(this.<String> getProperty(message, AmqpConnector.APP_ID))
+        bob.appId(this.<String> getProperty(message, AmqpConnector.MESSAGE_PROPERTY_APP_ID))
             .contentEncoding(
-                this.<String> getProperty(message, AmqpConnector.CONTENT_ENCODING, outputEncoding))
-            .contentType(this.<String> getProperty(message, AmqpConnector.CONTENT_TYPE))
+                this.<String> getProperty(message, AmqpConnector.MESSAGE_PROPERTY_CONTENT_ENCODING, outputEncoding))
+            .contentType(this.<String> getProperty(message, AmqpConnector.MESSAGE_PROPERTY_CONTENT_TYPE))
             .correlationId(
-                this.<String> getProperty(message, AmqpConnector.CORRELATION_ID, message.getCorrelationId()))
-            .clusterId(this.<String> getProperty(message, AmqpConnector.CLUSTER_ID, clusterId))
-            .deliveryMode(this.<Integer> getProperty(message, AmqpConnector.DELIVERY_MODE))
-            .expiration(this.<String> getProperty(message, AmqpConnector.EXPIRATION))
-            .messageId(this.<String> getProperty(message, AmqpConnector.MESSAGE_ID, message.getUniqueId()))
-            .priority(this.<Integer> getProperty(message, AmqpConnector.PRIORITY))
+                this.<String> getProperty(message, AmqpConnector.MESSAGE_PROPERTY_CORRELATION_ID, message.getCorrelationId()))
+            .clusterId(this.<String> getProperty(message, AmqpConnector.MESSAGE_PROPERTY_CLUSTER_ID, clusterId))
+            .deliveryMode(this.<Integer> getProperty(message, AmqpConnector.MESSAGE_PROPERTY_DELIVERY_MODE))
+            .expiration(this.<String> getProperty(message, AmqpConnector.MESSAGE_PROPERTY_EXPIRATION))
+            .messageId(this.<String> getProperty(message, AmqpConnector.MESSAGE_PROPERTY_MESSAGE_ID, message.getUniqueId()))
+            .priority(this.<Integer> getProperty(message, AmqpConnector.MESSAGE_PROPERTY_PRIORITY))
             .replyTo(
-                this.<String> getProperty(message, AmqpConnector.REPLY_TO, (String) message.getReplyTo()))
-            .timestamp(this.<Date> getProperty(message, AmqpConnector.TIMESTAMP, new Date()))
-            .type(this.<String> getProperty(message, AmqpConnector.TYPE))
-            .userId(this.<String> getProperty(message, AmqpConnector.USER_ID));
+                this.<String> getProperty(message, AmqpConnector.MESSAGE_PROPERTY_REPLY_TO, (String) message.getReplyTo()))
+            .timestamp(this.<Date> getProperty(message, AmqpConnector.MESSAGE_PROPERTY_TIMESTAMP, new Date()))
+            .type(this.<String> getProperty(message, AmqpConnector.MESSAGE_PROPERTY_TYPE))
+            .userId(this.<String> getProperty(message, AmqpConnector.MESSAGE_PROPERTY_USER_ID));
 
         bob.headers(getHeaders(message));
 

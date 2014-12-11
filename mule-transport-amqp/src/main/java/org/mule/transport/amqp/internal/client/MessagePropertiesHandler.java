@@ -44,20 +44,17 @@ public class MessagePropertiesHandler
         }
     }
 
-    public void addInvocationPropertiesIfNecessary(final Channel channel,
-                                                   final AmqpMessage amqpMessage,
-                                                   final MuleMessage muleMessage,
-                                                   final AmqpConnector connector)
+    public void addInvocationProperties(final Channel channel,
+                                        final AmqpMessage amqpMessage,
+                                        final MuleMessage muleMessage,
+                                        final AmqpConnector connector)
     {
-        if (connector.getAckMode() == AckMode.MANUAL)
-        {
-            // in manual AckMode, the channel will be needed to ack the message
-            muleMessage.setProperty(AmqpConnector.CHANNEL, channel, PropertyScope.INVOCATION);
-            // so will the consumer tag (which is already added in the inbound properties
-            // for the end user but that we also add here in the invocation scope for
-            // internal needs)
-            muleMessage.setProperty(AmqpConnector.AMQP_DELIVERY_TAG, amqpMessage.getEnvelope()
-                    .getDeliveryTag(), PropertyScope.INVOCATION);
-        }
+        // in manual AckMode, the channel will be needed to ack the message
+        muleMessage.setProperty(AmqpConnector.MESSAGE_PROPERTY_CHANNEL, channel, PropertyScope.INVOCATION);
+        // so will the consumer tag (which is already added in the inbound properties
+        // for the end user but that we also add here in the invocation scope for
+        // internal needs)
+        muleMessage.setProperty(AmqpConnector.AMQP_DELIVERY_TAG, amqpMessage.getEnvelope()
+            .getDeliveryTag(), PropertyScope.INVOCATION);
     }
 }

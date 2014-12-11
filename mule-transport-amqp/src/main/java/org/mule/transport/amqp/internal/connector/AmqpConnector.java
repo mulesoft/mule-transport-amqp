@@ -11,25 +11,17 @@ package org.mule.transport.amqp.internal.connector;
 
 import org.mule.api.DefaultMuleException;
 import org.mule.api.MuleContext;
-import org.mule.api.MuleEvent;
 import org.mule.api.MuleException;
 import org.mule.api.endpoint.EndpointBuilder;
 import org.mule.api.endpoint.EndpointException;
 import org.mule.api.endpoint.ImmutableEndpoint;
-import org.mule.api.endpoint.InboundEndpoint;
-import org.mule.api.endpoint.OutboundEndpoint;
 import org.mule.api.lifecycle.InitialisationException;
 import org.mule.api.processor.MessageProcessor;
 import org.mule.api.transformer.Transformer;
-import org.mule.api.transport.Connectable;
-import org.mule.api.transport.MessageDispatcher;
-import org.mule.api.transport.MessageReceiver;
-import org.mule.api.transport.MessageRequester;
 import org.mule.config.i18n.MessageFactory;
 import org.mule.transport.AbstractConnector;
 import org.mule.transport.ConnectException;
-import org.mule.transport.amqp.internal.client.UrlEndpointURIParser;
-import org.mule.transport.amqp.internal.connector.connection.*;
+import org.mule.transport.amqp.internal.client.ChannelHandler;
 import org.mule.transport.amqp.internal.client.DispatchingReturnListener;
 import org.mule.transport.amqp.internal.processor.ReturnHandler;
 import org.mule.transport.amqp.internal.domain.AckMode;
@@ -46,68 +38,98 @@ import com.rabbitmq.client.ReturnListener;
 import com.rabbitmq.client.ShutdownListener;
 import com.rabbitmq.client.ShutdownSignalException;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import org.apache.commons.pool.impl.StackObjectPool;
 
 /**
  * Connects to a particular virtual host on a particular AMQP broker.
  */
 public class AmqpConnector extends AbstractConnector
 {
+    /**
+      * Default number of channels
+      */
+    public static final int DEFAULT_NUMBER_OF_CHANNELS = 1;
+
+    public static final String NUMBER_OF_CHANNELS = "numberOfChannels";
+
     public static final String AMQP = "amqp";
+
+    public static final String AMQP_DELIVERY_TAG = AMQP + ".delivery-tag";
+
+    public static final String ALL_USER_HEADERS = AMQP + ".headers";
 
     // message properties names are consistent with AMQP spec
     // (cluster-id is deprecated and not supported here)
-    public static final String APP_ID = "app-id";
+    public static final String MESSAGE_PROPERTY_APP_ID = "app-id";
 
-    public static final String CONTENT_ENCODING = "content-encoding";
+    public static final String MESSAGE_PROPERTY_CHANNEL = AMQP + ".channel";
 
-    public static final String CONTENT_TYPE = "content-type";
+    public static final String MESSAGE_PROPERTY_CONTENT_ENCODING = "content-encoding";
 
-    public static final String CORRELATION_ID = "correlation-id";
+    public static final String MESSAGE_PROPERTY_CONTENT_TYPE = "content-type";
 
-    public static final String DELIVERY_MODE = "delivery_mode";
+    public static final String MESSAGE_PROPERTY_CORRELATION_ID = "correlation-id";
 
-    public static final String DELIVERY_TAG = "delivery-tag";
+    public static final String MESSAGE_PROPERTY_DELIVERY_MODE = "delivery_mode";
+
+    public static final String MESSAGE_PROPERTY_DELIVERY_TAG = "delivery-tag";
 
     public static final String EXCHANGE = "exchange";
 
-    public static final String EXPIRATION = "expiration";
+    public static final String MESSAGE_PROPERTY_EXPIRATION = "expiration";
 
-    public static final String MESSAGE_ID = "message-id";
+    public static final String MESSAGE_PROPERTY_MESSAGE_ID = "message-id";
 
-    public static final String CLUSTER_ID = "cluster-id";
+    public static final String MESSAGE_PROPERTY_CLUSTER_ID = "cluster-id";
 
-    public static final String PRIORITY = "priority";
+    public static final String MESSAGE_PROPERTY_PRIORITY = "priority";
 
-    public static final String REDELIVER = "redelivered";
+    public static final String MESSAGE_PROPERTY_REDELIVER = "redelivered";
 
-    public static final String REPLY_TO = "reply-to";
+    public static final String MESSAGE_PROPERTY_REPLY_TO = "reply-to";
 
-    public static final String ROUTING_KEY = "routing-key";
+    public static final String MESSAGE_PROPERTY_ROUTING_KEY = "routing-key";
 
-    public static final String TIMESTAMP = "timestamp";
+    public static final String MESSAGE_PROPERTY_TIMESTAMP = "timestamp";
 
-    public static final String TYPE = "type";
+    public static final String MESSAGE_PROPERTY_TYPE = "type";
 
-    public static final String USER_ID = "user-id";
+    public static final String MESSAGE_PROPERTY_USER_ID = "user-id";
 
-    public static final String NEXT_PUBLISH_SEQ_NO = "nextPublishSequenceNo";
+    public static final String MESSAGE_PROPERTY_NEXT_PUBLISH_SEQ_NO = "nextPublishSequenceNo";
 
     // technical properties not intended to be messed with directly
-    public static final String CONSUMER_TAG = "consumer-tag";
+    public static final String MESSAGE_PROPERTY_CONSUMER_TAG = "consumer-tag";
 
     // Connector properties
 
+    public static final String ENDPOINT_DEFAULT_EXCHANGE_ALIAS = "AMQP.DEFAULT.EXCHANGE";
+
+    public static final String ENDPOINT_EXCHANGE_PREFIX = "amqp-exchange.";
+
+    public static final String ENDPOINT_PROPERTY_ROUTING_KEY = "routingKey";
+
+    public static final String ENDPOINT_PROPERTY_QUEUE_EXCLUSIVE = "queueExclusive";
+
+    public static final String ENDPOINT_PROPERTY_QUEUE_AUTO_DELETE = "queueAutoDelete";
+
+    public static final String ENDPOINT_PROPERTY_QUEUE_DURABLE = "queueDurable";
+
+    public static final String ENDPOINT_PROPERTY_EXCHANGE_AUTO_DELETE = "exchangeAutoDelete";
+
+    public static final String ENDPOINT_PROPERTY_EXCHANGE_DURABLE = "exchangeDurable";
+
+    public static final String ENDPOINT_PROPERTY_EXCHANGE_TYPE = "exchangeType";
+
+    public static final String ENDPOINT_QUEUE_PREFIX = "amqp-queue.";
+
+
     public static final String RETURN_CONTEXT_PREFIX = AMQP + ".return.";
 
-    public static final String RETURN_ROUTING_KEY = RETURN_CONTEXT_PREFIX + ROUTING_KEY;
+    public static final String RETURN_ROUTING_KEY = RETURN_CONTEXT_PREFIX + ENDPOINT_PROPERTY_ROUTING_KEY;
 
     public static final String RETURN_EXCHANGE = RETURN_CONTEXT_PREFIX + EXCHANGE;
 
@@ -116,13 +138,6 @@ public class AmqpConnector extends AbstractConnector
     public static final String RETURN_REPLY_CODE = RETURN_CONTEXT_PREFIX + "reply-code";
 
     public static final String RETURN_LISTENER = AMQP + ".return.listener";
-
-    public static final String AMQP_DELIVERY_TAG = AMQP + ".delivery-tag";
-
-    public static final String CHANNEL = AMQP + ".channel";
-
-    public static final String ALL_USER_HEADERS = AMQP + ".headers";
-
 
     private final Transformer receiveTransformer;
 
@@ -146,26 +161,22 @@ public class AmqpConnector extends AbstractConnector
     private boolean noLocal;
     private boolean exclusiveConsumers;
     private boolean requestBrokerConfirms = false;
+    private int numberOfChannels = DEFAULT_NUMBER_OF_CHANNELS;
 
     private ConnectionFactory connectionFactory;
     private Connection connection;
-    private final StackObjectPool connectorConnectionPool;
-    private UrlEndpointURIParser uriParser;
+    private ChannelHandler channelHandler;
+
+    private ExecutorService receiverExecutor;
 
 
     public AmqpConnector(final MuleContext context)
     {
         super(context);
-
+        channelHandler = new ChannelHandler();
         receiveTransformer = new AmqpMessageToObject();
         receiveTransformer.setMuleContext(context);
-
-        uriParser = new UrlEndpointURIParser();
-
-        final int maxIdle = 1;
-        final int initIdleCapacity = 0;
-        connectorConnectionPool = new StackObjectPool(new ConnectorConnectionPoolableObjectFactory(this),
-            maxIdle, initIdleCapacity);
+        receiverExecutor = this.getReceiverThreadingProfile().createPool("amqpReceiver");
     }
 
     @Override
@@ -205,11 +216,7 @@ public class AmqpConnector extends AbstractConnector
         addFallbackAddresses(brokerAddresses);
 
         connectToFirstResponsiveBroker(brokerAddresses);
-
         configureDefaultReturnListener();
-        // clear any connector connections that could have been created in a previous
-        // connect() operation
-        connectorConnectionPool.clear();
     }
 
     @Override
@@ -227,21 +234,12 @@ public class AmqpConnector extends AbstractConnector
     @Override
     public void doDisconnect() throws Exception
     {
-        connectorConnectionPool.clear();
         connection.close();
     }
 
     @Override
     public void doDispose()
     {
-        try
-        {
-            connectorConnectionPool.close();
-        }
-        catch (final Exception e)
-        {
-            logger.error("Can't close the connector connection pool", e);
-        }
         connection = null;
         connectionFactory = null;
     }
@@ -282,7 +280,7 @@ public class AmqpConnector extends AbstractConnector
             {
                 connectionFactory.setHost(brokerAddress.getHost());
                 connectionFactory.setPort(brokerAddress.getPort());
-                connection = connectionFactory.newConnection();
+                connection = connectionFactory.newConnection(receiverExecutor);
 
                 connection.addShutdownListener(new ShutdownListener()
                 {
@@ -335,120 +333,6 @@ public class AmqpConnector extends AbstractConnector
         }
     }
 
-    public InboundConnection connect(final MessageReceiver messageReceiver) throws ConnectException
-    {
-        return connect(messageReceiver, messageReceiver.getEndpoint());
-    }
-
-    public InboundConnection connect(final MessageRequester messageRequester) throws ConnectException
-    {
-        return connect(messageRequester, messageRequester.getEndpoint());
-    }
-
-    protected <T> T runConnectorConnectionAction(final ConnectorConnectionAction<T> action) throws Exception
-    {
-        ConnectorConnection connectorConnection = null;
-
-        try
-        {
-            connectorConnection = (ConnectorConnection) connectorConnectionPool.borrowObject();
-            return action.run(connectorConnection);
-        }
-        catch (final Exception e)
-        {
-            // whenever an exception occurs with a ConnectorConnection, consider the
-            // object failed and invalidate it
-            if (connectorConnection != null)
-            {
-                try
-                {
-                    connectorConnectionPool.invalidateObject(connectorConnection);
-                }
-                catch (final Exception e2)
-                {
-                    logger.error("Can't invalidate a borrowed connector connection", e2);
-                }
-            }
-
-            throw e;
-        }
-        finally
-        {
-            if (connectorConnection != null)
-            {
-                try
-                {
-                    connectorConnectionPool.returnObject(connectorConnection);
-                }
-                catch (final Exception e)
-                {
-                    logger.error("Can't return a borrowed connector connection", e);
-                }
-            }
-        }
-    }
-
-    protected InboundConnection connect(final Connectable connectable, final InboundEndpoint inboundEndpoint)
-        throws ConnectException
-    {
-        try
-        {
-            return runConnectorConnectionAction(new ConnectorConnectionAction<InboundConnection>()
-            {
-                public InboundConnection run(final ConnectorConnection connectorConnection) throws Exception
-                {
-                    final String queueName = uriParser.getOrCreateQueue(
-                            connectorConnection.getChannel(), inboundEndpoint, activeDeclarationsOnly);
-                    return new InboundConnection(connectorConnection.getAmqpConnector(), queueName);
-                }
-            });
-        }
-        catch (final Exception e)
-        {
-            throw new ConnectException(
-                MessageFactory.createStaticMessage("Error when connecting inbound endpoint: "
-                                                   + inboundEndpoint), e, connectable);
-        }
-    }
-
-    public OutboundConnection connect(final MessageDispatcher messageDispatcher, final MuleEvent muleEvent)
-        throws ConnectException
-    {
-        final OutboundEndpoint outboundEndpoint = messageDispatcher.getEndpoint();
-
-        try
-        {
-            return runConnectorConnectionAction(new ConnectorConnectionAction<OutboundConnection>()
-            {
-                public OutboundConnection run(final ConnectorConnection connectorConnection) throws Exception
-                {
-                    final String exchange = uriParser.getOrCreateExchange(
-                            connectorConnection.getChannel(), outboundEndpoint, activeDeclarationsOnly);
-
-                    final String routingKey = uriParser.getRoutingKey(outboundEndpoint, muleEvent);
-
-                    if (StringUtils.isNotEmpty(uriParser.getQueueName(outboundEndpoint.getAddress()))
-                        || outboundEndpoint.getProperties().containsKey(UrlEndpointURIParser.QUEUE_DURABLE)
-                        || outboundEndpoint.getProperties().containsKey(UrlEndpointURIParser.QUEUE_AUTO_DELETE)
-                        || outboundEndpoint.getProperties().containsKey(UrlEndpointURIParser.QUEUE_EXCLUSIVE))
-                    {
-                        uriParser.getOrCreateQueue(connectorConnection.getChannel(), outboundEndpoint,
-                                activeDeclarationsOnly, exchange, routingKey);
-                    }
-
-                    return new OutboundConnection(connectorConnection.getAmqpConnector(), exchange,
-                        routingKey);
-                }
-            });
-        }
-        catch (final Exception e)
-        {
-            throw new ConnectException(
-                MessageFactory.createStaticMessage("Error when connecting outbound endpoint: "
-                                                   + outboundEndpoint), e, messageDispatcher);
-        }
-    }
-
     public void setDefaultReturnEndpoint(final EndpointBuilder defaultReturnEndpointBuilder)
     {
         this.defaultReturnEndpointBuilder = defaultReturnEndpointBuilder;
@@ -457,7 +341,7 @@ public class AmqpConnector extends AbstractConnector
     @Override
     public org.mule.api.transport.ReplyToHandler getReplyToHandler(final ImmutableEndpoint endpoint)
     {
-        return new ReplyToHandler(this);
+        return new ReplyToHandler(this, endpoint);
     }
 
     @SuppressWarnings("unchecked")
@@ -466,9 +350,9 @@ public class AmqpConnector extends AbstractConnector
     {
         try
         {
-            return ChannelHandler.createChannel(this);
+            return channelHandler.getOrCreateChannel(endpoint);
         }
-        catch (final IOException ioe)
+        catch (final Exception ioe)
         {
             throw new DefaultMuleException(ioe);
         }
@@ -666,4 +550,19 @@ public class AmqpConnector extends AbstractConnector
         return defaultReturnListener;
     }
 
+    public int getNumberOfChannels() {
+        return numberOfChannels;
+    }
+
+    public void setNumberOfChannels(int numberOfChannels) {
+        this.numberOfChannels = numberOfChannels;
+    }
+
+    public ChannelHandler getChannelHandler() {
+        return channelHandler;
+    }
+
+    public void setChannelHandler(ChannelHandler channelHandler) {
+        this.channelHandler = channelHandler;
+    }
 }
