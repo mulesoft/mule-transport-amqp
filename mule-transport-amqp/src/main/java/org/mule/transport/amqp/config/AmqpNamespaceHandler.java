@@ -24,7 +24,6 @@ import org.mule.config.spring.parsers.specific.endpoint.support.OrphanEndpointDe
 import org.mule.endpoint.EndpointURIEndpointBuilder;
 import org.mule.endpoint.URIBuilder;
 import org.mule.transport.amqp.internal.client.DispatchingReturnListener;
-import org.mule.transport.amqp.internal.client.UrlEndpointURIParser;
 import org.mule.transport.amqp.internal.config.NonExclusiveAddressedEndpointDefinitionParser;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 import org.mule.transport.amqp.internal.processor.*;
@@ -108,7 +107,7 @@ public class AmqpNamespaceHandler extends AbstractMuleNamespaceHandler
     {
         parser.addAlias("exchangeName", URIBuilder.HOST);
         parser.addAlias("queueName", URIBuilder.PATH);
-        parser.addMapping("queueName", new PrefixValueMap(UrlEndpointURIParser.QUEUE_PREFIX));
+        parser.addMapping("queueName", new PrefixValueMap(AmqpConnector.ENDPOINT_QUEUE_PREFIX));
         registerBeanDefinitionParser(element, parser);
     }
 

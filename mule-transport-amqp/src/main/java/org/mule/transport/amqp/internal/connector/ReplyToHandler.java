@@ -13,7 +13,6 @@ package org.mule.transport.amqp.internal.connector;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,10 +22,11 @@ import org.mule.api.MessagingException;
 import org.mule.api.MuleEvent;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
+import org.mule.api.endpoint.ImmutableEndpoint;
 import org.mule.api.endpoint.OutboundEndpoint;
 import org.mule.config.i18n.MessageFactory;
 import org.mule.transport.DefaultReplyToHandler;
-import org.mule.transport.amqp.internal.connector.connection.ConnectorConnection;
+import org.mule.transport.amqp.internal.client.AmqpDeclarer;
 import org.mule.transport.amqp.internal.endpoint.dispatcher.Dispatcher;
 import org.mule.util.StringUtils;
 
@@ -35,18 +35,22 @@ public class ReplyToHandler extends DefaultReplyToHandler
     private static final long serialVersionUID = 1L;
     private static final Log LOG = LogFactory.getLog(ReplyToHandler.class);
     private final transient AmqpConnector amqpConnector;
+    private final ImmutableEndpoint endpoint;
+    private final AmqpDeclarer declarator;
 
-    public ReplyToHandler(final AmqpConnector amqpConnector)
+    public ReplyToHandler(final AmqpConnector amqpConnector, final ImmutableEndpoint endpoint)
     {
         super(amqpConnector.getMuleContext());
         this.amqpConnector = amqpConnector;
+        this.endpoint = endpoint;
+        declarator = new AmqpDeclarer();
     }
 
     @Override
     public void processReplyTo(final MuleEvent event, final MuleMessage returnMessage, final Object replyTo)
         throws MuleException
     {
-        String replyToQueueName = createTemporaryQueueIfNecessary((String) replyTo);
+        String replyToQueueName = createTemporaryQueueIfNecessary(endpoint, (String) replyTo);
 
         OutboundEndpoint outboundEndpoint;
         if (replyToQueueName.contains("://"))
@@ -82,22 +86,22 @@ public class ReplyToHandler extends DefaultReplyToHandler
         }
     }
 
-    private String createTemporaryQueueIfNecessary(String replyToQueueName) throws MuleException {
+    private String createTemporaryQueueIfNecessary(ImmutableEndpoint endpoint, String replyToQueueName) throws MuleException {
         Channel channel = null;
         try
         {
             if (StringUtils.isEmpty(replyToQueueName))
             {
-                channel = ((ConnectorConnection) amqpConnector.getConnection()).getChannel();
-                final AMQP.Queue.DeclareOk declareOk = channel.queueDeclare();
-                replyToQueueName = declareOk.getQueue();
+                channel = amqpConnector.getChannelHandler().getOrCreateChannel(endpoint);
+                replyToQueueName = declarator.declareTemporaryQueue(channel);
             }
         }
         catch (Exception e)
         {
             throw new DefaultMuleException(e);
         }
-        finally {
+        finally
+        {
             try
             {
                 channel.close();

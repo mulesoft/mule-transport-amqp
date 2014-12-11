@@ -44,12 +44,12 @@ public class Rejecter extends AbstractChannelMessageProcessor
         this.requeue = requeue;
     }
 
-    public static void reject(final MuleEvent event, final boolean multiple) throws MuleException
+    public void reject(final MuleEvent event, final boolean multiple) throws MuleException
     {
         reject(event.getMessage(), multiple);
     }
 
-    public static void reject(final MuleMessage message, final boolean requeue) throws MuleException
+    public void reject(final MuleMessage message, final boolean requeue) throws MuleException
     {
         final Long deliveryTag = getDeliveryTagOrFail(message, CHANNEL_ACTION);
         final Channel channel = getChannelOrFail(message, CHANNEL_ACTION);

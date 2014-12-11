@@ -102,6 +102,14 @@
                         </xsd:documentation>
                     </xsd:annotation>
                 </xsd:attribute>
+                <xsd:attribute name="numberOfChannels" type="mule:substitutableInt">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            The number of channels that will be spawned per inbound endpoint to receive AMQP messages.
+                            Default value is 4.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
                 <xsd:attribute name="requestedHeartbeat" type="mule:substitutableInt" default="0">
                     <xsd:annotation>
                         <xsd:documentation>
@@ -282,6 +290,7 @@
             <xsd:extension base="mule:inboundEndpointType">
                 <xsd:attributeGroup ref="addressAttributes" />
                 <xsd:attributeGroup ref="propertyAttributes" />
+                <xsd:attributeGroup ref="inboundPropertyAttributes" />
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -394,6 +403,17 @@
             <xsd:annotation>
                 <xsd:documentation>
                     Specifies if the declared queue is exclusive.
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:attributeGroup>
+
+    <xsd:attributeGroup name="inboundPropertyAttributes">
+        <xsd:attribute name="numberOfChannels" type="mule:substitutableInt">
+            <xsd:annotation>
+                <xsd:documentation>
+                    The number of channels that will be spawned for this inbound endpoint to receive AMQP messages.
+                    If not present the value defined in the connector will be used. Otherwise, it will be 4.
                 </xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>

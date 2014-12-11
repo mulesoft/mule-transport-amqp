@@ -24,7 +24,7 @@ import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.api.endpoint.OutboundEndpoint;
 import org.mule.api.processor.MessageProcessor;
 import org.mule.tck.junit4.FunctionalTestCase;
-import org.mule.transport.amqp.internal.client.UrlEndpointURIParser;
+import org.mule.transport.amqp.internal.connector.AmqpConnector;
 import org.mule.transport.amqp.internal.processor.Acknowledger;
 import org.mule.transport.amqp.internal.transaction.AmqpTransaction.RecoverStrategy;
 import org.mule.transport.amqp.internal.transaction.AmqpTransactionFactory;
@@ -50,21 +50,19 @@ public abstract class AbstractAmqpNamespaceHandlerTestCase extends FunctionalTes
         assertNotNull(endpointBuilder);
 
         final InboundEndpoint inboundEndpoint = endpointBuilder.buildInboundEndpoint();
-        assertEquals(getProtocol() + "://target-exchange/amqp-queue.target-queue",
-            inboundEndpoint.getAddress());
+        assertEquals(getProtocol() + "://target-exchange/amqp-queue.target-queue", inboundEndpoint.getAddress());
         assertEquals(getProtocol() + "://target-exchange/amqp-queue.target-queue",
             inboundEndpoint.getEndpointURI().getAddress());
-        assertEquals("a.b.c", inboundEndpoint.getProperty(UrlEndpointURIParser.ROUTING_KEY));
-        assertEquals("true", inboundEndpoint.getProperty(UrlEndpointURIParser.EXCHANGE_DURABLE));
+        assertEquals("a.b.c", inboundEndpoint.getProperty(AmqpConnector.ENDPOINT_PROPERTY_ROUTING_KEY));
+        assertEquals("true", inboundEndpoint.getProperty(AmqpConnector.ENDPOINT_PROPERTY_EXCHANGE_DURABLE));
         assertFalse(inboundEndpoint.getTransactionConfig().isTransacted());
 
         final OutboundEndpoint outboundEndpoint = endpointBuilder.buildOutboundEndpoint();
-        assertEquals(getProtocol() + "://target-exchange/amqp-queue.target-queue",
-            outboundEndpoint.getAddress());
+        assertEquals(getProtocol() + "://target-exchange/amqp-queue.target-queue", outboundEndpoint.getAddress());
         assertEquals(getProtocol() + "://target-exchange/amqp-queue.target-queue",
             outboundEndpoint.getEndpointURI().getAddress());
-        assertEquals("a.b.c", outboundEndpoint.getProperty(UrlEndpointURIParser.ROUTING_KEY));
-        assertEquals("true", outboundEndpoint.getProperty(UrlEndpointURIParser.EXCHANGE_DURABLE));
+        assertEquals("a.b.c", outboundEndpoint.getProperty(AmqpConnector.ENDPOINT_PROPERTY_ROUTING_KEY));
+        assertEquals("true", outboundEndpoint.getProperty(AmqpConnector.ENDPOINT_PROPERTY_EXCHANGE_DURABLE));
         assertFalse(outboundEndpoint.getTransactionConfig().isTransacted());
     }
 

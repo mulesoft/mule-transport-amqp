@@ -16,9 +16,12 @@ import java.io.IOException;
 import org.apache.commons.lang.Validate;
 
 import com.rabbitmq.client.Channel;
+import org.mule.transport.amqp.internal.client.ChannelHandler;
 
 public class CloseableChannelWrapper implements Closeable
 {
+    private ChannelHandler channelHandler = new ChannelHandler();
+
     private final Channel channel;
 
     public CloseableChannelWrapper(final Channel channel)
@@ -34,6 +37,13 @@ public class CloseableChannelWrapper implements Closeable
 
     public void close() throws IOException
     {
-        channel.close();
+        try
+        {
+            channelHandler.closeChannel(channel);
+        }
+        catch (Exception e)
+        {
+            throw new IOException(e);
+        }
     }
 }

@@ -29,14 +29,14 @@ final class MessageReceiverWorker extends AbstractReceiverWorker
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageReceiverWorker.class);
 
-    private MessageReceiver messageReceiver;
+    private MultiChannelMessageSubReceiver messageReceiver;
     private final Channel channel;
     private final AmqpMessage amqpMessage;
 
     private MessagePropertiesHandler messagePropertiesHandler = new MessagePropertiesHandler();
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    MessageReceiverWorker(MessageReceiver messageReceiver, final Channel channel, final AmqpMessage amqpMessage)
+    MessageReceiverWorker(MultiChannelMessageSubReceiver messageReceiver, final Channel channel, final AmqpMessage amqpMessage)
     {
         super(new ArrayList(1), messageReceiver);
         this.messageReceiver = messageReceiver;
@@ -71,7 +71,7 @@ final class MessageReceiverWorker extends AbstractReceiverWorker
                     messageReceiver.getEndpoint(), muleMessage));
         }
 
-        messagePropertiesHandler.addInvocationPropertiesIfNecessary(channel, amqpMessage, muleMessage,
+        messagePropertiesHandler.addInvocationProperties(channel, amqpMessage, muleMessage,
                 (AmqpConnector) messageReceiver.getConnector());
     }
 
