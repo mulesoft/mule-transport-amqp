@@ -22,6 +22,7 @@ import org.mule.transaction.AbstractSingleResourceTransaction;
 import org.mule.transaction.IllegalTransactionStateException;
 
 import com.rabbitmq.client.Channel;
+import org.mule.transport.amqp.internal.client.ChannelHandler;
 
 /**
  * {@link AmqpTransaction} is a wrapper for an AMQP local transaction. This object holds the AMQP
@@ -36,12 +37,15 @@ public class AmqpTransaction extends AbstractSingleResourceTransaction
 
     private final RecoverStrategy recoverStrategy;
 
+    private final ChannelHandler channelHandler;
+
     public AmqpTransaction(final MuleContext muleContext, final RecoverStrategy recoverStrategy)
     {
         super(muleContext);
 
         Validate.notNull(recoverStrategy, "recoverStrategy can't be null");
         this.recoverStrategy = recoverStrategy;
+        channelHandler = new ChannelHandler();
     }
 
     @Override
@@ -180,11 +184,11 @@ public class AmqpTransaction extends AbstractSingleResourceTransaction
 
             try
             {
-                channel.close();
+                channelHandler.closeChannel(channel);
             }
-            catch (final IOException ioe)
+            catch (final Exception e)
             {
-                logger.error("Failed to close transacted channel: " + channel, ioe);
+                logger.error("Failed to close transacted channel: " + channel, e);
             }
         }
     }

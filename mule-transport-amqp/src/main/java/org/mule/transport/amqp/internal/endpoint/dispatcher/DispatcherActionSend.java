@@ -9,8 +9,8 @@
  */
 package org.mule.transport.amqp.internal.endpoint.dispatcher;
 
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
+import org.mule.transport.amqp.internal.client.AmqpDeclarer;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 import org.mule.transport.amqp.internal.domain.AmqpMessage;
 import org.mule.transport.amqp.internal.client.MessageConsumer;
@@ -24,6 +24,9 @@ public class DispatcherActionSend extends DispatcherAction
 
     protected MessageConsumer messageConsumer = new MessageConsumer();
 
+    private final AmqpDeclarer declarator = new AmqpDeclarer();
+
+
     public AmqpMessage run(final AmqpConnector amqpConnector,
                            final Channel channel,
                            final String exchange,
@@ -34,8 +37,7 @@ public class DispatcherActionSend extends DispatcherAction
         String replyTo = amqpMessage.getReplyTo();
         if (StringUtils.isEmpty(replyTo))
         {
-            final AMQP.Queue.DeclareOk declareOk = channel.queueDeclare();
-            replyTo = declareOk.getQueue();
+            replyTo = declarator.declareTemporaryQueue(channel);
         }
 
         amqpMessage.setReplyTo(replyTo);

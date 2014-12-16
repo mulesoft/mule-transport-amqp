@@ -354,7 +354,7 @@ public abstract class AbstractAmqpITCase extends FunctionalTestCase
         assertTrue(receivedMessage.getPayload() instanceof byte[]);
         assertTrue(Arrays.equals(body, receivedMessage.getPayloadAsBytes()));
         assertEquals(correlationId, receivedMessage.getCorrelationId());
-        assertEquals(correlationId, receivedMessage.getInboundProperty(AmqpConnector.CORRELATION_ID));
+        assertEquals(correlationId, receivedMessage.getInboundProperty(AmqpConnector.MESSAGE_PROPERTY_CORRELATION_ID));
         assertEquals(123L, receivedMessage.getInboundProperty("customHeader"));
 
         final Map<String, Object> allHeaders = receivedMessage.getInboundProperty("amqp.headers");
