@@ -50,7 +50,7 @@ public class DefaultConfirmsManager implements ConfirmsManager
         channel.confirmSelect();
         long nextSequence = channel.getNextPublishSeqNo();
         pendingConfirms.put(nextSequence, new ConfirmHandler());
-        event.setFlowVariable(AmqpConnector.NEXT_PUBLISH_SEQ_NO, nextSequence);
+        event.setFlowVariable(AmqpConnector.MESSAGE_PROPERTY_NEXT_PUBLISH_SEQ_NO, nextSequence);
 
     }
 
@@ -63,7 +63,7 @@ public class DefaultConfirmsManager implements ConfirmsManager
                 return true;
             }
 
-            Long seqNo = event.getFlowVariable(AmqpConnector.NEXT_PUBLISH_SEQ_NO);
+            Long seqNo = event.getFlowVariable(AmqpConnector.MESSAGE_PROPERTY_NEXT_PUBLISH_SEQ_NO);
             if (seqNo == null)
             {
                 throw new IllegalStateException("Event is missing publish sequence number");
@@ -87,7 +87,7 @@ public class DefaultConfirmsManager implements ConfirmsManager
 
     public void forget(MuleEvent event)
     {
-        Long seqNo = event.getFlowVariable(AmqpConnector.NEXT_PUBLISH_SEQ_NO);
+        Long seqNo = event.getFlowVariable(AmqpConnector.MESSAGE_PROPERTY_NEXT_PUBLISH_SEQ_NO);
         if (seqNo != null)
         {
             pendingConfirms.remove(seqNo);

@@ -39,8 +39,7 @@ public class AmqpNamespaceHandlerTestCase extends AbstractAmqpNamespaceHandlerTe
     @Test
     public void testDefaultConnector() throws Exception
     {
-        final AmqpConnector c = (AmqpConnector) muleContext.getRegistry().lookupConnector(
-            "amqpDefaultConnector");
+        final AmqpConnector c = (AmqpConnector) muleContext.getRegistry().lookupConnector("amqpDefaultConnector");
         assertNotNull(c);
 
         assertEquals(AckMode.AMQP_AUTO, c.getAckMode());

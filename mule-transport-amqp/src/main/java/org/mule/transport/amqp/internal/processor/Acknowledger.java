@@ -44,12 +44,12 @@ public class Acknowledger extends AbstractChannelMessageProcessor
         this.multiple = multiple;
     }
 
-    public static void ack(final MuleEvent event, final boolean multiple) throws MuleException
+    public void ack(final MuleEvent event, final boolean multiple) throws MuleException
     {
         ack(event.getMessage(), multiple);
     }
 
-    public static void ack(final MuleMessage message, final boolean multiple) throws MuleException
+    public void ack(final MuleMessage message, final boolean multiple) throws MuleException
     {
         final Long deliveryTag = getDeliveryTagOrFail(message, CHANNEL_ACTION);
         final Channel channel = getChannelOrFail(message, CHANNEL_ACTION);

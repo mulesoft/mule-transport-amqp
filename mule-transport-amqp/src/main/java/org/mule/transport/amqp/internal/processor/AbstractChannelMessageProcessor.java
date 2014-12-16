@@ -17,13 +17,16 @@ import org.mule.api.processor.MessageProcessor;
 
 import com.rabbitmq.client.Channel;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
+import org.mule.transport.amqp.internal.client.ChannelHandler;
 
 /**
  * Provides common logic to all channel aware message processors.
  */
 public abstract class AbstractChannelMessageProcessor implements MessageProcessor
 {
-    protected static Long getDeliveryTagOrFail(final MuleMessage muleMessage, final String channelAction)
+    protected ChannelHandler channelHandler = new ChannelHandler();
+
+    protected Long getDeliveryTagOrFail(final MuleMessage muleMessage, final String channelAction)
         throws MuleException
     {
         final Long deliveryTag = getDeliveryTagFromMessage(muleMessage);
@@ -38,14 +41,14 @@ public abstract class AbstractChannelMessageProcessor implements MessageProcesso
         return deliveryTag;
     }
 
-    protected static Channel getChannelOrFail(final MuleMessage muleMessage, final String channelAction)
+    protected Channel getChannelOrFail(final MuleMessage muleMessage, final String channelAction)
         throws MuleException
     {
-        final Channel channel = getChannelFromMessage(muleMessage);
+        final Channel channel = channelHandler.getFlowVariableChannel(muleMessage);
 
         if (channel == null)
         {
-            throw new DefaultMuleException("No " + AmqpConnector.CHANNEL
+            throw new DefaultMuleException("No " + AmqpConnector.MESSAGE_PROPERTY_CHANNEL
                                            + " invocation property found, impossible to " + channelAction
                                            + " message: " + muleMessage);
         }
@@ -53,20 +56,10 @@ public abstract class AbstractChannelMessageProcessor implements MessageProcesso
         return channel;
     }
 
-    public static Long getDeliveryTagFromMessage(final MuleMessage message)
+    public Long getDeliveryTagFromMessage(final MuleMessage message)
     {
         return message.getInvocationProperty(AmqpConnector.AMQP_DELIVERY_TAG,
-                message.<Long> getInboundProperty(AmqpConnector.DELIVERY_TAG));
-    }
-
-    protected static Channel getChannelFromMessage(final MuleMessage message)
-    {
-        return getChannelFromMessage(message, null);
-    }
-
-    protected static Channel getChannelFromMessage(final MuleMessage message, final Channel defaultValue)
-    {
-        return message.getInvocationProperty(AmqpConnector.CHANNEL, defaultValue);
+                message.<Long> getInboundProperty(AmqpConnector.MESSAGE_PROPERTY_DELIVERY_TAG));
     }
 
 }
