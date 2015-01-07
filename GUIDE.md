@@ -89,7 +89,9 @@ All the configuration parameters supported by the connector and endpoint configu
 
 The AMQP connector defines what broker to connect to, which credentials to use when doing so and all the common properties used by the inbound and outbound endpoints using this connector.
 
-It is possible to create several connectors connected to the same broker for the purpose of having different sets of common properties that the endpoints will use. 
+It is possible to create several connectors connected to the same broker for the purpose of having different sets of common properties that the endpoints will use.
+
+The AMQP connector will accept an use a `receiver-threading-profile` that will be used to set the consumer thread pool as per the rabbitmq [guide](https://www.rabbitmq.com/api-guide.html#consumer-thread-pool). More information on how to set a receiver threading profile in the Mule [tunning performance](http://www.mulesoft.org/documentation/display/current/Tuning+Performance) guide.
 
 <table class="confluenceTable">
   <tr>
@@ -159,7 +161,7 @@ It is possible to create several connectors connected to the same broker for the
         </p>
     </td>
   </tr>
-  <tr>
+<tr>
     <td rowspan="1" class="confluenceTd">mandatory</td><td style="text-align: center" class="confluenceTd">boolean</td><td style="text-align: center" class="confluenceTd">no</td><td style="text-align: center" class="confluenceTd">false</td><td class="confluenceTd">
       <p>
           This flag tells the server how to react
@@ -237,10 +239,11 @@ It is possible to create several connectors connected to the same broker for the
         </p>
     </td>
   </tr>
-    <tr>
-    <td rowspan="1" class="confluenceTd">numberOfConsumers</td><td style="text-align: center" class="confluenceTd">integer</td><td style="text-align: center" class="confluenceTd">no</td><td style="text-align: center" class="confluenceTd">4</td><td class="confluenceTd">
+  <tr>
+    <td rowspan="1" class="confluenceTd">numberOfChannels</td><td style="text-align: center" class="confluenceTd">integer</td><td style="text-align: center" class="confluenceTd">no</td><td style="text-align: center" class="confluenceTd">4</td><td class="confluenceTd">
       <p>
-          The number of concurrent consumer threads that will be used to receive AMQP messages.
+          The number of channels that will be spawned per inbound endpoint to receive AMQP messages.
+          Default value is 4.
         </p>
     </td>
   </tr>
@@ -318,6 +321,14 @@ Endpoint attributes are interpreted differently if they are used on inbound or o
       Specifies if the declared exchange should be
       autodeleted.
     </p>
+    </td>
+  </tr>
+  <tr>
+    <td rowspan="1" class="confluenceTd">numberOfChannels</td><td style="text-align: center" class="confluenceTd">integer</td><td style="text-align: center" class="confluenceTd">no</td><td style="text-align: center" class="confluenceTd"></td><td class="confluenceTd">
+      <p>
+          The number of channels that will be spawned for this inbound endpoint to receive AMQP messages.
+          If not present the value defined in the connector will be used. Otherwise, it will be 4.
+        </p>
     </td>
   </tr>
   <tr>
