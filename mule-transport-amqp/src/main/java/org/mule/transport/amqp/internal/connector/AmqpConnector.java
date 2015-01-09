@@ -242,6 +242,8 @@ public class AmqpConnector extends AbstractConnector
     {
         connection = null;
         connectionFactory = null;
+        receiverExecutor.shutdown();
+        receiverExecutor = null;
     }
 
     protected void addFallbackAddresses(final List<Address> brokerAddresses)
