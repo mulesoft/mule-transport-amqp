@@ -60,10 +60,10 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
     }
 
     @Override
-    public synchronized void doStart() throws MuleException
+    protected synchronized void doConnect() throws Exception
     {
         started = true;
-        logger.info("Starting message receiver for endpoint " + endpoint.getEndpointURI());
+        logger.info("Connecting message receiver for endpoint " + endpoint.getEndpointURI());
 
         try
         {
@@ -89,10 +89,10 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
     }
 
     @Override
-    public void doStop() throws MuleException
+    protected void doDisconnect() throws Exception
     {
         super.doStop();
-        logger.debug("doStop()");
+        logger.debug("doDisconnect()");
 
         for (MultiChannelMessageSubReceiver sub : subReceivers)
         {
