@@ -10,6 +10,8 @@
 
 package org.mule.transport.amqp.internal.endpoint.dispatcher;
 
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.ReturnListener;
 import org.mule.api.MuleEvent;
 import org.mule.api.MuleMessage;
 import org.mule.api.endpoint.OutboundEndpoint;
@@ -19,15 +21,11 @@ import org.mule.config.i18n.MessageFactory;
 import org.mule.transport.AbstractMessageDispatcher;
 import org.mule.transport.NullPayload;
 import org.mule.transport.amqp.internal.client.AmqpDeclarer;
+import org.mule.transport.amqp.internal.client.DispatchingReturnListener;
 import org.mule.transport.amqp.internal.confirm.ConfirmsManager;
 import org.mule.transport.amqp.internal.confirm.DefaultConfirmsManager;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
-import org.mule.transport.amqp.internal.client.ChannelHandler;
-
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.ReturnListener;
 import org.mule.transport.amqp.internal.domain.AmqpMessage;
-import org.mule.transport.amqp.internal.client.DispatchingReturnListener;
 import org.mule.transport.amqp.internal.endpoint.AmqpEndpointUtil;
 
 import java.util.concurrent.TimeUnit;
@@ -98,6 +96,14 @@ public class Dispatcher extends AbstractMessageDispatcher
         {
             throw new IllegalStateException("No AMQP Connection");
         }
+
+        // Check if the channel got closed for any reason
+        if (channel == null || !channel.isOpen())
+        {
+            logger.debug("Reopening unexpectedly closed channel");
+            channel = amqpConnector.getChannelHandler().getOrCreateChannel(getEndpoint());
+        }
+
         doOutboundAction(event, new DispatcherActionDispatch());
     }
 
@@ -126,7 +132,6 @@ public class Dispatcher extends AbstractMessageDispatcher
     {
         // If a transaction resource channel is present use it, otherwise use the dispatcher's channel
         Channel eventChannel = amqpConnector.getChannelHandler().getOrDefaultChannel(endpoint, event.getMessage(), channel);
-        //Channel eventChannel = amqpConnector.getChannelHandler().getOrCreateChannel(endpoint);
 
         final MuleMessage message = event.getMessage();
 
