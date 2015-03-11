@@ -5,9 +5,9 @@
          point="org.mule.tooling.core.contribution">
     
       <externalContribution
-            contributionJar="mule-transport-amqp-3.6.1-SNAPSHOT.jar"
+            contributionJar="mule-transport-amqp-3.6.2-SNAPSHOT.jar"
             contributionLibPathInMule="/plugins"
-            contributionLibs="mule-transport-amqp-3.6.1-SNAPSHOT.zip"
+            contributionJar="mule-transport-amqp-3.6.2-SNAPSHOT.zip"
             contributionNamespace="http://www.mulesoft.org/schema/mule/amqp"
             contributionNamespaceFile="http://www.mulesoft.org/schema/mule/amqp/current/mule-amqp.xsd"
             contributionNamespacePrefix="amqp"
@@ -15,7 +15,7 @@
             icon="icons/small/amqp-endpoint-24x16.png"
             name="AMQP-0-9"
             path="amqp.xml"
-            version="3.6.1-SNAPSHOT">
+            version="3.6.2-SNAPSHOT">
       </externalContribution>
         <module
                 description="Core endpoints and patterns for Mule Tooling"
