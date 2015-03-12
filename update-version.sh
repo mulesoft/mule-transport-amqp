@@ -10,5 +10,5 @@ sed -e "s/mule-transport-amqp-$1.zip/mule-transport-amqp-$2.zip/g" -i '' amqp-ec
 find . -name MANIFEST.MF -exec sed -e "s/Bundle-Version:.*/Bundle-Version: $4/g" -i '' {} \; 
 find . -name feature.xml -exec sed -e "s/version=.*$3/version=\"$4/g" -i '' {} \; 
 sed -e "s/contributionJar=\"mule-transport-amqp-$1.jar\"/contributionJar=\"mule-transport-amqp-$2.jar\"/g" -i '' amqp-eclipse-plugin/org.mule.tooling.ui.contribution.amqp/plugin.xml 
-sed -e "s/contributionLibs=\"mule-transport-amqp-$1.zip\"/contributionJar=\"mule-transport-amqp-$2.zip\"/g" -i '' amqp-eclipse-plugin/org.mule.tooling.ui.contribution.amqp/plugin.xml 
+sed -e "s/contributionLibs=\"mule-transport-amqp-$1.zip\"/contributionLibs=\"mule-transport-amqp-$2.zip\"/g" -i '' amqp-eclipse-plugin/org.mule.tooling.ui.contribution.amqp/plugin.xml 
 sed -e "s/version=.*$1/version=\"$2/g" -i '' amqp-eclipse-plugin/org.mule.tooling.ui.contribution.amqp/plugin.xml
