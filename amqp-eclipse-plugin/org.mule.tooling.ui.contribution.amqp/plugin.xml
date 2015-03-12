@@ -7,7 +7,7 @@
       <externalContribution
             contributionJar="mule-transport-amqp-3.6.2-SNAPSHOT.jar"
             contributionLibPathInMule="/plugins"
-            contributionJar="mule-transport-amqp-3.6.2-SNAPSHOT.zip"
+            contributionLibs="mule-transport-amqp-3.6.2-SNAPSHOT.zip"
             contributionNamespace="http://www.mulesoft.org/schema/mule/amqp"
             contributionNamespaceFile="http://www.mulesoft.org/schema/mule/amqp/current/mule-amqp.xsd"
             contributionNamespacePrefix="amqp"
