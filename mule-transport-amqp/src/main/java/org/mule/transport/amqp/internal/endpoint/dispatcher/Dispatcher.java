@@ -97,13 +97,6 @@ public class Dispatcher extends AbstractMessageDispatcher
             throw new IllegalStateException("No AMQP Connection");
         }
 
-        // Check if the channel got closed for any reason
-        if (channel == null || !channel.isOpen())
-        {
-            logger.debug("Reopening unexpectedly closed channel");
-            channel = amqpConnector.getChannelHandler().getOrCreateChannel(getEndpoint());
-        }
-
         doOutboundAction(event, new DispatcherActionDispatch());
     }
 
@@ -130,6 +123,13 @@ public class Dispatcher extends AbstractMessageDispatcher
     protected AmqpMessage doOutboundAction(final MuleEvent event, final DispatcherAction outboundAction)
             throws Exception
     {
+        // Check if the channel got closed for any reason
+        if (channel == null || !channel.isOpen())
+        {
+            logger.debug("Reopening unexpectedly closed channel");
+            channel = amqpConnector.getChannelHandler().getOrCreateChannel(getEndpoint());
+        }
+        
         // If a transaction resource channel is present use it, otherwise use the dispatcher's channel
         Channel eventChannel = amqpConnector.getChannelHandler().getOrDefaultChannel(endpoint, event.getMessage(), channel);
 
