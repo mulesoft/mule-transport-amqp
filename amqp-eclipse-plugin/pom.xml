@@ -15,8 +15,8 @@
     <packaging>pom</packaging>
 
     <properties>
-        <tycho-version>0.14.0</tycho-version>
-        <tycho-extras-version>0.18.0</tycho-extras-version>
+        <tycho-version>0.21.0</tycho-version>
+        <tycho-extras-version>0.21.0</tycho-extras-version>
         <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
         <eclipse-updatesite>http://download.eclipse.org/eclipse/updates/3.8/R-3.8.1-201209141540</eclipse-updatesite>
         <studio-updatesite>http://studio-nightly-update.s3.amazonaws.com</studio-updatesite>
