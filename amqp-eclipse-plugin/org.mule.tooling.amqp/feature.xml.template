@@ -2,7 +2,7 @@
 <feature
       id="mule-transport-amqp-tooling"
       label="Mule AMQP Transport"
-      version="3.6.2.qualifier"
+      version="3.7.0.qualifier"
       provider-name="MuleSoft Inc."
       plugin="mule-transport-amqp-contribution"
       exclusive="true">
@@ -12,7 +12,7 @@
    </description>
 
    <copyright url="http://www.mulesoft.org">
-      Copyright 2015 MuleSoft Inc.
+      @COPYRIGHT@
    </copyright>
 
    <license url="http://www.mulesoft.com/downloads/legal/studio-license.html">
