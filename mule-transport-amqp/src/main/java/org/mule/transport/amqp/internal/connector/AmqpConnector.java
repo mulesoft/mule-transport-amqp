@@ -277,6 +277,8 @@ public class AmqpConnector extends AbstractConnector
 
             try
             {
+                logger.debug("Connecting to AMQP host: " + brokerAddress.getHost() +
+                        " and port: " + brokerAddress.getPort());
                 connectionFactory.setHost(brokerAddress.getHost());
                 connectionFactory.setPort(brokerAddress.getPort());
                 connection = connectionFactory.newConnection(receiverExecutor);
@@ -296,10 +298,14 @@ public class AmqpConnector extends AbstractConnector
                                                                    + getName()), sse, AmqpConnector.this));
                     }
                 });
+                logger.info("Connected to AMQP host: " + brokerAddress.getHost() +
+                        " and port: " + brokerAddress.getPort());
                 break;
             }
             catch (final Exception e)
             {
+                logger.error("Error occurred when connecting to AMQP host: " + brokerAddress.getHost() +
+                        " and port: " + brokerAddress.getPort(), e);
                 lastException = e;
             }
         }
