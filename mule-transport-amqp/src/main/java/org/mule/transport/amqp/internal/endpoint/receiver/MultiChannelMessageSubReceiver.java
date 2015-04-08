@@ -14,7 +14,6 @@ import org.mule.api.lifecycle.StartException;
 import org.mule.config.i18n.MessageFactory;
 import org.mule.transport.AbstractMessageReceiver;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
-import org.mule.transport.amqp.internal.client.ChannelHandler;
 import org.mule.transport.amqp.internal.endpoint.AmqpEndpointUtil;
 import org.mule.util.StringUtils;
 
@@ -51,6 +50,8 @@ public class MultiChannelMessageSubReceiver extends AbstractMessageReceiver
         try
         {
             logger.debug("Starting subreceiver on queue: " + getQueueName() + " on channel: " + getChannel());
+
+            super.doStart();
 
             channel = amqpConnector.getChannelHandler().getOrCreateChannel(endpoint);
             parentReceiver.declareEndpoint(channel);
@@ -95,6 +96,8 @@ public class MultiChannelMessageSubReceiver extends AbstractMessageReceiver
                 return;
             }
 
+            super.doStop();
+
             if (consumerTag != null)
             {
                 if (logger.isDebugEnabled())
@@ -128,6 +131,11 @@ public class MultiChannelMessageSubReceiver extends AbstractMessageReceiver
         }
     }
 
+    /**
+     * Attempts to restart this consumer only. If an error happens on retry, a full reconnection will be forced to
+     * restart the cycle of declarations.
+     * @param cancelSubscription defines if the subscriptions has to be canceled or not
+     */
     protected void restart(final boolean cancelSubscription)
     {
         if (!cancelSubscription)
@@ -138,12 +146,13 @@ public class MultiChannelMessageSubReceiver extends AbstractMessageReceiver
 
         try
         {
-            doStop();
-            doStart();
+            stop();
+            start();
         }
         catch (final Exception e)
         {
-            logger.error("Failed to restart: " + this, e);
+            logger.error("Failed to restart receiver: " + this, e);
+            amqpConnector.forceReconnect("Unresolvable receiver problem, forcing a reconnection", e);
         }
     }
 

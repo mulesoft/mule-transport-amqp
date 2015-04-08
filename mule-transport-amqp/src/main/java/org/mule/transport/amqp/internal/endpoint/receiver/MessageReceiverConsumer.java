@@ -37,10 +37,13 @@ public final class MessageReceiverConsumer extends DefaultConsumer
     @Override
     public void handleShutdownSignal(final String consumerTag, final ShutdownSignalException sig)
     {
-        logger.warn("Received shutdown signal for consumer tag: " + consumerTag
-                + ", the message receiver will try to restart.", sig);
-
-        messageReceiver.restart(false);
+        // Only restart the consumer in case this is not a connection problem. If that is the
+        // case the connector's reconnection strategy will handle it.
+        if (!sig.isHardError()) {
+            logger.warn("Received shutdown signal for consumer tag: " + consumerTag
+                    + ", the message receiver will try to restart.", sig);
+            messageReceiver.restart(false);
+        }
     }
 
     @Override
