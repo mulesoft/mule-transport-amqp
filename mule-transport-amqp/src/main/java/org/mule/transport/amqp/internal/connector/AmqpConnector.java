@@ -292,10 +292,7 @@ public class AmqpConnector extends AbstractConnector
                             return;
                         }
 
-                        getMuleContext().getExceptionListener().handleException(
-                            new ConnectException(
-                                MessageFactory.createStaticMessage("Connection shutdown detected for: "
-                                                                   + getName()), sse, AmqpConnector.this));
+                        forceReconnect("Connection shutdown detected for: " + getName(), sse);
                     }
                 });
                 logger.info("Connected to AMQP host: " + brokerAddress.getHost() +
@@ -313,6 +310,16 @@ public class AmqpConnector extends AbstractConnector
         if (lastException != null)
         {
             throw lastException;
+        }
+    }
+
+    public void forceReconnect(String message, Exception e) {
+        // Only attempt to reconnect if the connector is in started and non stopping mode to prevent
+        // stacking more than one reconnection attempts
+        if (getLifecycleState().isStarted() && (!getLifecycleState().isStopping()))
+        {
+            muleContext.getExceptionListener()
+                    .handleException(new ConnectException(MessageFactory.createStaticMessage(message), e, this));
         }
     }
 
