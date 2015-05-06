@@ -18,6 +18,7 @@ import org.mule.api.MessagingException;
 import org.mule.api.MuleEvent;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
+import org.mule.api.config.MuleProperties;
 import org.mule.api.endpoint.ImmutableEndpoint;
 import org.mule.api.endpoint.OutboundEndpoint;
 import org.mule.config.i18n.MessageFactory;
@@ -46,68 +47,61 @@ public class ReplyToHandler extends DefaultReplyToHandler
     public void processReplyTo(final MuleEvent event, final MuleMessage returnMessage, final Object replyTo)
         throws MuleException
     {
-        String replyToQueueName = createTemporaryQueueIfNecessary(endpoint, (String) replyTo);
+        String replyToAddress;
+        
+        if (!(replyTo instanceof String))
+        {
+            throw new DefaultMuleException(new IllegalArgumentException(
+                    MuleProperties.MULE_REPLY_TO_PROPERTY + " should be of type String"));
+        }
+        
+        replyToAddress = (String) replyTo;
 
         OutboundEndpoint outboundEndpoint;
-        if (replyToQueueName.contains("://"))
+        if (replyToAddress.contains("://"))
         {
-            outboundEndpoint = getEndpoint(event, replyToQueueName);
+            outboundEndpoint = getEndpoint(event, replyToAddress);
         }
         else
         {
             // target the default (ie. "") exchange with a routing key equals to the
             // queue replied to
             outboundEndpoint = getEndpoint(event,
-                    amqpConnector.getProtocol() + "://?routingKey=" + urlEncode(event, replyToQueueName)
+                    amqpConnector.getProtocol() + "://?routingKey=" + urlEncode(event, replyToAddress)
                             + "&connector=" + urlEncode(event, amqpConnector.getName()));
         }
 
-        final Dispatcher dispatcher = new Dispatcher(outboundEndpoint);
-
-        final DefaultMuleEvent replyEvent = new DefaultMuleEvent(returnMessage, event);
-        dispatcher.process(replyEvent);
+        Dispatcher dispatcher = null;
 
         try
         {
-            dispatcher.disconnect();
+            dispatcher = new Dispatcher(outboundEndpoint);
+            DefaultMuleEvent replyEvent = new DefaultMuleEvent(returnMessage, event);
+            dispatcher.initialise();
+            dispatcher.process(replyEvent);
+            
+            if (logger.isDebugEnabled())
+            {
+                logger.debug(String.format("Successfully replied to %s: %s", replyToAddress, replyEvent));
+            }
         }
         catch (final Exception e)
         {
             LOG.warn("Failed to disconnect message endpoint: " + dispatcher, e);
         }
-
-        if (logger.isDebugEnabled())
+        finally 
         {
-            logger.debug(String.format("Successfully replied to %s: %s", replyToQueueName, replyEvent));
-        }
-    }
-
-    private String createTemporaryQueueIfNecessary(ImmutableEndpoint endpoint, String replyToQueueName) throws MuleException {
-        Channel channel = null;
-        try
-        {
-            if (StringUtils.isEmpty(replyToQueueName))
+            if (dispatcher != null)
             {
-                channel = amqpConnector.getChannelHandler().getOrCreateChannel(endpoint);
-                replyToQueueName = declarator.declareTemporaryQueue(channel);
+                try 
+                {
+                    dispatcher.disconnect();
+                    dispatcher.dispose();
+                } 
+                catch (Exception e) {}
             }
         }
-        catch (Exception e)
-        {
-            throw new DefaultMuleException(e);
-        }
-        finally
-        {
-            try
-            {
-                channel.close();
-            }
-            catch (Exception closeException)
-            {
-                // Silently ignore errors on close
-            }
-        }
-        return replyToQueueName;
+        
     }
 
     protected String urlEncode(final MuleEvent event, final String stringToEncode) throws MessagingException
