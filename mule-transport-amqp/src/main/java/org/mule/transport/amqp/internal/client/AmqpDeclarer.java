@@ -120,7 +120,7 @@ public class AmqpDeclarer
         final AMQP.Queue.DeclareOk queueDeclareResult =  channel.queueDeclare();
 
         final String privateQueueName = queueDeclareResult.getQueue();
-        logger.info("Declared private queue: " + privateQueueName);
+        logger.debug("Declared private queue: " + privateQueueName);
 
         return privateQueueName;
     }
