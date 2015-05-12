@@ -200,14 +200,6 @@ public class Dispatcher extends AbstractMessageDispatcher
             {
                 logger.debug("Disconnecting: " + eventChannel);
             }
-
-            // Channel should only be closed if the action is not performed in a transaction so the transactional
-            // resource could be reused later.
-            if (((channel != null) && eventChannel.getChannelNumber() == channel.getChannelNumber()))
-            {
-                amqpConnector.getChannelHandler().closeChannelIfNotTransacted(eventChannel);
-            }
-
         }
 
         return result;
