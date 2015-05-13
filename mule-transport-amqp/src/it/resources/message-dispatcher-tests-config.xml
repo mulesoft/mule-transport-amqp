@@ -9,24 +9,39 @@
        http://www.mulesoft.org/schema/mule/test http://www.mulesoft.org/schema/mule/test/current/mule-test.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <amqp:connector name="amqpConnector" virtualHost="mule-test"
-        username="mule" password="elum" />
+    <amqp:connector name="amqpConnector" 
+        virtualHost="${amqpVirtualHost}"
+        username="${amqpUserName}"
+        password="${amqpPassword}"
+        host="${amqpHost}"
+        port="${amqpPort}" />
 
-    <amqp:connector name="activeOnlyAmqpConnector" virtualHost="mule-test"
-        username="mule" password="elum" activeDeclarationsOnly="true" />
+    <amqp:connector name="activeOnlyAmqpConnector" 
+        virtualHost="${amqpVirtualHost}"
+        username="${amqpUserName}"
+        password="${amqpPassword}"
+        host="${amqpHost}"
+        port="${amqpPort}"
+        activeDeclarationsOnly="true" />
 
-    <amqp:connector name="mandatoryAmqpConnector" virtualHost="mule-test"
-        username="mule" password="elum" mandatory="true" />
+    <amqp:connector name="mandatoryAmqpConnector" 
+        virtualHost="${amqpVirtualHost}"
+        username="${amqpUserName}"
+        password="${amqpPassword}"
+        host="${amqpHost}"
+        port="${amqpPort}"
+        mandatory="true" />
 
-    <amqp:connector name="externalFactoryAmqpConnector"
+    <amqp:connector 
+        name="externalFactoryAmqpConnector"
         connectionFactory-ref="rabbitMQConnectionFactory" />
 
     <spring:bean name="rabbitMQConnectionFactory" class="com.rabbitmq.client.ConnectionFactory">
-        <spring:property name="username" value="mule" />
-        <spring:property name="password" value="elum" />
-        <spring:property name="virtualHost" value="mule-test" />
-        <spring:property name="host" value="localhost" />
-        <spring:property name="port" value="5672" />
+        <spring:property name="username" value="${amqpUserName}" />
+        <spring:property name="password" value="${amqpPassword}" />
+        <spring:property name="virtualHost" value="${amqpVirtualHost}" />
+        <spring:property name="host" value="${amqpHost}" />
+        <spring:property name="port" value="${amqpPort}" />
     </spring:bean>
 
 
@@ -35,6 +50,7 @@
             <!-- Carry a custom inbound property to the outbound scope so it is preserved in the rest of the message processing flow -->
             <copy-properties propertyName="customHeader" />
         </vm:inbound-endpoint>
+        
         <!-- Dispatch to an existing exchange -->
         <amqp:outbound-endpoint exchangeName="amqpExistingExchangeService-exchange"
             connector-ref="amqpConnector" />
@@ -53,6 +69,9 @@
 
     <flow name="amqpNewExchangeService">
         <vm:inbound-endpoint path="amqpNewExchangeService.in" />
+        
+        <logger level="ERROR" /> 
+        
         <!-- Dispatch to a new exchange  -->
         <amqp:outbound-endpoint exchangeName="amqpNewExchangeService-exchange"
             exchangeType="fanout" exchangeAutoDelete="true" exchangeDurable="false"
@@ -228,13 +247,17 @@
             queueDurable="true" connector-ref="amqpConnector" />
     </flow>
 
-    <flow name="amqpExternalFactoryConnector">
-        <vm:inbound-endpoint path="amqpExternalFactoryConnector.in" />
-
+	<flow name="amqpExternalFactoryConnector">
+        <vm:inbound-endpoint path="amqpExternalFactoryConnector.in">
+            <!-- Carry a custom inbound property to the outbound scope so it is preserved in the rest of the message processing flow -->
+            <copy-properties propertyName="customHeader" />
+        </vm:inbound-endpoint>
+        
+        <!-- Dispatch to an existing exchange -->
         <amqp:outbound-endpoint exchangeName="amqpExternalFactoryConnector-exchange"
-            exchangeType="fanout" connector-ref="externalFactoryAmqpConnector" />
+            connector-ref="externalFactoryAmqpConnector"  />
     </flow>
-
+    
     <amqp:endpoint name="amqpEndpointWithCustomArguments"
         exchangeName="amqpCustomArgumentsService-exchange" queueName="amqpCustomArgumentsService-queue"
         queueDurable="true" connector-ref="amqpConnector">

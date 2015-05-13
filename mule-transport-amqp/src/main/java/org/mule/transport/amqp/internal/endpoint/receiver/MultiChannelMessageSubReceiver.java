@@ -49,7 +49,7 @@ public class MultiChannelMessageSubReceiver extends AbstractMessageReceiver
     {
         try
         {
-            logger.debug("Starting subreceiver on queue: " + getQueueName() + " on channel: " + getChannel());
+        	logger.debug("Starting subreceiver on queue: " + getQueueName() + " on channel: " + getChannel());
 
             super.doStart();
 

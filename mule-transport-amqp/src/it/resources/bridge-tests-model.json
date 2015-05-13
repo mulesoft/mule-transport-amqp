@@ -1,0 +1,82 @@
+{
+	"queues": [{
+		"name": "amqpOneWayBridge-queue"
+	},{
+		"name": "amqpOneWayBridgeTarget-queue",
+		"durable": false,
+		"auto_delete": true
+	},{
+		"name": "amqpRequestResponseBridge-queue"
+	},{
+		"name": "amqpThrottledBridge-queue"
+	},{
+		"name": "amqpThrottledBridgeTarget-queue"
+	},{
+		"name": "amqpTransactedBridge-queue"
+	},{
+		"name": "amqpTransactedBridgeTarget-queue"
+	}],
+
+
+	"exchanges": [{
+		"name": "amqpOneWayBridge-exchange",
+		"type": "fanout"
+	}, {
+		"name": "amqpOneWayBridgeTarget-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpRequestResponseBridge-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpThrottledBridge-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpThrottledBridgeTarget-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpTransactedBridge-exchange",
+		"type": "fanout"
+	}, {
+		"name": "amqpTransactedBridgeTarget-exchange",
+		"type": "fanout"
+	}],
+
+
+	"bindings": [{
+		"source": "amqpOneWayBridge-exchange",
+		"destination": "amqpOneWayBridge-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpOneWayBridgeTarget-exchange",
+		"destination": "amqpOneWayBridgeTarget-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpRequestResponseBridge-exchange",
+		"destination": "amqpRequestResponseBridge-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpThrottledBridge-exchange",
+		"destination": "amqpThrottledBridge-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpThrottledBridgeTarget-exchange",
+		"destination": "amqpThrottledBridgeTarget-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpTransactedBridge-exchange",
+		"destination": "amqpTransactedBridge-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpTransactedBridgeTarget-exchange",
+		"destination": "amqpTransactedBridgeTarget-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	}]
+
+}
