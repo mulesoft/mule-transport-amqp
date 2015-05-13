@@ -6,13 +6,14 @@
  */
 package org.mule.transport.amqp;
 
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 import org.mule.tck.junit4.FunctionalTestCase;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 
-public class ConnectionFallbackITCase extends FunctionalTestCase
+public class ConnectionFallbackItCase extends FunctionalTestCase
 {
     @Override
     protected String getConfigResources()
@@ -23,9 +24,9 @@ public class ConnectionFallbackITCase extends FunctionalTestCase
     @Test
     public void testFallbackSuccessfull() throws Exception
     {
-        final AmqpConnector connector = (AmqpConnector) muleContext.getRegistry().lookupConnector(
-            "amqpConnectorWithFallback");
+        AmqpConnector connector = (AmqpConnector) muleContext.getRegistry()
+        	.lookupConnector("amqpConnectorWithFallback");
 
-        assertTrue(connector.isConnected());
+        assertThat(connector.isConnected(), is(true));
     }
 }

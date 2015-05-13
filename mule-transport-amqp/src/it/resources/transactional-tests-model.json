@@ -1,0 +1,25 @@
+{
+	"queues": [{
+		"name": "amqpTransactionalSupport-queue"
+	}],
+
+
+	"exchanges": [{
+		"name": "amqpTransactionalSupport-exchange",
+		"type": "direct"
+	}],
+
+
+	"bindings": [{
+		"source": "amqpTransactionalSupport-exchange",
+		"destination": "amqpTransactionalSupport-queue",
+		"destination_type": "queue",
+		"routing_key": "rk1"
+	},{
+		"source": "amqpTransactionalSupport-exchange",
+		"destination": "amqpTransactionalSupport-queue",
+		"destination_type": "queue",
+		"routing_key": "rk2"
+	}]
+
+}

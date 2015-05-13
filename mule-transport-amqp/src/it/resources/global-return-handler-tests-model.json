@@ -1,0 +1,24 @@
+{
+	"queues": [{
+		"name": "amqpMandatoryDeliveryWithGlobalHandlerSuccess-queue",
+		"durable": false,
+		"auto_delete": true
+	}],
+	"exchanges": [{
+		"name": "amqpMandatoryDeliveryWithGlobalHandlerSuccess-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpMandatoryDeliveryFailureGlobalHandler-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpMandatoryDeliveryFailureFlowHandler-exchange",
+		"type": "fanout"
+	}],
+	"bindings": [{
+		"source": "amqpMandatoryDeliveryWithGlobalHandlerSuccess-exchange",
+		"destination": "amqpMandatoryDeliveryWithGlobalHandlerSuccess-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	}]
+
+}

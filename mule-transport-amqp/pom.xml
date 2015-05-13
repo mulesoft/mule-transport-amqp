@@ -29,6 +29,9 @@
         <jdk5Name>JavaSE-1.6</jdk5Name>
         <jdk.version>1.6</jdk.version>
         <domainName>maven2</domainName>
+        <junitVersion>4.11</junitVersion>
+        <jackson2Version>2.4.3</jackson2Version>
+        <hamcrestVersion>1.3</hamcrestVersion>
     </properties>
 
     <scm>
@@ -280,6 +283,25 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <version>${junitVersion}</version>
+            <scope>test</scope>
+            <exclusions>
+		        <exclusion>
+		            <groupId>org.hamcrest</groupId>
+		            <artifactId>hamcrest-core</artifactId>
+		        </exclusion>
+		    </exclusions>
+		</dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <version>${hamcrestVersion}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson2Version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -325,10 +347,19 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
-                            <additionalClasspathElements>
-                                <additionalClasspathElement>${basedir}/conf</additionalClasspathElement>
-                            </additionalClasspathElements>
+                            <includes>
+                                <include>**/*ItCase.java</include>
+                            </includes>
+                            <systemPropertyVariables>
+                                <amqpVirtualHost>/</amqpVirtualHost>
+                                <amqpUserName>guest</amqpUserName>
+                                <amqpPassword>guest</amqpPassword>
+                                <amqpHost>127.0.0.1</amqpHost>
+                                <amqpPort>5672</amqpPort>
+                                <amqpSslPort>5671</amqpSslPort>
+                            </systemPropertyVariables>
                         </configuration>
+                       
                         <executions>
                             <execution>
                                 <id>integration-test</id>
@@ -341,24 +372,6 @@
                                 <goals>
                                     <goal>verify</goal>
                                 </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>1.2.1</version>
-                        <executions>
-                            <execution>
-                                <id>create-test-vhost-and-user</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <workingDirectory>src/it/config</workingDirectory>
-                                    <executable>src/it/config/sudo_setup_rabbitmq.sh</executable>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

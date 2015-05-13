@@ -1,0 +1,99 @@
+{
+	"queues": [{
+		"name": "amqpReceiverTestExistingQueueService-queue"
+	},{
+		"name": "amqpReceiverTestUnboundQueueService-queue",
+		"durable": true,
+		"auto_delete": false
+	},{
+		"name": "amqpReceiverTestClientConsumerTagService-queue"
+	},{
+		"name": "amqpReceiverTestMuleAckService-queue"
+	},{
+		"name": "amqpReceiverTestManualAckService-queue"
+	},{
+		"name": "amqpReceiverTestManualRejectService-queue"
+	},{
+		"name": "amqpReceiverTestManualRecoverService-queue"
+	},{
+		"name": "amqpReceiverTestExclusiveConsumerService-queue"
+	}],
+
+
+	"exchanges": [{
+		"name": "amqpReceiverTestExistingQueueService-exchange",
+		"type": "fanout"
+	}, {
+		"name": "amqpReceiverTestClientConsumerTagService-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpReceiverTestMuleAckService-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpReceiverTestManualAckService-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpReceiverTestManualRejectService-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpReceiverTestManualRecoverService-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpReceiverTestExclusiveConsumerService-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpReceiverTestUnboundQueueService-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpReceiverTestServerNamedQueueExistingExchangeService-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpReceiverTestNewQueueExistingExchangeService-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpReceiverTestNewQueueRedeclaredExistingExchangeService-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpReceiverTestAlternateExchange-exchange",
+		"type": "fanout"
+	}],
+
+
+	"bindings": [{
+		"source": "amqpReceiverTestExistingQueueService-exchange",
+		"destination": "amqpReceiverTestExistingQueueService-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpReceiverTestClientConsumerTagService-exchange",
+		"destination": "amqpReceiverTestClientConsumerTagService-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpReceiverTestMuleAckService-exchange",
+		"destination": "amqpReceiverTestMuleAckService-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpReceiverTestManualAckService-exchange",
+		"destination": "amqpReceiverTestManualAckService-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpReceiverTestManualRejectService-exchange",
+		"destination": "amqpReceiverTestManualRejectService-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpReceiverTestManualRecoverService-exchange",
+		"destination": "amqpReceiverTestManualRecoverService-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpReceiverTestExclusiveConsumerService-exchange",
+		"destination": "amqpReceiverTestExclusiveConsumerService-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	}]
+
+}

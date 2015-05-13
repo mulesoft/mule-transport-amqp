@@ -1,0 +1,48 @@
+{
+	"queues": [{
+		"name": "amqpAutoAckRequester-queue"
+	},{
+		"name": "amqpMuleAckRequester-queue"
+	},{
+		"name": "amqpManualAckRequester-queue"
+	},{
+		"name": "amqpTimeOutRequester-queue"
+	}],
+	
+	"exchanges": [{
+		"name": "amqpAutoAckRequester-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpMuleAckRequester-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpManualAckRequester-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpTimeOutRequester-exchange",
+		"type": "fanout"
+	}],
+
+	"bindings": [{
+		"source": "amqpAutoAckRequester-exchange",
+		"destination": "amqpAutoAckRequester-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpMuleAckRequester-exchange",
+		"destination": "amqpMuleAckRequester-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpManualAckRequester-exchange",
+		"destination": "amqpManualAckRequester-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpTimeOutRequester-exchange",
+		"destination": "amqpTimeOutRequester-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	}]
+
+}
