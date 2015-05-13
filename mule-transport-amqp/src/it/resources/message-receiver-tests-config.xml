@@ -9,151 +9,159 @@
        http://www.mulesoft.org/schema/mule/test http://www.mulesoft.org/schema/mule/test/current/mule-test.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-  <amqp:connector name="amqpAutoAckLocalhostConnector"
-                  virtualHost="mule-test"
-                  username="mule"
-                  password="elum" />
+  <amqp:connector name="amqpReceiverTestAutoAckLocalhostConnector"
+        virtualHost="${amqpVirtualHost}"
+        username="${amqpUserName}"
+        password="${amqpPassword}"
+        host="${amqpHost}"
+        port="${amqpPort}" />
 
-  <amqp:connector name="amqpMuleAckLocalhostConnector"
-                  virtualHost="mule-test"
-                  username="mule"
-                  password="elum"
-                  ackMode="MULE_AUTO" />
+  <amqp:connector name="amqpReceiverTestMuleAckLocalhostConnector"
+        virtualHost="${amqpVirtualHost}"
+        username="${amqpUserName}"
+        password="${amqpPassword}"
+        host="${amqpHost}"
+        port="${amqpPort}"
+        ackMode="MULE_AUTO" />
 
-  <amqp:connector name="amqpManualAckLocalhostConnector"
-                  virtualHost="mule-test"
-                  username="mule"
-                  password="elum"
-                  ackMode="MANUAL" />
+  <amqp:connector name="amqpReceiverTestManualAckLocalhostConnector"
+        virtualHost="${amqpVirtualHost}"
+        username="${amqpUserName}"
+        password="${amqpPassword}"
+        host="${amqpHost}"
+        port="${amqpPort}"
+        ackMode="MANUAL" />
 
-  <amqp:connector name="amqpExclusiveLocalhostConnector"
-                  virtualHost="mule-test"
-                  username="mule"
-                  password="elum"
-                  exclusiveConsumers="true" />
+  <amqp:connector name="amqpReceiverTestExclusiveLocalhostConnector"
+        virtualHost="${amqpVirtualHost}"
+        username="${amqpUserName}"
+        password="${amqpPassword}"
+        host="${amqpHost}"
+        port="${amqpPort}"
+        exclusiveConsumers="true" />
 
-  <flow name="amqpExistingQueueService">
+  <flow name="amqpReceiverTestExistingQueueService">
     <!-- Use an existing queue -->
-    <amqp:inbound-endpoint queueName="amqpExistingQueueService-queue"
-                           connector-ref="amqpAutoAckLocalhostConnector" />
+    <amqp:inbound-endpoint queueName="amqpReceiverTestExistingQueueService-queue"
+                           connector-ref="amqpReceiverTestAutoAckLocalhostConnector" />
     <test:component />
   </flow>
 
-  <flow name="amqpUnboundQueueService">
+  <flow name="amqpReceiverTestUnboundQueueService">
     <!-- Create a public unbound queue -->
-    <amqp:inbound-endpoint queueName="amqpUnboundQueueService-queue"
+    <amqp:inbound-endpoint queueName="amqpReceiverTestUnboundQueueService-queue"
                            queueDurable="true"
-                           connector-ref="amqpAutoAckLocalhostConnector" />
+                           connector-ref="amqpReceiverTestAutoAckLocalhostConnector" />
     <test:component />
   </flow>
 
-  <flow name="amqpServerNamedQueueExistingExchangeService">
+  <flow name="amqpReceiverTestServerNamedQueueExistingExchangeService">
     <!-- Create a private exclusive server-named queue and bind it to an existing exchange --> 
-    <amqp:inbound-endpoint exchangeName="amqpServerNamedQueueExistingExchangeService-exchange"
-                           connector-ref="amqpAutoAckLocalhostConnector" />
+    <amqp:inbound-endpoint exchangeName="amqpReceiverTestServerNamedQueueExistingExchangeService-exchange"
+                           connector-ref="amqpReceiverTestAutoAckLocalhostConnector" />
     <test:component />
   </flow>
 
-  <flow name="amqpNewQueueExistingExchangeService">
+  <flow name="amqpReceiverTestNewQueueExistingExchangeService">
     <!-- Create a new queue and bind it to an existing exchange  --> 
-    <amqp:inbound-endpoint exchangeName="amqpNewQueueExistingExchangeService-exchange"
-                           queueName="amqpNewQueueExistingExchangeService-queue"
+    <amqp:inbound-endpoint exchangeName="amqpReceiverTestNewQueueExistingExchangeService-exchange"
+                           queueName="amqpReceiverTestNewQueueExistingExchangeService-queue"
                            queueDurable="false"
                            queueExclusive="false"
                            queueAutoDelete="true"
-                           connector-ref="amqpAutoAckLocalhostConnector" />
+                           connector-ref="amqpReceiverTestAutoAckLocalhostConnector" />
     <test:component />
   </flow>
   
-  <flow name="amqpNewQueueRedeclaredExistingExchangeService">
+  <flow name="amqpReceiverTestNewQueueRedeclaredExistingExchangeService">
     <!-- Create a new queue and bind it to an existing exchange re-declared in Mule to ensure presence --> 
-    <amqp:inbound-endpoint exchangeName="amqpNewQueueRedeclaredExistingExchangeService-exchange"
+    <amqp:inbound-endpoint exchangeName="amqpReceiverTestNewQueueRedeclaredExistingExchangeService-exchange"
                            exchangeType="fanout"
                            exchangeAutoDelete="false"
                            exchangeDurable="false"
-                           queueName="amqpNewQueueRedeclaredExistingExchangeService-queue"
+                           queueName="amqpReceiverTestNewQueueRedeclaredExistingExchangeService-queue"
                            queueDurable="false"
                            queueExclusive="false"
                            queueAutoDelete="true"
-                           connector-ref="amqpAutoAckLocalhostConnector" />
+                           connector-ref="amqpReceiverTestAutoAckLocalhostConnector" />
     <test:component />
   </flow>
   
-  <flow name="amqpNewQueueNewExchangeService">
+  <flow name="amqpReceiverTestNewQueueNewExchangeService">
     <!-- Create a new queue and bind it to a new exchange  --> 
-    <amqp:inbound-endpoint exchangeName="amqpNewQueueNewExchangeService-exchange"
+    <amqp:inbound-endpoint exchangeName="amqpReceiverTestNewQueueNewExchangeService-exchange"
                            exchangeType="fanout"
                            exchangeAutoDelete="true"
                            exchangeDurable="false"
-                           queueName="amqpNewQueueNewExchangeService-queue"
+                           queueName="amqpReceiverTestNewQueueNewExchangeService-queue"
                            queueDurable="false"
                            queueExclusive="false"
                            queueAutoDelete="true"
-                           connector-ref="amqpAutoAckLocalhostConnector" />
+                           connector-ref="amqpReceiverTestAutoAckLocalhostConnector" />
     <test:component />
   </flow>
   
-  <flow name="amqpClientConsumerTagService">
+  <flow name="amqpReceiverTestClientConsumerTagService">
     <!-- Set a custom consumer tag -->
-    <amqp:inbound-endpoint queueName="amqpClientConsumerTagService-queue"
+    <amqp:inbound-endpoint queueName="amqpReceiverTestClientConsumerTagService-queue"
                            consumerTag="test-consumer-tag"
-                           connector-ref="amqpAutoAckLocalhostConnector" />
+                           connector-ref="amqpReceiverTestAutoAckLocalhostConnector" />
     <test:component />
   </flow>
 
-  <flow name="amqpMuleAckService">
+  <flow name="amqpReceiverTestMuleAckService">
     <!-- Test the Mule-driven acknowledgment of messages -->
-    <amqp:inbound-endpoint queueName="amqpMuleAckService-queue"
-                           connector-ref="amqpMuleAckLocalhostConnector" />
+    <amqp:inbound-endpoint queueName="amqpReceiverTestMuleAckService-queue"
+                           connector-ref="amqpReceiverTestMuleAckLocalhostConnector" />
     <test:component />
   </flow>
 
-  <flow name="amqpManualAckService">
+  <flow name="amqpReceiverTestManualAckService">
     <!-- Test the manual acknowledgment of messages -->
-    <amqp:inbound-endpoint queueName="amqpManualAckService-queue"
-                           connector-ref="amqpManualAckLocalhostConnector" />
+    <amqp:inbound-endpoint queueName="amqpReceiverTestManualAckService-queue"
+                           connector-ref="amqpReceiverTestManualAckLocalhostConnector" />
     <test:component />
     <amqp:acknowledge-message />
   </flow>
 
-  <flow name="amqpManualRejectService">
+  <flow name="amqpReceiverTestManualRejectService">
     <!-- Test the manual rejection of messages -->
-    <amqp:inbound-endpoint queueName="amqpManualRejectService-queue"
-                           connector-ref="amqpManualAckLocalhostConnector" />
+    <amqp:inbound-endpoint queueName="amqpReceiverTestManualRejectService-queue"
+                           connector-ref="amqpReceiverTestManualAckLocalhostConnector" />
     <test:component />
     <amqp:reject-message requeue="true" />
   </flow>
 
-  <flow name="amqpManualRecoverService">
+  <flow name="amqpReceiverTestManualRecoverService">
     <!-- Test the manual recovery of channels -->
-    <amqp:inbound-endpoint queueName="amqpManualRecoverService-queue"
-                           connector-ref="amqpManualAckLocalhostConnector" />
+    <amqp:inbound-endpoint queueName="amqpReceiverTestManualRecoverService-queue"
+                           connector-ref="amqpReceiverTestManualAckLocalhostConnector" />
     <test:component />
     <amqp:recover requeue="true" />
   </flow>
   
-  <flow name="amqpExclusiveConsumerService">
+  <flow name="amqpReceiverTestExclusiveConsumerService">
     <!-- Use a connector configured for creating exclusive consumers only -->
-    <amqp:inbound-endpoint queueName="amqpExclusiveConsumerService-queue"
-                           connector-ref="amqpExclusiveLocalhostConnector" />
+    <amqp:inbound-endpoint queueName="amqpReceiverTestExclusiveConsumerService-queue"
+                           connector-ref="amqpReceiverTestExclusiveLocalhostConnector" />
     <test:component />
   </flow>
   
-  <flow name="amqpCustomArgumentsService">
-    <amqp:inbound-endpoint exchangeName="amqpCustomArgumentsService-exchange"
+  <flow name="amqpReceiverTestCustomArgumentsService">
+    <amqp:inbound-endpoint exchangeName="amqpReceiverTestCustomArgumentsService-exchange"
                            exchangeType="fanout"
                            exchangeAutoDelete="false"
                            exchangeDurable="false"
-                           queueName="amqpCustomArgumentsService-queue"
+                           queueName="amqpReceiverTestCustomArgumentsService-queue"
                            queueDurable="false"
                            queueExclusive="false"
                            queueAutoDelete="true"
-                           connector-ref="amqpAutoAckLocalhostConnector">
+                           connector-ref="amqpReceiverTestAutoAckLocalhostConnector">
       <properties>
         <spring:entry key="amqp-exchange.alternate-exchange"
-                      value="amqpAlternateExchange-exchange" />
+                      value="amqpReceiverTestAlternateExchange-exchange" />
         <spring:entry key="amqp-queue.x-dead-letter-exchange"
-                      value="amqpExistingQueueService-queue" />
+                      value="amqpReceiverTestExistingQueueService-queue" />
       </properties>
     </amqp:inbound-endpoint>
     <test:component />

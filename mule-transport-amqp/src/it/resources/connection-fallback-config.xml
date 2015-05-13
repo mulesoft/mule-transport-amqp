@@ -8,10 +8,10 @@
        http://www.mulesoft.org/schema/mule/test http://www.mulesoft.org/schema/mule/test/current/mule-test.xsd">
 
   <amqp:connector name="amqpConnectorWithFallback"
-                  host="localhost"
+                  host="${amqpHost}"
                   port="9876"
-                  fallbackAddresses="localhost:9875,localhost:5672,localhost"
-                  virtualHost="mule-test"
-                  username="mule"
-                  password="elum" />
+                  fallbackAddresses="localhost:9875,localhost:${amqpPort},localhost"
+                  virtualHost="${amqpVirtualHost}"
+                  username="${amqpUserName}"
+                  password="${amqpPassword}" />
 </mule>

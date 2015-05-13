@@ -41,7 +41,11 @@ Run:
 
     mvn -Pit clean verify
 
-The integration tests rely on a locally running RabbitMQ broker and an OS that can run shell scripts (for the setup of the testing vhost and user).
+The integration tests rely on a locally running RabbitMQ broker with a default configuration. If you
+have to you a different configuration, you can use the following arguments:
+
+    -DamqpPort=6666 -DamqpSslPort=6665 -DamqpVirtualHost=/ -DamqpUserName=guest \
+    -DamqpPassword=guest -DamqpHost=localhost
 
 If you have configured SSL support on RabbitMQ as detailed [here](http://www.rabbitmq.com/ssl.html) on the default port you can include the SSL tests by running:
 

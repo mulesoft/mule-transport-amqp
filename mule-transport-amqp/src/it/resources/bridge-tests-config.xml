@@ -10,14 +10,18 @@
        http://www.mulesoft.org/schema/mule/test http://www.mulesoft.org/schema/mule/test/current/mule-test.xsd">
 
     <amqp:connector name="amqpConnector"
-                  virtualHost="mule-test"
-                  username="mule"
-                  password="elum" />
+                  virtualHost="${amqpVirtualHost}"
+                  username="${amqpUserName}"
+                  password="${amqpPassword}"
+                  host="${amqpHost}"
+                  port="${amqpPort}" />
 
     <amqp:connector name="amqpThrottledConnector"
-                  virtualHost="mule-test"
-                  username="mule"
-                  password="elum"
+                  virtualHost="${amqpVirtualHost}"
+                  username="${amqpUserName}"
+                  password="${amqpPassword}"
+                  host="${amqpHost}"
+                  port="${amqpPort}"
                   prefetchCount="1"
                   ackMode="MANUAL" />
 
@@ -51,6 +55,7 @@
                                 exchange-pattern="request-response"
                                 connector-ref="amqpConnector" />
     </flow>
+    
     <flow name="amqpRequestResponseBridgeTargetService">
         <amqp:inbound-endpoint exchangeName="amqpRequestResponseBridgeTarget-exchange"
                                exchangeType="fanout"
@@ -63,12 +68,13 @@
                                connector-ref="amqpConnector" />
         <test:component appendString="-response" />
     </flow>
+    
     <flow name="amqpTransactedBridge">
         <amqp:inbound-endpoint queueName="amqpTransactedBridge-queue"
                                connector-ref="amqpConnector">
             <amqp:transaction action="ALWAYS_BEGIN" />
         </amqp:inbound-endpoint>
-        <amqp:outbound-endpoint exchangeName="amqpOneWayBridgeTarget-exchange"
+        <amqp:outbound-endpoint exchangeName="amqpTransactedBridgeTarget-exchange"
                                 connector-ref="amqpConnector">
             <amqp:transaction action="ALWAYS_JOIN" />
         </amqp:outbound-endpoint>

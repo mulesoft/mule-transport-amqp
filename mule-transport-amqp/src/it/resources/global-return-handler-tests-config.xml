@@ -12,8 +12,13 @@
   <vm:endpoint name="flowReturnedMessageChannel" path="flow.returnedMessages" />
 
   <amqp:connector name="mandatoryAmqpConnector"
-    virtualHost="mule-test" username="mule" password="elum" mandatory="true"
-    default-return-endpoint-ref="globalReturnedMessageChannel" />
+        virtualHost="${amqpVirtualHost}"
+        username="${amqpUserName}"
+        password="${amqpPassword}"
+        host="${amqpHost}"
+        port="${amqpPort}"
+        mandatory="true"
+        default-return-endpoint-ref="globalReturnedMessageChannel"/>
 
   <flow name="amqpMandatoryDeliveryWithGlobalHandlerSuccess">
     <vm:inbound-endpoint path="amqpMandatoryDeliveryWithGlobalHandlerSuccess.in">
@@ -30,7 +35,7 @@
 
     <!-- No queue is bound to this exchange so this should fail -->
     <amqp:outbound-endpoint
-      exchangeName="amqpMandatoryDeliveryFailureGlobalHandler-exchange" />
+      exchangeName="amqpMandatoryDeliveryFailureGlobalHandler-exchange" connector-ref="mandatoryAmqpConnector"/>
   </flow>
 
   <flow name="amqpMandatoryDeliveryFailureFlowHandler">
@@ -39,7 +44,7 @@
     <amqp:return-handler>
       <vm:outbound-endpoint ref="flowReturnedMessageChannel" />
     </amqp:return-handler>
-
+    
     <!-- No queue is bound to this exchange so this should fail -->
     <amqp:outbound-endpoint
       exchangeName="amqpMandatoryDeliveryFailureFlowHandler-exchange" />

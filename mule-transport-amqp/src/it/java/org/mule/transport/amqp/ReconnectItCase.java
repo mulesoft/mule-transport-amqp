@@ -6,13 +6,14 @@
  */
 package org.mule.transport.amqp;
 
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 import org.mule.tck.junit4.FunctionalTestCase;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 
-public class ReconnectITCase extends FunctionalTestCase
+public class ReconnectItCase extends FunctionalTestCase
 {
     @Override
     protected String getConfigResources()
@@ -23,8 +24,8 @@ public class ReconnectITCase extends FunctionalTestCase
     @Test
     public void testReconnectSupported() throws Exception
     {
-        final AmqpConnector connector = (AmqpConnector) muleContext.getRegistry().lookupConnector(
-            "amqpConnectorWithReconnect");
+        AmqpConnector connector = (AmqpConnector) muleContext.getRegistry()
+        		.lookupConnector("amqpConnectorWithReconnect");
 
         // connection happens asynchronously: wait until connected or let the test timeout
         while (!connector.isConnected())
@@ -32,6 +33,6 @@ public class ReconnectITCase extends FunctionalTestCase
             Thread.sleep(500L);
         }
 
-        assertTrue(connector.isConnected());
+        assertThat(connector.isConnected(), is(true));
     }
 }

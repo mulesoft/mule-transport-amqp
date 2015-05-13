@@ -7,25 +7,21 @@
 package org.mule.transport.amqp;
 
 import org.junit.Test;
+import org.mule.transport.amqp.harness.AbstractItSslCase;
 
-import java.io.IOException;
-
-public class SslAdvancedConnectivityITCase extends AbstractSslConnectivityITCase
+public class SslSimpleConnectivityItCase extends AbstractItSslCase
 {
-    public SslAdvancedConnectivityITCase() throws IOException
-    {
-        super();
-    }
-
     @Override
     protected String getConfigResources()
     {
-        return "ssl-advanced-tests-config.xml";
+        return "ssl/ssl-simple-tests-config.xml";
     }
-
+    
     @Test
-    public void sslDispatchingAndReceivingWithoutKeystore() throws Exception
+    public void sslDispatchingAndReceiving() throws Exception
     {
-        dispatchAndReceiveAMQPS("sslReceiverWithoutKeystore", "vm://sslDispatcherWithoutKeystore.in");
+        amqpTestClient.dispatchAndReceiveAMQPS(nameFactory.getVmName("sslDispatcher"), muleContext, 
+        	getFunctionalTestComponent("sslReceiver"), getTestTimeoutSecs());
     }
+    
 }

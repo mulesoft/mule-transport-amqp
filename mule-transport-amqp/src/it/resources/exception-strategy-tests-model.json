@@ -1,0 +1,32 @@
+{
+	"queues": [{
+		"name": "amqpRejectingExceptionStrategy-queue",
+		"durable": false,
+		"auto_delete": true
+	},{
+		"name": "amqpTransactedRedeliveryWithRollbackExceptionStrategy-queue",
+		"durable": false,
+		"auto_delete": true
+	}],
+	"exchanges": [{
+		"name": "amqpRejectingExceptionStrategy-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpTransactedRedeliveryWithRollbackExceptionStrategy-exchange",
+		"type": "fanout"
+	}],
+	"bindings": [{
+		"source": "amqpRejectingExceptionStrategy-exchange",
+		"destination": "amqpRejectingExceptionStrategy-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},
+	{
+		"source": "amqpTransactedRedeliveryWithRollbackExceptionStrategy-exchange",
+		"destination": "amqpTransactedRedeliveryWithRollbackExceptionStrategy-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	}
+	]
+
+}

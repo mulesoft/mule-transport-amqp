@@ -1,0 +1,85 @@
+{
+	"queues": [{
+		"name": "amqpExistingExchangeService-queue"
+	},{
+		"name": "amqpRedeclaredExistingExchangeService-queue"
+	},{
+		"name": "amqpMessageLevelOverrideService-queue"
+	},{
+		"name": "amqpMandatoryDeliverySuccess-queue"
+	},{
+		"name": "amqpLegacyDefaultExchangeService-queue"
+	},{
+		"name": "amqpLegacyGlobalDefaultExchangeService-queue"
+	},{
+		"name": "amqpDefaultExchangeService-queue"
+	},{
+		"name": "amqpGlobalDefaultExchangeService-queue"
+	},{
+		"name": "amqpMelOutboundEndpointService-queue"
+	},{
+		"name": "amqpExternalFactoryConnector-queue"
+	}],
+	
+	"exchanges": [{
+		"name": "amqpExistingExchangeService-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpRedeclaredExistingExchangeService-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpMessageLevelOverrideService-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpMandatoryDeliverySuccess-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpMandatoryDeliveryFailureNoHandler-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpMandatoryDeliveryFailureWithHandler-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpCustomArgumentsService-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpExternalFactoryConnector-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpMelOutboundEndpointService-exchange",
+		"type": "direct"
+	}],
+
+	"bindings": [{
+		"source": "amqpExistingExchangeService-exchange",
+		"destination": "amqpExistingExchangeService-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpRedeclaredExistingExchangeService-exchange",
+		"destination": "amqpRedeclaredExistingExchangeService-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpMessageLevelOverrideService-exchange",
+		"destination": "amqpMessageLevelOverrideService-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpMandatoryDeliverySuccess-exchange",
+		"destination": "amqpMandatoryDeliverySuccess-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpExternalFactoryConnector-exchange",
+		"destination": "amqpExternalFactoryConnector-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpMelOutboundEndpointService-exchange",
+		"destination": "amqpMelOutboundEndpointService-queue",
+		"destination_type": "queue",
+		"routing_key": "amqpMelOutboundEndpointService-queue"
+	}]
+
+}
