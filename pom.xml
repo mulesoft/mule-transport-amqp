@@ -41,5 +41,13 @@
             <url>https://repository.mulesoft.org/nexus/content/repositories/private/</url>
         </repository>
     </repositories>
+    
+    <pluginRepositories>
+        <pluginRepository>
+            <id>mule-plugin</id>
+            <name>Mule Public Repository</name>
+            <url>https://repository.mulesoft.org/nexus/content/repositories/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
 </project>
