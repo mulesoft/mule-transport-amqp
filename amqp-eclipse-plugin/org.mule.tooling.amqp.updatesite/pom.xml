@@ -4,7 +4,7 @@
     xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.mule.modules</groupId>
-    <artifactId>mule-transport-amqp-studio-plugin</artifactId>
+    <artifactId>mule-transport-amqp-studio</artifactId>
     <packaging>eclipse-repository</packaging>
     <parent>
         <artifactId>mule-transport-amqp-plugin-parent</artifactId>
@@ -17,6 +17,7 @@
         <category>Community</category>
         <licensePath>LICENSE.md</licensePath>
         <mule.devkit.version>3.4.0</mule.devkit.version>
+        <finalName>mule-transport-amqp-studio-${project.version}-studio-plugin</finalName>
     </properties>
 
     <build>
@@ -40,7 +41,7 @@
                 <artifactId>tycho-p2-repository-plugin</artifactId>
                 <version>${tycho-version}</version>
                 <configuration>
-                    <finalName>mule-transport-amqp-studio-plugin</finalName>
+                    <finalName>${finalName}</finalName>
                     <compress>false</compress>
                 </configuration>
             </plugin>
@@ -56,7 +57,7 @@
                             <tasks>
                                 <echo message="prepare update-site for signing" />
                                 <unzip
-                                    src="${project.build.directory}\mule-transport-amqp-studio-plugin.zip"
+                                    src="${project.build.directory}\${finalName}.zip"
                                     dest="${project.build.directory}\update-site\" />
                             </tasks>
                         </configuration>
