@@ -19,7 +19,7 @@
         <tycho-extras-version>0.21.0</tycho-extras-version>
         <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
         <eclipse-updatesite>http://download.eclipse.org/eclipse/updates/3.8/R-3.8.1-201209141540</eclipse-updatesite>
-        <studio-updatesite>http://studio-nightly-update.s3.amazonaws.com</studio-updatesite>
+        <studio-updatesite>http://studio-nightly-update.s3.amazonaws.com/nero</studio-updatesite>
         <eclipse-gef-updatesite>http://download.eclipse.org/releases/juno/201209280900</eclipse-gef-updatesite>
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <build.qualifier>${maven.build.timestamp}</build.qualifier>
