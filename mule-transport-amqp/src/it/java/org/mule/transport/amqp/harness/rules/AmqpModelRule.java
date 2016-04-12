@@ -6,11 +6,6 @@
  */
 package org.mule.transport.amqp.harness.rules;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-
-import org.junit.rules.ExternalResource;
 import org.mule.transport.amqp.harness.TestConnectionManager;
 import org.mule.transport.amqp.harness.rules.configuration.Binding;
 import org.mule.transport.amqp.harness.rules.configuration.Configuration;
@@ -20,6 +15,13 @@ import org.mule.util.IOUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.TimeoutException;
+
+import org.junit.rules.ExternalResource;
 
 /**
  * JUnit Rule that sets up the AMQP model using a JSON file very similar to
@@ -60,7 +62,11 @@ public class AmqpModelRule extends ExternalResource
     	{
 			throw new RuntimeException(e);
 		}
-    };
+		catch (TimeoutException e)
+		{
+			throw new RuntimeException(e);
+		}
+	};
     
     protected void applyConfiguration(Configuration configuration, Channel channel) throws IOException
     {
