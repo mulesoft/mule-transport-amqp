@@ -6,12 +6,13 @@
  */
 package org.mule.transport.amqp.harness;
 
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Manages a connection to RabbitMQ and its channels. A channel count is kept in order
@@ -28,7 +29,7 @@ public class TestConnectionManager
 	
 	protected static AtomicInteger channelCount = new AtomicInteger();
 	
-	public Connection getConnection() throws IOException
+	public Connection getConnection() throws IOException, TimeoutException
 	{
 		if (connection != null && connection.isOpen())
 		{
@@ -46,7 +47,7 @@ public class TestConnectionManager
 	    return connection;
 	}
 	
-	public Channel getChannel() throws IOException
+	public Channel getChannel() throws IOException, TimeoutException
 	{
 		if (connection == null || !connection.isOpen())
 		{
@@ -58,7 +59,7 @@ public class TestConnectionManager
         return connection.createChannel();
 	}
 	
-	public void disposeChannel(Channel channel) throws IOException
+	public void disposeChannel(Channel channel) throws IOException, TimeoutException
 	{
 		if (channel == null)
 		{
