@@ -6,12 +6,14 @@
  */
 package org.mule.transport.amqp.harness.rules;
 
-import java.io.IOException;
-
-import org.junit.rules.ExternalResource;
 import org.mule.transport.amqp.harness.TestConnectionManager;
 
 import com.rabbitmq.client.Channel;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+import org.junit.rules.ExternalResource;
 
 /**
  * JUnit Rule that deletes the given queues and exchanges before
@@ -48,9 +50,11 @@ public class AmqpModelCleanupRule extends ExternalResource
 		{
 			connectionFactory.disposeChannel(channel);
 		} 
-		catch (IOException e) 
+		catch (IOException e)
 		{}
-    }
+		catch (TimeoutException e)
+		{}
+	}
     
     protected void cleanAll(String[] queues, String[] exchanges, Channel channel)
     {
