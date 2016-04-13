@@ -41,8 +41,9 @@ Run:
 
     mvn -Pit clean verify
 
-The integration tests rely on a locally running RabbitMQ broker with a default configuration. If you
-have to you a different configuration, you can use the following arguments:
+The integration tests rely on a locally running RabbitMQ broker with a default configuration. They have been run using a RabbitMQ installation from Homebrew (https://www.rabbitmq.com/install-homebrew.html) set up with the configuration found in /mule-transport-amqp/src/it/resources/ssl/rabbit/rabbitmq.config.
+
+If you have a different configuration, you can use the following arguments:
 
     -DamqpPort=6666 -DamqpSslPort=6665 -DamqpVirtualHost=/ -DamqpUserName=guest \
     -DamqpPassword=guest -DamqpHost=localhost
