@@ -22,7 +22,7 @@
     <url>https://github.com/mulesoft/mule-transport-amqp</url>
 
     <properties>
-        <mule.version>3.4.0</mule.version>
+        <mule.version>3.6.0</mule.version>
         <rabbitmq.amqp-client.version>3.6.1</rabbitmq.amqp-client.version>
         <!-- Tools properties -->
         <vmtype>org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType</vmtype>
