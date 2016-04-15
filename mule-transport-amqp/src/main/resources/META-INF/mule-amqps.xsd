@@ -95,18 +95,12 @@
                     </xsd:element>
                 </xsd:sequence>
 
-                <xsd:attribute name="sslProtocol" default="SSLv3">
+                <xsd:attribute name="sslProtocol" type="xsd:string">
                     <xsd:annotation>
                         <xsd:documentation>
                             SSL protocol to use.
                         </xsd:documentation>
                     </xsd:annotation>
-                    <xsd:simpleType>
-                        <xsd:restriction base="xsd:string">
-                            <xsd:enumeration value="SSLv3" />
-                            <xsd:enumeration value="TLS" />
-                        </xsd:restriction>
-                    </xsd:simpleType>
                 </xsd:attribute>
                 <xsd:attribute name="sslTrustManager-ref" type="xsd:string"
                     use="optional">
