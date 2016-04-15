@@ -9,9 +9,10 @@ package org.mule.transport.amqp.config;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import org.mule.api.security.tls.TlsConfiguration;
+import org.mule.transport.amqp.internal.connector.AmqpsConnector;
 
 import org.junit.Test;
-import org.mule.transport.amqp.internal.connector.AmqpsConnector;
 
 public class AmqpsNamespaceHandlerTestCase extends AbstractAmqpNamespaceHandlerTestCase
 {
@@ -38,7 +39,7 @@ public class AmqpsNamespaceHandlerTestCase extends AbstractAmqpNamespaceHandlerT
         final AmqpsConnector c = (AmqpsConnector) muleContext.getRegistry().lookupConnector(
             "amqpsDefaultSslConnector");
 
-        assertEquals("SSLv3", c.getSslProtocol());
+        assertEquals(TlsConfiguration.DEFAULT_SSL_TYPE, c.getSslProtocol());
         assertNull(c.getSslTrustManager());
     }
 
@@ -48,7 +49,7 @@ public class AmqpsNamespaceHandlerTestCase extends AbstractAmqpNamespaceHandlerT
         final AmqpsConnector c = (AmqpsConnector) muleContext.getRegistry().lookupConnector(
             "amqpsTlsConnector");
 
-        assertEquals("TLS", c.getSslProtocol());
+        assertEquals("TLSv1.2", c.getSslProtocol());
         assertNull(c.getSslTrustManager());
     }
 
@@ -58,7 +59,6 @@ public class AmqpsNamespaceHandlerTestCase extends AbstractAmqpNamespaceHandlerT
         final AmqpsConnector c = (AmqpsConnector) muleContext.getRegistry().lookupConnector(
             "amqpsTrustManagerConnector");
 
-        assertEquals("SSLv3", c.getSslProtocol());
         assertNotNull(c.getSslTrustManager());
     }
 
@@ -68,7 +68,7 @@ public class AmqpsNamespaceHandlerTestCase extends AbstractAmqpNamespaceHandlerT
         final AmqpsConnector c = (AmqpsConnector) muleContext.getRegistry().lookupConnector(
             "amqpsTlsTrustManagerConnector");
 
-        assertEquals("TLS", c.getSslProtocol());
+        assertEquals("TLSv1.2", c.getSslProtocol());
         assertNotNull(c.getSslTrustManager());
     }
 }

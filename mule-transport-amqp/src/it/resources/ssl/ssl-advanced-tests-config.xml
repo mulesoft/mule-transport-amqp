@@ -14,7 +14,8 @@
         username="${amqpUserName}"
         password="${amqpPassword}"
         host="${amqpHost}"
-        port="${amqpSslPort}">
+        port="${amqpSslPort}"
+        sslProtocol="TLSv1.2">
         <amqps:ssl-key-store path="ssl/client/keycert.p12" type="PKCS12"
             algorithm="SunX509" keyPassword="MySecretPassword" storePassword="MySecretPassword" />
         <amqps:ssl-trust-store path="ssl/client/trustStore.jks" type="JKS"
@@ -26,7 +27,8 @@
         username="${amqpUserName}"
         password="${amqpPassword}"
         host="${amqpHost}"
-        port="${amqpSslPort}">
+        port="${amqpSslPort}"
+        sslProtocol="TLSv1.2">
         <amqps:ssl-trust-store path="ssl/client/trustStore.jks" type="JKS"
             algorithm="SunX509" storePassword="rabbitstore" />
     </amqps:connector>
