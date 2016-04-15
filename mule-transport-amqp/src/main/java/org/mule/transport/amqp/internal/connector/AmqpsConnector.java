@@ -6,20 +6,25 @@
  */
 package org.mule.transport.amqp.internal.connector;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-
 import org.mule.api.MuleContext;
 import org.mule.api.lifecycle.CreateException;
 import org.mule.api.lifecycle.InitialisationException;
+import org.mule.api.security.tls.RestrictedSSLSocketFactory;
 import org.mule.api.security.tls.TlsConfiguration;
 import org.mule.config.i18n.MessageFactory;
 
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.NullTrustManager;
 import com.thoughtworks.xstream.InitializationException;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Connects to a particular virtual host on a particular AMQP broker.
@@ -38,7 +43,6 @@ public class AmqpsConnector extends AmqpConnector
         super(muleContext);
 
         tls = new TlsConfiguration(null);
-        tls.setSslType(null);
 
         setPort(ConnectionFactory.DEFAULT_AMQP_OVER_SSL_PORT);
     }
@@ -64,39 +68,48 @@ public class AmqpsConnector extends AmqpConnector
 
         try
         {
+            //initialise the tls config to load tls properties
+            try
+            {
+                if (tls.getKeyStore() != null)
+                {
+                    tls.initialise(false, null);
+                }
+                else
+                {
+                    tls.initialise(true, null);
+                }
+            }
+            catch (final CreateException e)
+            {
+                throw new InitialisationException(e, this);
+            }
             if (configuredWithStores)
             {
-                try
-                {
-                    if (tls.getKeyStore() != null)
-                    {
-                        tls.initialise(false, null);
-                    }
-                    else
-                    {
-                        tls.initialise(true, null);
-                    }
-                }
-                catch (final CreateException e)
-                {
-                    throw new InitialisationException(e, this);
-                }
-
-                getConnectionFactory().useSslProtocol(tls.getSslContext());
+                //set up the socket factory to guarantee a restricted one
+                getConnectionFactory().setSocketFactory(tls.getSocketFactory());
             }
             else if (sslTrustManager == null)
             {
-                getConnectionFactory().useSslProtocol(tls.getSslType());
+                setUpSslWithTrustManager(new NullTrustManager());
             }
             else
             {
-                getConnectionFactory().useSslProtocol(tls.getSslType(), sslTrustManager);
+                setUpSslWithTrustManager(sslTrustManager);
             }
         }
         catch (final GeneralSecurityException gse)
         {
             throw new InitializationException("Failed to configure SSL", gse);
         }
+    }
+
+    private void setUpSslWithTrustManager(TrustManager trustManager) throws NoSuchAlgorithmException, KeyManagementException
+    {
+        //Build own context so that we can set our own restricted socket factory instead of delegating that to the client
+        SSLContext context = SSLContext.getInstance(tls.getSslType());
+        context.init(null, new TrustManager[] {trustManager}, null);
+        getConnectionFactory().setSocketFactory(new RestrictedSSLSocketFactory(context, tls.getEnabledCipherSuites(), tls.getEnabledProtocols()));
     }
 
     public TrustManager getSslTrustManager()
