@@ -1,2 +1,2 @@
-V	160514144244Z		01	unknown	/CN=portatil.local/O=server
-V	160514144338Z		02	unknown	/CN=portatil.local/O=client
+V	260514180924Z		01	unknown	/CN=MSBA-OSX-AFELISATTI.local/O=server
+V	260514181119Z		02	unknown	/CN=MSBA-OSX-AFELISATTI.local/O=client
