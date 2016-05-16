@@ -9,18 +9,21 @@ package org.mule.transport.amqp;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-
-import org.apache.commons.lang.RandomStringUtils;
-import org.junit.ClassRule;
-import org.junit.Test;
 import org.mule.tck.functional.FunctionalTestComponent;
 import org.mule.transport.amqp.harness.AbstractItCase;
 import org.mule.transport.amqp.harness.rules.AmqpModelCleanupRule;
 import org.mule.transport.amqp.harness.rules.AmqpModelRule;
+import org.mule.util.UUID;
 
 import com.rabbitmq.client.QueueingConsumer.Delivery;
+
+import org.apache.commons.lang.RandomStringUtils;
+import org.junit.ClassRule;
+import org.junit.Test;
 
 public class BridgeItCase extends AbstractItCase
 {
@@ -44,6 +47,12 @@ public class BridgeItCase extends AbstractItCase
     	String flowName = "amqpOneWayBridge";
     	dispatchTestMessageAndAssertValidReceivedMessage("amqpOneWayBridgeTarget-queue",
     		nameFactory.getExchangeName(flowName));
+    }
+
+    @Test
+    public void testRequestResponseBridge() throws Exception
+    {
+        sendTestMessageAndAssertValidReceivedMessage("amqpRequestResponseBridge");
     }
 
     @Test
@@ -88,5 +97,20 @@ public class BridgeItCase extends AbstractItCase
 		assertThat(new String(dispatchedMessage.getBody()), equalTo(payload));
 		assertThat(new String(dispatchedMessage.getProperties().getCorrelationId()), equalTo(correlationId));
 	}
-  
+
+    private void sendTestMessageAndAssertValidReceivedMessage(final String flowName) throws Exception
+    {
+        final String payload = RandomStringUtils.randomAlphanumeric(20);
+        final String correlationId = UUID.getUUID();
+
+        final Delivery result = amqpTestClient.sendMessageWithAmqp(correlationId, payload.getBytes(), flowName + "-exchange",
+                                                    getTestTimeoutSecs() * 1000L);
+
+        assertNotNull(result);
+        assertEquals(payload + "-response", new String(result.getBody()));
+        assertEquals(correlationId, result.getProperties().getCorrelationId());
+    }
+
+
+
 }
