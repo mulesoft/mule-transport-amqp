@@ -9,8 +9,6 @@ package org.mule.transport.amqp;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import org.mule.tck.functional.FunctionalTestComponent;
@@ -106,9 +104,9 @@ public class BridgeItCase extends AbstractItCase
         final Delivery result = amqpTestClient.sendMessageWithAmqp(correlationId, payload.getBytes(), flowName + "-exchange",
                                                     getTestTimeoutSecs() * 1000L);
 
-        assertNotNull(result);
-        assertEquals(payload + "-response", new String(result.getBody()));
-        assertEquals(correlationId, result.getProperties().getCorrelationId());
+        assertThat(result, is(notNullValue()));
+        assertThat(new String(result.getBody()), equalTo(payload + "-response"));
+        assertThat(new String(result.getProperties().getCorrelationId()), equalTo(correlationId));
     }
 
 
