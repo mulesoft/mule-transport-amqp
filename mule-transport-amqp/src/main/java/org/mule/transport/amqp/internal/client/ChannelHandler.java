@@ -6,10 +6,6 @@
  */
 package org.mule.transport.amqp.internal.client;
 
-import com.rabbitmq.client.AlreadyClosedException;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.ShutdownListener;
-import com.rabbitmq.client.ShutdownSignalException;
 import org.mule.api.MuleMessage;
 import org.mule.api.endpoint.ImmutableEndpoint;
 import org.mule.api.transaction.Transaction;
@@ -23,10 +19,16 @@ import org.mule.transport.ConnectException;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 import org.mule.transport.amqp.internal.transaction.AmqpTransaction;
 import org.mule.transport.amqp.internal.transaction.CloseableChannelWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.rabbitmq.client.AlreadyClosedException;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.ShutdownListener;
+import com.rabbitmq.client.ShutdownSignalException;
 
 import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ChannelHandler
 {
@@ -78,15 +80,6 @@ public class ChannelHandler
             if (ret != null)
             {
                 LOGGER.debug("Found Channel as transaction resource");
-                return ret;
-            }
-        }
-        else if (message != null)
-        {
-            ret = getFlowVariableChannel(message);
-            if (ret != null)
-            {
-                LOGGER.debug("Found Channel as flow variable resource");
                 return ret;
             }
         }
