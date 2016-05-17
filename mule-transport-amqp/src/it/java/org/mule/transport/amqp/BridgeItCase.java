@@ -25,14 +25,14 @@ import org.junit.Test;
 
 public class BridgeItCase extends AbstractItCase
 {
-	@ClassRule
-	public static AmqpModelRule modelRule = new AmqpModelRule("bridge-tests-model.json");
-	
-	@ClassRule
-	public static AmqpModelCleanupRule modelCleanupRule = new AmqpModelCleanupRule(
-			new String[] {},
-			new String[] {"amqpRequestResponseBridgeTarget-exchange"});
-	
+    @ClassRule
+    public static AmqpModelRule modelRule = new AmqpModelRule("bridge-tests-model.json");
+
+    @ClassRule
+    public static AmqpModelCleanupRule modelCleanupRule = new AmqpModelCleanupRule(
+            new String[] {},
+            new String[] {"amqpRequestResponseBridgeTarget-exchange"});
+
     @Override
     protected String getConfigResources()
     {
@@ -42,9 +42,9 @@ public class BridgeItCase extends AbstractItCase
     @Test
     public void testOneWayBridge() throws Exception
     {
-    	String flowName = "amqpOneWayBridge";
-    	dispatchTestMessageAndAssertValidReceivedMessage("amqpOneWayBridgeTarget-queue",
-    		nameFactory.getExchangeName(flowName));
+        String flowName = "amqpOneWayBridge";
+        dispatchTestMessageAndAssertValidReceivedMessage("amqpOneWayBridgeTarget-queue",
+            nameFactory.getExchangeName(flowName));
     }
 
     @Test
@@ -59,12 +59,12 @@ public class BridgeItCase extends AbstractItCase
         for (int i = 0; i < 10; i++)
         {
             String payload = RandomStringUtils.randomAlphanumeric(20);
-            amqpTestClient.publishMessageWithAmqp(payload.getBytes(), 
-            	nameFactory.getExchangeName("amqpThrottledBridge"));
+            amqpTestClient.publishMessageWithAmqp(payload.getBytes(),
+                nameFactory.getExchangeName("amqpThrottledBridge"));
         }
 
         FunctionalTestComponent functionalTestComponent = 
-        	getFunctionalTestComponent("amqpThrottledBridgeTarget");
+            getFunctionalTestComponent("amqpThrottledBridgeTarget");
 
         int attempts = 0;
         while (attempts++ < getTestTimeoutSecs() * 2)
@@ -78,31 +78,31 @@ public class BridgeItCase extends AbstractItCase
     @Test
     public void testTransactedBridge() throws Exception
     {
-    	dispatchTestMessageAndAssertValidReceivedMessage("amqpTransactedBridgeTarget-queue",
-    		"amqpTransactedBridge-exchange");
+        dispatchTestMessageAndAssertValidReceivedMessage("amqpTransactedBridgeTarget-queue",
+            "amqpTransactedBridge-exchange");
     }
 
-	private void dispatchTestMessageAndAssertValidReceivedMessage(String targetQueueName, String exchangeName)
-			throws Exception 
-	{
-		String payload = RandomStringUtils.randomAlphanumeric(20);
-		String correlationId = amqpTestClient.publishMessageWithAmqp(payload.getBytes(), exchangeName);
+    private void dispatchTestMessageAndAssertValidReceivedMessage(String targetQueueName, String exchangeName)
+            throws Exception
+    {
+        String payload = RandomStringUtils.randomAlphanumeric(20);
+        String correlationId = amqpTestClient.publishMessageWithAmqp(payload.getBytes(), exchangeName);
 
-		Delivery dispatchedMessage = amqpTestClient.consumeMessageWithAmqp(
-				targetQueueName, getTestTimeoutSecs() * 1000L);
+        Delivery dispatchedMessage = amqpTestClient.consumeMessageWithAmqp(
+                targetQueueName, getTestTimeoutSecs() * 1000L);
 
-		assertThat(dispatchedMessage, is(notNullValue()));
-		assertThat(new String(dispatchedMessage.getBody()), equalTo(payload));
-		assertThat(new String(dispatchedMessage.getProperties().getCorrelationId()), equalTo(correlationId));
-	}
+        assertThat(dispatchedMessage, is(notNullValue()));
+        assertThat(new String(dispatchedMessage.getBody()), equalTo(payload));
+        assertThat(new String(dispatchedMessage.getProperties().getCorrelationId()), equalTo(correlationId));
+    }
 
     private void sendTestMessageAndAssertValidReceivedMessage(final String flowName) throws Exception
     {
         final String payload = RandomStringUtils.randomAlphanumeric(20);
         final String correlationId = UUID.getUUID();
 
-        final Delivery result = amqpTestClient.sendMessageWithAmqp(correlationId, payload.getBytes(), flowName + "-exchange",
-                                                    getTestTimeoutSecs() * 1000L);
+        final Delivery result = amqpTestClient.sendMessageWithAmqp(correlationId, payload.getBytes(),
+            flowName + "-exchange", getTestTimeoutSecs() * 1000L);
 
         assertThat(result, is(notNullValue()));
         assertThat(new String(result.getBody()), equalTo(payload + "-response"));
