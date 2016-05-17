@@ -8,6 +8,10 @@
 	},{
 		"name": "amqpRequestResponseBridge-queue"
 	},{
+		"name": "amqpRequestResponseBridgeTarget-queue",
+	  	"durable": false,
+	  	"auto_delete": true
+	},{
 		"name": "amqpThrottledBridge-queue"
 	},{
 		"name": "amqpThrottledBridgeTarget-queue"
@@ -26,6 +30,9 @@
 		"type": "fanout"
 	},{
 		"name": "amqpRequestResponseBridge-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpRequestResponseBridgeTarget-exchange",
 		"type": "fanout"
 	},{
 		"name": "amqpThrottledBridge-exchange",
@@ -55,6 +62,11 @@
 	},{
 		"source": "amqpRequestResponseBridge-exchange",
 		"destination": "amqpRequestResponseBridge-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpRequestResponseBridgeTarget-exchange",
+		"destination": "amqpRequestResponseBridgeTarget-queue",
 		"destination_type": "queue",
 		"routing_key": ""
 	},{
