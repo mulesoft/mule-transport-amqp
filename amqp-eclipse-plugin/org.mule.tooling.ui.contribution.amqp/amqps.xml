@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<namespace xmlns="http://www.mulesoft.org/schema/mule/tooling.attributes" xmlns:mule="http://www.mulesoft.org/schema/mule/core" prefix="amqps" url="http://www.mulesoft.org/schema/mule/amqps">
+
+    <!-- GLOBAL ELEMENT CONFIGURATION DEFINITION -->
+
+    <connector caption="AMQPS-0-9 Connector" localId="connector" icon="icons/small/amqp-endpoint-24x16.png" image="icons/large/amqp-endpoint-48x32.png" extends="http://www.mulesoft.org/schema/mule/core/connectorWithReconnectionType" description="">
+        <attribute-category caption="Protocol" description="Advanced AMQPS-0-9 Protocol properties">
+            <group caption="General" id="general">
+                <string javaType="java.lang.String" required="false" defaultValue="localhost" description="The main AMQPS-0-9 broker host to connect to" caption="Host" name="host" />
+                <integer step="1" min="0" javaType="int" required="false" defaultValue="5672" description="The port to use to connect to the main AMQPS-0-9 broker" caption="Port" name="port" />
+                <string javaType="java.lang.String" required="false" description="A comma-separated list of &quot;host:port&quot; or &quot;host&quot;, defining fallback brokers to attempt connection to, should the connection to main broker fail." caption="Fallback Addresses" name="fallbackAddresses" />
+                <string javaType="java.lang.String" required="false" defaultValue="/" description="The virtual host to connect to on the AMQPS-0-9 broker" caption="Virtual Host" name="virtualHost" />
+                <string javaType="java.lang.String" required="false" defaultValue="guest" description="The user name to use to connect to the AMQPS-0-9 broker" caption="Username" name="username" />
+                <string javaType="java.lang.String" required="false" defaultValue="guest" description="The password to use to connect to the AMQPS-0-9 broker" caption="Password" name="password" />
+                <enum allowsCustom="true" javaType="org.mule.modules.AmqpConstants.DeliveryMode" required="false" defaultValue="PERSISTENT" supportsExpressions="true" description="The delivery mode to use when publishing to the AMQPS-0-9 broker" caption="Delivery Mode" name="deliveryMode">
+                    <option value="NON_PERSISTENT" />
+                    <option value="PERSISTENT" />
+                </enum>
+                <string javaType="byte" required="false" defaultValue="0" description="The priority to use when publishing to the AMQPS-0-9 broker" caption="Priority" name="priority" />
+                <enum allowsCustom="true" javaType="org.mule.modules.AmqpConstants.AckMode" required="false" defaultValue="AMQP_AUTO" supportsExpressions="true" description="The acknowledgment mode to use when consuming from the AMQPS-0-9 broker" caption="Ack Mode" name="ackMode">
+                    <option value="AMQP_AUTO" />
+                    <option value="MANUAL" />
+                    <option value="MULE_AUTO" />
+                </enum>
+                <integer step="1" min="0" javaType="int" required="false" defaultValue="0" description="The maximum amount of content (measured in octets) that the server will deliver, 0 if unlimited" caption="Prefetch Size" name="prefetchSize" />
+                <integer step="1" min="0" javaType="int" required="false" defaultValue="0" description="The maximum number of messages that the server will deliver, 0 if unlimited" caption="Prefetch Count" name="prefetchCount" />
+                <boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="true" description="Defines if the connector should only do active exchange and queue declarations or can also perform passive declarations to enforce their existence" caption="Active Declarations Only" name="activeDeclarationsOnly" />
+                <boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="true" description="Set to true if the connector should only create exclusive consumers" caption="Exclusive Consumers" name="exclusiveConsumers" />
+                <integer step="1" min="0" javaType="int" required="false" defaultValue="4" description="Set number of concurrent channels that will be used to receive AMQPS-0-9 messages" caption="Number of channels" name="numberOfChannels" />
+                <boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="true" description="This flag tells the server how to react if the message cannot be routed to a queue consumer immediately. If this flag is set to true, the server will throw an exception for any undeliverable message. If this flag is false, the server will queue the message, but with no guarantee that it will ever be consumed" caption="Immediate" name="immediate" />
+                <boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="true" description="This flag tells the server how to react if the message cannot be routed to a queue. If this flag is set to true, the server will throw an exception for any unroutable message. If this flag is false, the server silently drops the message" caption="Mandatory" name="mandatory" />
+                <boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="true" description="If the no-local field is set the server will not send messages to the connection that published them" caption="No Local" name="noLocal" />
+                <string javaType="com.rabbitmq.client.ReturnListener" required="false" defaultValue="/" description="Reference to an endpoint to which AMQPS-0-9 returned message should be dispatched to" caption="Default Return Listener Reference" name="defaultReturnListener-ref" />
+                <string javaType="org.mule.api.endpoint.EndpointBuilder" required="false" description="Reference to an endpoint builder to which be used to get the return listener endpoint" caption="Default Return Endpoint Builder Reference" name="defaultReturnEndpointBuilder-ref" />
+            </group>
+        </attribute-category>
+        <attribute-category caption="Security" description="Security">
+            <group caption="Key Store" id="keyStore" topAnchor="$">
+                <childElement
+                        name="http://www.mulesoft.org/schema/mule/amqps/ssl-key-store"
+                        description="SSL key store." caption="Key Store" inplace="true" />
+            </group>
+            <group caption="Trust Store" id="trustStore">
+                <childElement name="http://www.mulesoft.org/schema/mule/amqps/ssl-trust-store"
+                              description="SSL trust store." caption="Trust Store" inplace="true" />
+            </group>
+            <string javaType="java.lang.String" required="false" description="SSL protocol to use." caption="Protocol" name="sslProtocol" />
+            <string javaType="javax.net.ssl.TrustManager" required="false" description="Reference to the javax.net.ssl.TrustManager to use, defaults to one that trusts all certificates." caption="Trust Manager" name="sslTrustManager-ref" />
+        </attribute-category>
+    </connector>
+
+    <nested caption="Key Store" localId="ssl-key-store"
+            icon="icons/small/amqp-endpoint-24x16.png"
+            description="The client key store information, including location, key store type, and algorithm."
+            image="icons/large/amqp-endpoint-48x32.png">
+        <file caption="Path" name="path" required="false"
+              description="The location (which will be resolved relative to the current classpath and file system, if possible) of the keystore that contains public certificates and private keys for identification." />
+        <password caption="Key Password" name="keyPassword"
+                  description="The password used to protect the private key." required="false" />
+        <password caption="Store Password" name="storePassword"
+                  description="The password used to protect the keystore." required="false" />
+        <classname name="type"
+                   description="The type of keystore used (a Java class name)." caption="Type" />
+        <string name="algorithm" description="The algorithm used by the key store."
+                caption="Algorithm" />
+    </nested>
+
+    <nested caption="Trust Store" localId="ssl-trust-store"
+            icon="icons/small/amqp-endpoint-24x16.png"
+            description="The client trust store. TLS connections are made to trusted systems. The public certificates of trusted systems are stored in a keystore (called a trust store) and used to verify that the connection made to a remote system really is the expected identity."
+            image="icons/large/amqp-endpoint-48x32.png">
+        <file caption="Path" name="path"
+              description="The location (which will be resolved relative to the current classpath and file system, if possible) of the keystore that contains public certificates and private keys for identification" />
+        <password caption="Password" name="storePassword"
+                  description="The password used to protect the trust store." />
+        <classname name="type"
+                   description="The type of keystore used (a Java class name)." caption="Type" />
+        <string name="algorithm" description="The algorithm used by the trust store."
+                caption="Algorithm" />
+        <globalRef name="factory-ref" description="Reference to the trust manager factory"
+                   caption="Trust Manager Factory" requiredType="http://www.springframework.org/schema/beans/bean" />
+        <boolean caption="Explicit Trust Store" description="Whether this is an explicit trust store."
+                 name="explicitOnly" xsdType="substitutableBoolean" />
+    </nested>
+
+    <!-- ENDPOINT DEFINITION -->
+
+    <endpoint localId="endpoint" caption="AMQPS-0-9" icon="icons/small/amqp-endpoint-24x16.png" image="icons/large/amqp-endpoint-48x32.png" extends="http://www.mulesoft.org/schema/mule/core/endPointType" defaultMep="RequestResponse" doNotInherit="ref,connector-ref,transformer-refs,responseTransformer-refs" description="The AMQPS-0-9 Endpoint allows Mule applications to send or receive messages to an AMQPS-0-9 Broker">
+        <attribute-category caption="General" description="General properties">
+            <group caption="Address Attributes" id="addressAttributes">
+                <string name="exchangeName" xsdType="string" caption="Exchange Name" alwaysFill="false" description="The exchange to publish to or bind queues to. Leave blank or omit for the default exchange" />
+                <string name="queueName" xsdType="string" caption="Queue Name" alwaysFill="false" description="The queue name to consume from. Leave blank or omit for using a new private exclusive server-named queue" />
+            </group>
+            <group caption="Property Attributes" id="propertyAttributes">
+                <string name="routingKey" xsdType="string" caption="Routing Key" alwaysFill="false" description="Comma-separated routing keys to use when binding a queue or publishing a message" />
+                <string name="consumerTag" xsdType="string" caption="Consumer Tag" alwaysFill="false" description="A client-generated consumer tag to establish context" />
+                <enum name="exchangeType" caption="Exchange Type" alwaysFill="false" description="The type of exchange to be declared">
+                    <option value="fanout" />
+                    <option value="direct" />
+                    <option value="topic" />
+                    <option value="headers" />
+                </enum>
+                <boolean name="exchangeDurable" xsdType="boolean" caption="Exchange Durable" defaultValue="false" description="The durability of the declared exchange" />
+                <boolean name="exchangeAutoDelete" xsdType="boolean" caption="Exchange Auto Delete" defaultValue="false" description="Specifies if the declared exchange should be autodeleted" />
+                <boolean name="queueDurable" xsdType="boolean" caption="Queue Durable" alwaysFill="false" defaultValue="false" description="Specifies if the declared queue is durable" />
+                <boolean name="queueAutoDelete" xsdType="boolean" caption="Queue Auto Delete" alwaysFill="false" defaultValue="false" description="Specifies if the declared queue should be autodeleted" />
+                <boolean name="queueExclusive" xsdType="boolean" caption="Queue Exclusive" alwaysFill="false" defaultValue="false" description="Specifies if the declared queue is exclusive" />
+            </group>
+            <group caption="Flow Control" id="flowControl">
+                <integer step="1" min="0" javaType="int" required="false" description="Set number of concurrent channels that will be used to receive AMQPS-0-9 messages. If set this value will be used instead on the one defined in the connector." caption="Number of channels" name="numberOfChannels" />
+            </group>
+        </attribute-category>
+        <attribute-category caption="References" description="References">
+            <group caption="Global References" id="abstractConnectorReferences">
+                <globalRef caption="Connector Reference" name="connector-ref" requiredType="http://www.mulesoft.org/schema/mule/amqp/connector" description="The name of the connector associated with this endpoint. This must be specified if more than one connector is defined for this transport." />
+                <globalRef name="ref" requiredType="http://www.mulesoft.org/schema/mule/amqp/endpoint" caption="Endpoint Reference" description="A reference to a global endpoint, which is used as a template to construct this endpoint. A template may specify initial values for various properties. Additional properties can be defined locally as long as they do not change the address." />
+                <list groupIn="Transformer References/Request" caption="Request" description="A list of the transformers that will be applied (in order) to the message before it is delivered to the component." name="transformer-refs" />
+                <list groupIn="Transformer References/Response" caption="Response" description="A list of the transformers that will be applied (in order) to the synchronous response before it is returned via the transport." name="responseTransformer-refs" />
+            </group>
+        </attribute-category>
+    </endpoint>
+    <global-endpoint localId="endpoint" caption="AMQPS-0-9" icon="icons/small/amqp-endpoint-24x16.png" image="icons/large/amqp-endpoint-48x32.png" extends="http://www.mulesoft.org/schema/mule/amqp/endpoint" defaultMep="RequestResponse" description="The AMQPS-0-9 Endpoint allows Mule applications to send or receive messages over AMQPS-0-9 message brokers.">
+        <attribute-category caption="General" description="General properties">
+            <group caption="Generic" id="endpointGeneric" topAnchor="$">
+                <name caption="Name" description="Endpoint name" name="name" required="true" />
+            </group>
+        </attribute-category>
+    </global-endpoint>
+
+    <!-- MESSAGE COMPONENTS DEFINITION -->
+
+    <component image="icons/large/amqp-component-48x32.png" caption="AMQPS-0-9 Acknowledge Message" icon="icons/small/amqp-component-24x16.png" localId="acknowledge-message" description="Acknowledges the AMQPS-0-9 message that is currently processed by Mule." extends="http://www.mulesoft.org/schema/mule/core/abstractComponentType" doNotInherit="http://www.mulesoft.org/schema/mule/core/abstract-interceptor,http://www.mulesoft.org/schema/mule/core/refInterceptorStackType">
+        <attribute-category caption="General" description="General properties">
+            <boolean name="multiple" xsdType="boolean" caption="Exchange Durable" defaultValue="false" required="false" description="Set to true to acknowledge all messages up to and including the delivery tag of the AMQPS-0-9 message that is currently processed by Mule; false to acknowledge just the current message." />
+        </attribute-category>
+    </component>
+    <component image="icons/large/amqp-component-48x32.png" caption="AMQPS-0-9 Reject Message" icon="icons/small/amqp-component-24x16.png" localId="reject-message" description="Rejects the AMQPS-0-9 message that is currently processed by Mule." extends="http://www.mulesoft.org/schema/mule/core/abstractComponentType" doNotInherit="http://www.mulesoft.org/schema/mule/core/abstract-interceptor,http://www.mulesoft.org/schema/mule/core/refInterceptorStackType">
+        <attribute-category caption="General" description="General properties">
+            <boolean name="requeue" xsdType="boolean" caption="Requeue" defaultValue="false" required="false" description="Set to true if the rejected message should be requeued rather than discarded/dead-lettered." />
+        </attribute-category>
+    </component>
+    <component image="icons/large/amqp-component-48x32.png" caption="AMQPS-0-9 Recover" icon="icons/small/amqp-component-24x16.png" localId="recover" description="Ask the broker to resend unacknowledged messages. In 0-8 basic.recover is asynchronous; in 0-9-1 it is synchronous." extends="http://www.mulesoft.org/schema/mule/core/abstractComponentType" doNotInherit="http://www.mulesoft.org/schema/mule/core/abstract-interceptor,http://www.mulesoft.org/schema/mule/core/refInterceptorStackType">
+        <attribute-category caption="General" description="General properties">
+            <boolean name="requeue" xsdType="boolean" caption="Requeue" defaultValue="false" required="false" description="If true, messages will be requeued and possibly delivered to a different consumer. If false, messages will be redelivered to the same consumer." />
+        </attribute-category>
+    </component>
+</namespace>
