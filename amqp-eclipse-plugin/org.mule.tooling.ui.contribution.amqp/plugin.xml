@@ -32,4 +32,34 @@
      </module>
    </extension>
 
+    <extension
+            point="org.mule.tooling.core.contribution">
+
+        <externalContribution
+                contributionJar="mule-transport-amqp-3.6.3-SNAPSHOT.jar"
+                contributionLibPathInMule="/plugins"
+                contributionLibs="mule-transport-amqp-3.6.3-SNAPSHOT.zip"
+                contributionNamespace="http://www.mulesoft.org/schema/mule/amqps"
+                contributionNamespaceFile="http://www.mulesoft.org/schema/mule/amqps/current/mule-amqps.xsd"
+                contributionNamespacePrefix="amqps"
+                contributionType="connector"
+                icon="icons/small/amqp-endpoint-24x16.png"
+                name="AMQPS-0-9"
+                path="amqps.xml"
+                version="3.6.3-SNAPSHOT">
+        </externalContribution>
+        <module
+                description="Core endpoints and patterns for Mule Tooling"
+                icon="icons/module-icon.png"
+                id="org.mule.tooling.ui.modules.coreModule"
+                name="Mule Tooling Core Elements">
+            <category
+                    expandByDefault="false"
+                    icon="icons/categories/EndpointsCategory-16x16.png"
+                    id="org.mule.tooling.ui.contribution.amqps"
+                    name="Mule AMQPS-0-9 Transport"
+                    paletteWeight="3000">
+            </category>
+        </module>
+    </extension>
 </plugin>
