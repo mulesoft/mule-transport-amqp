@@ -7,7 +7,7 @@
         <attribute-category caption="Protocol" description="Advanced AMQPS-0-9 Protocol properties">
             <group caption="General" id="general">
                 <string javaType="java.lang.String" required="false" defaultValue="localhost" description="The main AMQPS-0-9 broker host to connect to" caption="Host" name="host" />
-                <integer step="1" min="0" javaType="int" required="false" defaultValue="5672" description="The port to use to connect to the main AMQPS-0-9 broker" caption="Port" name="port" />
+                <integer step="1" min="0" javaType="int" required="false" defaultValue="5671" description="The port to use to connect to the main AMQPS-0-9 broker" caption="Port" name="port" />
                 <string javaType="java.lang.String" required="false" description="A comma-separated list of &quot;host:port&quot; or &quot;host&quot;, defining fallback brokers to attempt connection to, should the connection to main broker fail." caption="Fallback Addresses" name="fallbackAddresses" />
                 <string javaType="java.lang.String" required="false" defaultValue="/" description="The virtual host to connect to on the AMQPS-0-9 broker" caption="Virtual Host" name="virtualHost" />
                 <string javaType="java.lang.String" required="false" defaultValue="guest" description="The user name to use to connect to the AMQPS-0-9 broker" caption="Username" name="username" />
@@ -59,8 +59,12 @@
                   description="The password used to protect the private key." required="false" />
         <password caption="Store Password" name="storePassword"
                   description="The password used to protect the keystore." required="false" />
-        <classname name="type"
-                   description="The type of keystore used (a Java class name)." caption="Type" />
+        <enum caption="Type" description="The default Java KeyStore. If no keystore type is specified, the JVM default will be used (if not specified the default is 'jks')."
+              name="type" autoSort="false" defaultValue="" allowsCustom="true" removeEmptyOption="false">
+            <option caption="JKS" value="jks"/>
+            <option caption="JCEKS" value="jceks"/>
+            <option caption="PKCS12" value="pkcs12"/>
+        </enum>
         <string name="algorithm" description="The algorithm used by the key store."
                 caption="Algorithm" />
     </nested>
@@ -73,8 +77,12 @@
               description="The location (which will be resolved relative to the current classpath and file system, if possible) of the keystore that contains public certificates and private keys for identification" />
         <password caption="Password" name="storePassword"
                   description="The password used to protect the trust store." />
-        <classname name="type"
-                   description="The type of keystore used (a Java class name)." caption="Type" />
+        <enum caption="Type" description="The default Java KeyStore. If no keystore type is specified, the JVM default will be used (if not specified the default is 'jks')."
+              name="type" autoSort="false" defaultValue="" allowsCustom="true" removeEmptyOption="false">
+            <option caption="JKS" value="jks"/>
+            <option caption="JCEKS" value="jceks"/>
+            <option caption="PKCS12" value="pkcs12"/>
+        </enum>
         <string name="algorithm" description="The algorithm used by the trust store."
                 caption="Algorithm" />
         <globalRef name="factory-ref" description="Reference to the trust manager factory"
@@ -112,14 +120,14 @@
         </attribute-category>
         <attribute-category caption="References" description="References">
             <group caption="Global References" id="abstractConnectorReferences">
-                <globalRef caption="Connector Reference" name="connector-ref" requiredType="http://www.mulesoft.org/schema/mule/amqp/connector" description="The name of the connector associated with this endpoint. This must be specified if more than one connector is defined for this transport." />
-                <globalRef name="ref" requiredType="http://www.mulesoft.org/schema/mule/amqp/endpoint" caption="Endpoint Reference" description="A reference to a global endpoint, which is used as a template to construct this endpoint. A template may specify initial values for various properties. Additional properties can be defined locally as long as they do not change the address." />
+                <globalRef caption="Connector Reference" name="connector-ref" requiredType="http://www.mulesoft.org/schema/mule/amqps/connector" description="The name of the connector associated with this endpoint. This must be specified if more than one connector is defined for this transport." />
+                <globalRef name="ref" requiredType="http://www.mulesoft.org/schema/mule/amqps/endpoint" caption="Endpoint Reference" description="A reference to a global endpoint, which is used as a template to construct this endpoint. A template may specify initial values for various properties. Additional properties can be defined locally as long as they do not change the address." />
                 <list groupIn="Transformer References/Request" caption="Request" description="A list of the transformers that will be applied (in order) to the message before it is delivered to the component." name="transformer-refs" />
                 <list groupIn="Transformer References/Response" caption="Response" description="A list of the transformers that will be applied (in order) to the synchronous response before it is returned via the transport." name="responseTransformer-refs" />
             </group>
         </attribute-category>
     </endpoint>
-    <global-endpoint localId="endpoint" caption="AMQPS-0-9" icon="icons/small/amqp-endpoint-24x16.png" image="icons/large/amqp-endpoint-48x32.png" extends="http://www.mulesoft.org/schema/mule/amqp/endpoint" defaultMep="RequestResponse" description="The AMQPS-0-9 Endpoint allows Mule applications to send or receive messages over AMQPS-0-9 message brokers.">
+    <global-endpoint localId="endpoint" caption="AMQPS-0-9" icon="icons/small/amqp-endpoint-24x16.png" image="icons/large/amqp-endpoint-48x32.png" extends="http://www.mulesoft.org/schema/mule/amqps/endpoint" defaultMep="RequestResponse" description="The AMQPS-0-9 Endpoint allows Mule applications to send or receive messages over AMQPS-0-9 message brokers.">
         <attribute-category caption="General" description="General properties">
             <group caption="Generic" id="endpointGeneric" topAnchor="$">
                 <name caption="Name" description="Endpoint name" name="name" required="true" />
@@ -144,4 +152,23 @@
             <boolean name="requeue" xsdType="boolean" caption="Requeue" defaultValue="false" required="false" description="If true, messages will be requeued and possibly delivered to a different consumer. If false, messages will be redelivered to the same consumer." />
         </attribute-category>
     </component>
+
+    <!--TRANSFORMERS-->
+
+    <transformer image="icons/large/amqp-component-48x32.png"
+                 localId="object-to-amqpmessage-transformer"
+                 caption="Object to AMQP Message"
+                 icon="icons/small/amqp-component-24x16.png"
+                 extends="http://www.mulesoft.org/schema/mule/core/abstractTransformerType"
+                 description="The object-to-amqpmessage-transformer element configures a transformer that accepts byte[] payloads and copies outbound message properties to either standard AMQP headers or custom ones (based on their names)."
+                 visibleInPalette="false">
+    </transformer>
+    <transformer image="icons/large/amqp-component-48x32.png"
+                 localId="amqpmessage-to-object-transformer"
+                 caption="AMQPS Message to Object"
+                 icon="icons/small/amqp-component-24x16.png"
+                 extends="http://www.mulesoft.org/schema/mule/core/abstractTransformerType"
+                 description="The amqpmessage-to-object-transformer element configures a transformer that converts an AMQP message into an object by extracting the message payload."
+                 visibleInPalette="false">
+    </transformer>
 </namespace>
