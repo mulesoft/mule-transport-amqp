@@ -97,4 +97,21 @@
 			<boolean name="requeue" xsdType="boolean" caption="Requeue" defaultValue="false" required="false" description="If true, messages will be requeued and possibly delivered to a different consumer. If false, messages will be redelivered to the same consumer." />
 		</attribute-category>
 	</component>
+
+	<!--TRANSFORMERS-->
+
+	<transformer image="icons/large/amqp-component-48x32.png"
+				 localId="object-to-amqpmessage-transformer"
+				 caption="Object to AMQP Message"
+				 icon="icons/small/amqp-component-24x16.png"
+				 extends="http://www.mulesoft.org/schema/mule/core/abstractTransformerType"
+				 description="The object-to-amqpmessage-transformer element configures a transformer that accepts byte[] payloads and copies outbound message properties to either standard AMQP headers or custom ones (based on their names).">
+	</transformer>
+	<transformer image="icons/large/amqp-component-48x32.png"
+				 localId="amqpmessage-to-object-transformer"
+				 caption="AMQP Message to Object"
+				 icon="icons/small/amqp-component-24x16.png"
+				 extends="http://www.mulesoft.org/schema/mule/core/abstractTransformerType"
+				 description="The amqpmessage-to-object-transformer element configures a transformer that converts an AMQP message into an object by extracting the message payload.">
+	</transformer>
 </namespace>
