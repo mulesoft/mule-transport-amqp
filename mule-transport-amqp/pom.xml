@@ -22,7 +22,7 @@
     <url>https://github.com/mulesoft/mule-transport-amqp</url>
 
     <properties>
-        <mule.version>3.6.0</mule.version>
+        <mule.version>3.5.0</mule.version>
         <rabbitmq.amqp-client.version>3.6.1</rabbitmq.amqp-client.version>
         <!-- Tools properties -->
         <vmtype>org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType</vmtype>
@@ -141,6 +141,15 @@
                 <configuration>
                     <preparationGoals>assembly:assembly</preparationGoals>
                     <pushChanges>false</pushChanges>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <amqpSslProtocol>${amqpSslProtocolByJdk}</amqpSslProtocol>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>
@@ -314,6 +323,24 @@
 
     <profiles>
         <profile>
+            <id>jdk6-tests</id>
+            <activation>
+                <jdk>1.6</jdk>
+            </activation>
+            <properties>
+                <amqpSslProtocolByJdk>TLSv1</amqpSslProtocolByJdk>
+            </properties>
+        </profile>
+        <profile>
+            <id>jdk7-tests</id>
+            <activation>
+                <jdk>1.7</jdk>
+            </activation>
+            <properties>
+                <amqpSslProtocolByJdk>TLSv1.2</amqpSslProtocolByJdk>
+            </properties>
+        </profile>
+        <profile>
             <id>it</id>
             <build>
                 <testResources>
@@ -357,6 +384,7 @@
                                 <amqpHost>127.0.0.1</amqpHost>
                                 <amqpPort>5672</amqpPort>
                                 <amqpSslPort>5671</amqpSslPort>
+                                <amqpSslProtocol>${amqpSslProtocolByJdk}</amqpSslProtocol>
                             </systemPropertyVariables>
                         </configuration>
                        
