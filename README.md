@@ -41,7 +41,7 @@ Run:
 
     mvn -Pit clean verify
 
-The integration tests rely on a locally running RabbitMQ broker with a default configuration. They have been run using a RabbitMQ installation from Homebrew (https://www.rabbitmq.com/install-homebrew.html) set up with the configuration found in /mule-transport-amqp/src/it/resources/ssl/rabbit/rabbitmq.config.
+The integration tests rely on a locally running RabbitMQ broker with a default configuration. They have been run using a RabbitMQ installation from Homebrew (https://www.rabbitmq.com/install-homebrew.html) set up with the configuration found in /mule-transport-amqp/src/it/resources/ssl/rabbit/rabbitmq.config (in case of running with JDK6 please use rabbitmq-jdk6.config which is in the same folder).
 
 If you have a different configuration, you can use the following arguments:
 

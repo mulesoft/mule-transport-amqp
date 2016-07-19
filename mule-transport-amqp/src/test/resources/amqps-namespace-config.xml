@@ -18,13 +18,13 @@
 
     <amqps:connector name="amqpsDefaultSslConnector" />
 
-    <amqps:connector name="amqpsTlsConnector" sslProtocol="TLSv1.2" />
+    <amqps:connector name="amqpsTlsConnector" sslProtocol="${amqpSslProtocol}" />
 
     <amqps:connector name="amqpsTrustManagerConnector"
         sslTrustManager-ref="nullTrustManager" />
 
     <amqps:connector name="amqpsTlsTrustManagerConnector"
-        sslProtocol="TLSv1.2" sslTrustManager-ref="nullTrustManager" />
+        sslProtocol="${amqpSslProtocol}" sslTrustManager-ref="nullTrustManager" />
 
     <amqps:connector name="amqpsTlsKeyStores">
         <amqps:ssl-key-store type="jks" storePassword="aPass"
