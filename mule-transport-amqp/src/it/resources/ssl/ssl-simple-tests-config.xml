@@ -15,7 +15,7 @@
         password="${amqpPassword}"
         host="${amqpHost}"
         port="${amqpSslPort}"
-        sslProtocol="TLSv1.2"/>
+        sslProtocol="${amqpSslProtocol}"/>
 
     <!-- Declare an exchange, a queue, bind the latter to the former -->
     <amqps:endpoint name="amqpsFullGlobalEndpoint" exchangeName="target-exchange"

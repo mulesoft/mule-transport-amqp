@@ -6,6 +6,7 @@
  */
 package org.mule.transport.amqp.config;
 
+import static java.lang.System.getProperty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -20,6 +21,7 @@ public class AmqpsNamespaceHandlerTestCase extends AbstractAmqpNamespaceHandlerT
     {
         super();
     }
+    private static final String AMQP_SSL_PROTOCOL = getProperty("amqpSslProtocol");
 
     @Override
     protected String getConfigResources()
@@ -49,7 +51,7 @@ public class AmqpsNamespaceHandlerTestCase extends AbstractAmqpNamespaceHandlerT
         final AmqpsConnector c = (AmqpsConnector) muleContext.getRegistry().lookupConnector(
             "amqpsTlsConnector");
 
-        assertEquals("TLSv1.2", c.getSslProtocol());
+        assertEquals(AMQP_SSL_PROTOCOL, c.getSslProtocol());
         assertNull(c.getSslTrustManager());
     }
 
@@ -68,7 +70,7 @@ public class AmqpsNamespaceHandlerTestCase extends AbstractAmqpNamespaceHandlerT
         final AmqpsConnector c = (AmqpsConnector) muleContext.getRegistry().lookupConnector(
             "amqpsTlsTrustManagerConnector");
 
-        assertEquals("TLSv1.2", c.getSslProtocol());
+        assertEquals(AMQP_SSL_PROTOCOL, c.getSslProtocol());
         assertNotNull(c.getSslTrustManager());
     }
 }

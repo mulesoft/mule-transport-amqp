@@ -16,7 +16,7 @@
     <properties>
         <home.dir>.</home.dir>
         <lib.dir>lib</lib.dir>
-        <mule.version>3.6.0</mule.version>
+        <mule.version>3.5.0</mule.version>
     </properties>
     <build>
         <plugins>
