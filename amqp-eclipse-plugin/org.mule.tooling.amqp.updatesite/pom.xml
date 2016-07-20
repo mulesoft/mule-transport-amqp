@@ -46,73 +46,31 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.6</version>
+                <!-- AMQP-54: Added as a workaround to install/deploy the update-site with the 'studio-plugin' classifier.
+                For an unknown reason the tycho-p2-repository-plugin use the ${finalName} property in the package phase
+                but then in the install phase the maven-install-plugin use mule-transport-amqp-studio-${version}.zip -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.7</version>
                 <executions>
                     <execution>
-                        <id>unzip-update-site</id>
+                        <id>attach-artifacts</id>
                         <phase>package</phase>
-                        <configuration>
-                            <tasks>
-                                <echo message="prepare update-site for signing" />
-                                <unzip
-                                    src="${project.build.directory}\${finalName}.zip"
-                                    dest="${project.build.directory}\update-site\" />
-                            </tasks>
-                        </configuration>
                         <goals>
-                            <goal>run</goal>
+                            <goal>attach-artifact</goal>
                         </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}\${finalName}.zip</file>
+                                    <type>zip</type>
+                                    <classifier>studio-plugin</classifier>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <id>update-site</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                        <version>1.7</version>
-                        <executions>
-                            <execution>
-                                <id>attach-artifacts</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>attach-artifact</goal>
-                                </goals>
-                                <configuration>
-                                    <artifacts>
-                                        <artifact>
-                                            <file>${project.build.directory}\UpdateSite.zip</file>
-                                            <type>zip</type>
-                                            <classifier>studio-plugin</classifier>
-                                        </artifact>
-                                    </artifacts>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.mule.tooling</groupId>
-                        <artifactId>studio-us-signer</artifactId>
-                        <version>1.1</version>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>sign-us</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
