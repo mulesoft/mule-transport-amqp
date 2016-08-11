@@ -417,6 +417,11 @@ public class AmqpConnector extends AbstractConnector
         this.activeDeclarationsOnly = activeDeclarationsOnly;
     }
 
+    public boolean isActiveDeclarationsOnly()
+    {
+        return activeDeclarationsOnly;
+    }
+
     public DeliveryMode getDeliveryMode()
     {
         return deliveryMode;
