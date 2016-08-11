@@ -6,12 +6,15 @@
  */
 package org.mule.transport.amqp.internal.endpoint.dispatcher;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.ReturnListener;
+import static org.mule.transport.amqp.internal.connector.AmqpConnector.ENDPOINT_PROPERTY_QUEUE_AUTO_DELETE;
+import static org.mule.transport.amqp.internal.connector.AmqpConnector.ENDPOINT_PROPERTY_QUEUE_DURABLE;
+import static org.mule.transport.amqp.internal.connector.AmqpConnector.ENDPOINT_PROPERTY_QUEUE_EXCLUSIVE;
 import org.mule.api.MuleEvent;
+import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
 import org.mule.api.endpoint.OutboundEndpoint;
 import org.mule.api.lifecycle.InitialisationException;
+import org.mule.api.lifecycle.StartException;
 import org.mule.api.transport.DispatchException;
 import org.mule.config.i18n.MessageFactory;
 import org.mule.transport.AbstractMessageDispatcher;
@@ -23,7 +26,12 @@ import org.mule.transport.amqp.internal.confirm.DefaultConfirmsManager;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 import org.mule.transport.amqp.internal.domain.AmqpMessage;
 import org.mule.transport.amqp.internal.endpoint.AmqpEndpointUtil;
+import org.mule.util.StringUtils;
 
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.ReturnListener;
+
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -67,6 +75,28 @@ public class Dispatcher extends AbstractMessageDispatcher
         catch (Exception e)
         {
             throw new InitialisationException(e, this);
+        }
+    }
+
+    @Override
+    protected void doStart() throws MuleException
+    {
+        try
+        {
+            boolean activeDeclarationsOnly = amqpConnector.isActiveDeclarationsOnly();
+            final String exchangeName = declarator.declareExchange(channel, endpoint, activeDeclarationsOnly);
+            final String routingKey = endpointUtil.getRoutingKey(endpoint);
+            if (StringUtils.isNotEmpty(endpointUtil.getQueueName(endpoint.getAddress()))
+                    || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_DURABLE)
+                    || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_AUTO_DELETE)
+                    || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_EXCLUSIVE))
+            {
+                declarator.declareEndpoint(channel, endpoint, activeDeclarationsOnly, exchangeName, routingKey);
+            }
+        }
+        catch (IOException e)
+        {
+            throw new StartException(MessageFactory.createStaticMessage("Could not start dispatcher."), e, this);
         }
     }
 

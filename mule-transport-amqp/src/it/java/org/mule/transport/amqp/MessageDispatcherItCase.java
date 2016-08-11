@@ -12,17 +12,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.lang.RandomStringUtils;
-import org.junit.ClassRule;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.mule.DefaultMuleMessage;
 import org.mule.api.MuleMessage;
 import org.mule.module.client.MuleClient;
@@ -35,6 +24,16 @@ import org.mule.util.UUID;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang.RandomStringUtils;
+import org.junit.ClassRule;
+import org.junit.Test;
 public class MessageDispatcherItCase extends AbstractItCase
 {
 	@ClassRule
@@ -152,7 +151,6 @@ public class MessageDispatcherItCase extends AbstractItCase
     }
 
     @Test
-    @Ignore // AMQP-44
     public void testDispatchToNewExchange() throws Exception
     {
         String bridgeName = "amqpNewExchangeService";
@@ -161,12 +159,12 @@ public class MessageDispatcherItCase extends AbstractItCase
         // there is no queue bound to this new exchange, so we can only test its
         // presence
         int attempts = 0;
-        while (attempts++ < getTestTimeoutSecs() * 2)
+        while (attempts++ < getTestTimeoutSecs())
         {
-        	Channel channel = null;
+            Channel channel = null;
             try
             {
-            	channel = testConnectionManager.getChannel();
+                channel = testConnectionManager.getChannel();
                 channel.exchangeDeclarePassive(nameFactory.getExchangeName(bridgeName));
                 return;
             }
@@ -176,14 +174,16 @@ public class MessageDispatcherItCase extends AbstractItCase
             }
             finally
             {
-            	testConnectionManager.disposeChannel(channel);
+                if (channel != null && channel.isOpen())
+                {
+                    testConnectionManager.disposeChannel(channel);
+                }
             }
         }
         fail("Exchange not created by outbound endpoint");
     }
 
     @Test
-    @Ignore // AMQP-44
     public void testOutboundQueueCreation() throws Exception
     {
         String flowName = "amqpOutBoundQueue";
@@ -191,7 +191,7 @@ public class MessageDispatcherItCase extends AbstractItCase
 
         // test to see if there is a message on the queue.
         int attempts = 0;
-        while (attempts++ < getTestTimeoutSecs() * 2)
+        while (attempts++ < getTestTimeoutSecs())
         {
         	Channel channel = null;
             try
@@ -208,7 +208,10 @@ public class MessageDispatcherItCase extends AbstractItCase
             }
             finally
             {
-            	testConnectionManager.disposeChannel(channel);
+                if (channel != null && channel.isOpen())
+                {
+                    testConnectionManager.disposeChannel(channel);
+                }
             }
         }
         fail("Queue was not created or message not delivered");
