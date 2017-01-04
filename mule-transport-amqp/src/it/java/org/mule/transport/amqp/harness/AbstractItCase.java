@@ -29,7 +29,12 @@ public abstract class AbstractItCase extends FunctionalTestCase
 		super();
         setStartContext(false);
 	}
-	
+
+	protected boolean startMuleContext()
+	{
+		return true;
+	}
+
 	@Before
     public void prepareAbstractITCase() throws Exception
     {
@@ -38,7 +43,7 @@ public abstract class AbstractItCase extends FunctionalTestCase
 		channel = testConnectionManager.getChannel();
     	amqpTestClient = new AmqpTestClient(channel);
     	vmTestClient = new VmTestClient(muleContext, amqpTestClient);
-    	if (!muleContext.getLifecycleManager().getState().isStarted())
+    	if (!muleContext.getLifecycleManager().getState().isStarted() && startMuleContext())
     	{
     		muleContext.start();
     	}
