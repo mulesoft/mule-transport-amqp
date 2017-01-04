@@ -84,7 +84,7 @@ public class MultiChannelMessageSubReceiver extends AbstractMessageReceiver
             }
             catch (MuleException w)
             {
-                logger.error("Unable to stop channel's connection");
+                logger.error("Unable to stop amqp connector");
             }
             throw new StartException(
                     MessageFactory.createStaticMessage("Error when subscribing to queue: "

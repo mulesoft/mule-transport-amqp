@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns="http://www.mulesoft.org/schema/mule/core"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xmlns:spring="http://www.springframework.org/schema/beans"
       xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp"
       xmlns:test="http://www.mulesoft.org/schema/mule/test"
       xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.mulesoft.org/schema/mule/amqp http://www.mulesoft.org/schema/mule/amqp/current/mule-amqp.xsd
 http://www.mulesoft.org/schema/mule/test http://www.mulesoft.org/schema/mule/test/current/mule-test.xsd">
 
@@ -17,12 +15,8 @@ http://www.mulesoft.org/schema/mule/test http://www.mulesoft.org/schema/mule/tes
                     port="${amqpPort}"
                     mandatory="true"/>
 
-    <spring:beans>
-        <amqp:endpoint name="bogusQueue" queueName="bogusQueue" connector-ref="NonPersistent" />
-    </spring:beans>
-
     <flow name="jpmc">
-        <inbound-endpoint ref="bogusQueue"/>
+        <amqp:inbound-endpoint queueName="bogusQueue"/>
         <test:component />
     </flow>
 
