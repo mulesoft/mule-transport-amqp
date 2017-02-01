@@ -196,4 +196,8 @@ public class AmqpDeclarer
         return exchangeName;
     }
 
+    public AmqpEndpointUtil getEndpointUtil()
+    {
+        return endpointUtil;
+    }
 }
