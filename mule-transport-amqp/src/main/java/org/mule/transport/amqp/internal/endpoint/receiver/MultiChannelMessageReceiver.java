@@ -106,6 +106,12 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
             queueName = declarator.declareEndpoint(channel, endpoint, true);
             declared = true;
         }
+        else
+        {
+            final String exchangeName = declarator.declareExchange(channel, endpoint, true);
+            String routingKey = declarator.getEndpointUtil().getRoutingKey(endpoint);
+            declarator.declareBinding(channel, endpoint, exchangeName, routingKey, queueName);
+        }
     }
 
 
