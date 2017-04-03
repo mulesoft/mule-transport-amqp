@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 public class AmqpDeclarer
@@ -55,7 +56,8 @@ public class AmqpDeclarer
         if (StringUtils.isBlank(queueName))
         {
             final String privateQueueName = declareTemporaryQueue(channel);
-            declareBinding(channel, endpoint, exchangeName, routingKey, privateQueueName);
+            final Map<String, Object> bindArgs = new HashMap<String, Object>();
+            declareBinding(channel, endpoint, exchangeName, routingKey, privateQueueName, bindArgs);
             return privateQueueName;
         }
 
@@ -76,10 +78,10 @@ public class AmqpDeclarer
             final boolean queueAutoDelete = BooleanUtils.toBoolean((String) endpoint.getProperty(AmqpConnector.ENDPOINT_PROPERTY_QUEUE_AUTO_DELETE));
 
             final Map<String, Object> arguments = endpointUtil.getArguments(endpoint, AmqpConnector.ENDPOINT_QUEUE_PREFIX);
-
+            final Map<String, Object> bindArgs = endpointUtil.getArguments(endpoint, AmqpConnector.ENDPOINT_BINDING_PREFIX);
             declareQueueActively(channel, queueName, queueDurable, queueExclusive, queueAutoDelete, arguments);
 
-            declareBinding(channel, endpoint, exchangeName, routingKey, queueName);
+            declareBinding(channel, endpoint, exchangeName, routingKey, queueName, bindArgs);
         }
         else if (!activeDeclarationsOnly)
         {
@@ -129,7 +131,8 @@ public class AmqpDeclarer
                                 final ImmutableEndpoint endpoint,
                                 final String exchangeName,
                                 final String routingKey,
-                                final String queueName) throws IOException
+                                final String queueName,
+                                final Map<String, Object> arguments) throws IOException
     {
         if (endpointUtil.isDefaultExchange(exchangeName))
         {
@@ -142,8 +145,9 @@ public class AmqpDeclarer
 
         // bind queue to exchange
         String[] routingKeyArray = routingKey.split(",");
+
         for (int i = 0; i < routingKeyArray.length; i++) {
-            channel.queueBind(queueName, exchangeName, routingKeyArray[i].trim());
+            channel.queueBind(queueName, exchangeName, routingKeyArray[i].trim(), arguments);
         }
 
         logger.info("Bound queue: " + queueName + " to exchange: " + exchangeName + " with routing key: "

@@ -122,6 +122,8 @@ public class AmqpConnector extends AbstractConnector
     public static final String ENDPOINT_PROPERTY_EXCHANGE_TYPE = "exchangeType";
 
     public static final String ENDPOINT_QUEUE_PREFIX = "amqp-queue.";
+    
+    public static final String ENDPOINT_BINDING_PREFIX = "amqp-binding.";
 
 
     public static final String RETURN_CONTEXT_PREFIX = AMQP + ".return.";

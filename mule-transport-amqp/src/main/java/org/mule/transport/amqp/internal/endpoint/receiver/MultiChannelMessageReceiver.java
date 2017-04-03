@@ -25,6 +25,7 @@ import org.mule.util.StringUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * In Mule an endpoint corresponds to a single receiver. It's up to the receiver to do multithreaded consumption and
@@ -110,7 +111,8 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
         {
             final String exchangeName = declarator.declareExchange(channel, endpoint, true);
             String routingKey = declarator.getEndpointUtil().getRoutingKey(endpoint);
-            declarator.declareBinding(channel, endpoint, exchangeName, routingKey, queueName);
+            final Map<String, Object> bindArgs = declarator.getEndpointUtil().getArguments(endpoint, AmqpConnector.ENDPOINT_BINDING_PREFIX);
+            declarator.declareBinding(channel, endpoint, exchangeName, routingKey, queueName, bindArgs);
         }
     }
 
