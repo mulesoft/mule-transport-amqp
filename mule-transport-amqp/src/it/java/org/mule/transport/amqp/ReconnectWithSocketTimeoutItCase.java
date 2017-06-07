@@ -12,6 +12,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mule.tck.probe.PollingProber.DEFAULT_TIMEOUT;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +20,8 @@ import org.junit.Test;
 import org.mule.api.retry.RetryContext;
 import org.mule.api.retry.RetryNotifier;
 import org.mule.tck.junit4.FunctionalTestCase;
+import org.mule.tck.probe.JUnitProbe;
+import org.mule.tck.probe.PollingProber;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 
 import com.rabbitmq.client.Connection;
@@ -30,6 +33,7 @@ import java.util.concurrent.ExecutorService;
 public class ReconnectWithSocketTimeoutItCase extends FunctionalTestCase
 {
     private static Integer retries  = 0;
+    private static Integer POLL_TIMEOUT = 10;
 
     private AmqpConnector connector = null;
 
@@ -59,13 +63,20 @@ public class ReconnectWithSocketTimeoutItCase extends FunctionalTestCase
     public void testReconnectSupported() throws Exception
     {
         muleContext.start();
-
-        while (!connector.isConnected())
+        new PollingProber(DEFAULT_TIMEOUT, POLL_TIMEOUT).check(new JUnitProbe()
         {
-            Thread.sleep(500L);
-        }
+            public String describeFailure()
+            {
+                return "Reconnection after SocketTimeoutException fails";
+            }
 
-        assertThat(connector.isConnected(), is(true));
+            @Override
+            protected boolean test() throws Exception
+            {
+                return connector.isConnected();
+            }
+        });
+
         assertThat(retries, is(1));
     }
 
