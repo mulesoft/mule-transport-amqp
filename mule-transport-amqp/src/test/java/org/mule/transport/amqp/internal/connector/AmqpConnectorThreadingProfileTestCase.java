@@ -17,7 +17,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import org.junit.Test;
 
-@SmallTest
 public class AmqpConnectorThreadingProfileTestCase extends FunctionalTestCase
 {
 
