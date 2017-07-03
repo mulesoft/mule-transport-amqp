@@ -175,12 +175,12 @@ public class AmqpConnector extends AbstractConnector
         channelHandler = new ChannelHandler();
         receiveTransformer = new AmqpMessageToObject();
         receiveTransformer.setMuleContext(context);
-        receiverExecutor = this.getReceiverThreadingProfile().createPool("amqpReceiver");
     }
 
     @Override
     public void doInitialise() throws InitialisationException
     {
+        receiverExecutor = this.getReceiverThreadingProfile().createPool("amqpReceiver");
         if (connectionFactory == null)
         {
             connectionFactory = new ConnectionFactory();
