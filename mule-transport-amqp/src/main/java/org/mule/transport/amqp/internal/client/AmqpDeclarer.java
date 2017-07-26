@@ -9,6 +9,8 @@ package org.mule.transport.amqp.internal.client;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import org.apache.commons.lang.BooleanUtils;
+
+import org.mule.api.endpoint.EndpointURI;
 import org.mule.api.endpoint.ImmutableEndpoint;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 import org.mule.transport.amqp.internal.endpoint.AmqpEndpointUtil;
@@ -17,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Map;
 
 public class AmqpDeclarer
@@ -50,20 +51,24 @@ public class AmqpDeclarer
                                   final String routingKey) throws IOException
     {
         final String queueName = endpointUtil.getQueueName(endpoint.getAddress());
+        final EndpointURI uri = endpoint.getEndpointURI();
+        final boolean isDynamicBinding = endpointUtil.isDynamicRoutingKey(routingKey, endpoint);
 
         // no queue name -> create a private one on the server
         if (StringUtils.isBlank(queueName))
         {
             final String privateQueueName = declareTemporaryQueue(channel);
-            declareBinding(channel, endpoint, exchangeName, routingKey, privateQueueName);
+
+            if(!isDynamicBinding)
+            {
+                declareBinding(channel, exchangeName, routingKey, privateQueueName);
+            }
+
             return privateQueueName;
         }
 
-        if (logger.isDebugEnabled())
-        {
-            logger.debug("Declaring endpoint with URI: " + endpoint.getEndpointURI() + " with exchange: " + exchangeName + " rountingKey: " +
-                routingKey + " queueName: " + queueName);
-        }
+        logDeclaredEndpoint(uri, exchangeName, routingKey, queueName, isDynamicBinding);
+
 
         // queue name -> either create or ensure the queue exists
         if (endpoint.getProperties().containsKey(AmqpConnector.ENDPOINT_PROPERTY_QUEUE_DURABLE)
@@ -78,8 +83,10 @@ public class AmqpDeclarer
             final Map<String, Object> arguments = endpointUtil.getArguments(endpoint, AmqpConnector.ENDPOINT_QUEUE_PREFIX);
 
             declareQueueActively(channel, queueName, queueDurable, queueExclusive, queueAutoDelete, arguments);
-
-            declareBinding(channel, endpoint, exchangeName, routingKey, queueName);
+            if(!isDynamicBinding)
+            {
+                declareBinding(channel, exchangeName, routingKey, queueName);
+            }
         }
         else if (!activeDeclarationsOnly)
         {
@@ -87,11 +94,7 @@ public class AmqpDeclarer
             declareQueuePassively(channel, queueName);
         }
 
-        if (logger.isDebugEnabled())
-        {
-            logger.debug("Declared endpoint with URI: " + endpoint.getEndpointURI() + " with exchange: " + exchangeName + " rountingKey: " +
-                    routingKey + " queueName: " + queueName);
-        }
+        logDeclaredEndpoint(uri, exchangeName, routingKey, queueName, isDynamicBinding);
 
         return queueName;
     }
@@ -126,7 +129,6 @@ public class AmqpDeclarer
     }
 
     public void declareBinding(final Channel channel,
-                                final ImmutableEndpoint endpoint,
                                 final String exchangeName,
                                 final String routingKey,
                                 final String queueName) throws IOException
@@ -199,5 +201,22 @@ public class AmqpDeclarer
     public AmqpEndpointUtil getEndpointUtil()
     {
         return endpointUtil;
+    }
+
+    private void logDeclaredEndpoint (EndpointURI uri, String exchangeName, String routingKey, String queueName, boolean isDynamicBinding)
+    {
+        if (logger.isDebugEnabled())
+        {
+            if(isDynamicBinding)
+            {
+                logger.debug("Declaring endpoint with URI: " + uri + " with exchange: " + exchangeName + " queueName: " + queueName
+                    +". As routing key has a dynamic value, initial binding is ignored.");
+            }
+            else
+            {
+                logger.debug("Declaring endpoint with URI: " + uri + " with exchange: " + exchangeName + " rountingKey: " +
+                             routingKey + " queueName: " + queueName);
+            }
+        }
     }
 }
