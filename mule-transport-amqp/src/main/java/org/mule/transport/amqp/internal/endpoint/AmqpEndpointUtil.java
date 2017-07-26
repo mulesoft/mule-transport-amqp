@@ -90,6 +90,12 @@ public class AmqpEndpointUtil
         return routingKey;
     }
 
+    public boolean isDynamicRoutingKey(final String routingKey, final ImmutableEndpoint endpoint)
+    {
+        ExpressionManager expressionManager = endpoint.getMuleContext().getExpressionManager();
+        return expressionManager.isExpression(routingKey);
+    }
+
     private String getDynamicRoutingKey(final ImmutableEndpoint endpoint, final MuleEvent muleEvent)
     {
         final String eventRoutingKey = muleEvent.getMessage().getOutboundProperty(AmqpConnector.MESSAGE_PROPERTY_ROUTING_KEY,
