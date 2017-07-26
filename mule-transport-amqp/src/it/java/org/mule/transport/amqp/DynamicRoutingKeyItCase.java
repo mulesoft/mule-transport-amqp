@@ -6,8 +6,9 @@
  */
 package org.mule.transport.amqp;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
 import org.mule.api.MuleMessage;
 import org.mule.transport.amqp.harness.AbstractItCase;
 
@@ -27,8 +28,8 @@ public class DynamicRoutingKeyItCase extends AbstractItCase
     {
         runFlow("senderFlow");
         MuleMessage result = muleContext.getClient().request("vm://result", 5000);
-        assertNotNull(result);
-        assertEquals(result.getPayloadAsString(), "testedDynamicRoutingKey");
+        assertThat(result, is(notNullValue()));
+        assertThat(result.getPayloadAsString(), is("testedDynamicRoutingKey"));
     }
 
 }
