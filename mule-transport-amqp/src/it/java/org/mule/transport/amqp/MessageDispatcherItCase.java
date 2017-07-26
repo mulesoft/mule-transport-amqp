@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 public class MessageDispatcherItCase extends AbstractItCase
 {

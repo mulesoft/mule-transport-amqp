@@ -24,7 +24,7 @@ public class AmqpDeclarer
 {
     private static final Logger logger = LoggerFactory.getLogger(AmqpDeclarer.class);
 
-    protected AmqpEndpointUtil endpointUtil = new AmqpEndpointUtil();
+    protected AmqpEndpointUtil endpointUtil = createAmqpEndpointUtil();
 
     public String declareEndpoint(final Channel channel,
                                   final ImmutableEndpoint endpoint,
@@ -66,9 +66,9 @@ public class AmqpDeclarer
         }
 
         // queue name -> either create or ensure the queue exists
-        if (endpoint.getProperties().containsKey(AmqpConnector.ENDPOINT_PROPERTY_QUEUE_DURABLE)
+        if (activeDeclarationsOnly && (endpoint.getProperties().containsKey(AmqpConnector.ENDPOINT_PROPERTY_QUEUE_DURABLE)
                 || endpoint.getProperties().containsKey(AmqpConnector.ENDPOINT_PROPERTY_QUEUE_AUTO_DELETE)
-                || endpoint.getProperties().containsKey(AmqpConnector.ENDPOINT_PROPERTY_QUEUE_EXCLUSIVE))
+                || endpoint.getProperties().containsKey(AmqpConnector.ENDPOINT_PROPERTY_QUEUE_EXCLUSIVE)))
         {
             // any of the queue declaration parameter provided -> declare the queue
             final boolean queueDurable = BooleanUtils.toBoolean((String) endpoint.getProperty(AmqpConnector.ENDPOINT_PROPERTY_QUEUE_DURABLE));
@@ -168,7 +168,7 @@ public class AmqpDeclarer
         }
 
         final String exchangeType = endpointUtil.getEndpointType(endpoint);
-        if (StringUtils.isNotBlank(exchangeType))
+        if (activeDeclarationsOnly && StringUtils.isNotBlank(exchangeType))
         {
             // an exchange type is provided -> the exchange must be declared
             final boolean exchangeDurable = endpointUtil.isExchangeDurable(endpoint);
@@ -199,5 +199,10 @@ public class AmqpDeclarer
     public AmqpEndpointUtil getEndpointUtil()
     {
         return endpointUtil;
+    }
+
+    protected AmqpEndpointUtil createAmqpEndpointUtil ()
+    {
+        return new AmqpEndpointUtil();
     }
 }
