@@ -16,7 +16,6 @@
 
 
     <flow name="senderFlow">
-        <set-variable variableName="testRoutingKey" value="testRoutingKeyValue"/>
         <amqp:outbound-endpoint queueName="testQueue" routingKey="#[testRoutingKey]"
                                 exchangeName="testExchange"
                                 exchangeType="topic"
@@ -27,7 +26,7 @@
         <amqp:inbound-endpoint exchangeName="testExchange"
                                exchangeType="topic"
                                queueDurable="true"
-                               routingKey="testRoutingKeyValue"
+                               routingKey="testRoutingKeyValue,testRoutingKeyValue2"
                                queueName="testQueue2"  connector-ref="amqpConnector"
                                />
         <set-payload value="testedDynamicRoutingKey"/>
