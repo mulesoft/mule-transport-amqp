@@ -194,18 +194,7 @@ public class Dispatcher extends AbstractMessageDispatcher
         }
 
         final String eventExchange = endpointUtil.getExchangeName(endpoint, event);
-        String routingKey = endpointUtil.getRoutingKey(endpoint);
-        String eventRoutingKey = endpointUtil.getRoutingKey(endpoint, event);
-
-        String queueName = endpointUtil.getQueueName(endpoint.getAddress());
-
-        if(endpointUtil.isDynamicRoutingKey(routingKey, endpoint))
-        {
-            if(StringUtils.isNotEmpty(queueName))
-            {
-                declarator.declareBinding(eventChannel, eventExchange, eventRoutingKey, queueName);
-            }
-        }
+        final String eventRoutingKey = endpointUtil.getRoutingKey(endpoint, event);
 
         final long timeout = getTimeOutForEvent(event);
 
