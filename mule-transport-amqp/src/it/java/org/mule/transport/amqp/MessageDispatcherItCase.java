@@ -187,19 +187,22 @@ public class MessageDispatcherItCase extends AbstractItCase
     public void testOutboundQueueCreation() throws Exception
     {
         String flowName = "amqpOutBoundQueue";
-        new MuleClient(muleContext).dispatch(nameFactory.getVmName(flowName), "ignored_payload", null);
+        String testPayload = "payload";
+        GetResponse response = null;
+        new MuleClient(muleContext).dispatch(nameFactory.getVmName(flowName),testPayload , null);
 
         // test to see if there is a message on the queue.
         int attempts = 0;
         while (attempts++ < getTestTimeoutSecs())
         {
-        	Channel channel = null;
+            Channel channel = null;
             try
             {
-            	channel = testConnectionManager.getChannel();
-                if (channel.basicGet(nameFactory.getQueueName(flowName), true).getBody() != null)
+                channel = testConnectionManager.getChannel();
+                response = channel.basicGet(nameFactory.getQueueName(flowName), true);
+                if (response != null )
                 {
-                    return;
+                    break;
                 }
             }
             catch ( IOException ioe)
@@ -214,7 +217,8 @@ public class MessageDispatcherItCase extends AbstractItCase
                 }
             }
         }
-        fail("Queue was not created or message not delivered");
+        assertThat(response, is(notNullValue()));
+        assertThat(response.getBody(), is(testPayload.getBytes()));
     }
 
     @Test
