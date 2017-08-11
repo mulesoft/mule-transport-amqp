@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-    <feature id="mule-transport-amqp-tooling">
+    <feature id="org.mule.tooling.ui.extension.mule-transport-amqp-tooling.3.5.0">
       <category name="mule-transport-amqp-contribution"/>
     </feature>
-   <category-def name="mule-transport-amqp-contribution" label="Community">
+   <category-def name="mule-transport-amqp-contribution" label="Select">
       <description>
-			Community
+			Select
       </description>
    </category-def>
 </site>
