@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.mule.transports</groupId>
         <artifactId>mule-transport-amqp-parent</artifactId>
-        <version>3.7.2-SNAPSHOT</version>
+        <version>3.7.2</version>
     </parent>
 
     <!-- <parent>
@@ -17,7 +17,7 @@
     <artifactId>mule-transport-amqp</artifactId>
     <packaging>jar</packaging>
     <name>Mule AMQP Transport</name>
-    <version>3.7.2-SNAPSHOT</version>
+    <version>3.7.2</version>
     <description>Connects to AMQP brokers</description>
     <url>https://github.com/mulesoft/mule-transport-amqp</url>
 
