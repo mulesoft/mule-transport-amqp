@@ -14,7 +14,7 @@
 
     <properties>
         <mule.version>3.5.0</mule.version>
-        <category>Community</category>
+        <category>Select</category>
         <licensePath>LICENSE.md</licensePath>
         <mule.devkit.version>3.4.0</mule.devkit.version>
         <finalName>mule-transport-amqp-studio-${project.version}-studio-plugin</finalName>
