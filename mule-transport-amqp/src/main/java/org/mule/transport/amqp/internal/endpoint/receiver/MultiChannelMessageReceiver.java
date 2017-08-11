@@ -69,6 +69,7 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
             }
             catch (MuleException e)
             {
+                logger.error("Error starting subreceivers: " + e.getDetailedMessage());
                 throw new RuntimeException(e);
             }
         }
