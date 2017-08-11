@@ -59,18 +59,11 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
         subReceivers = new ArrayList<MultiChannelMessageSubReceiver>(numberOfChannels);
     }
     
-    protected void startSubReceivers()
+    protected void startSubReceivers() throws MuleException 
     {
         for (MultiChannelMessageSubReceiver channel : subReceivers)
         {
-            try
-            {
-                channel.doStart();
-            }
-            catch (MuleException e)
-            {
-                throw new RuntimeException(e);
-            }
+             channel.doStart();
         }
     }
 
@@ -96,7 +89,14 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
                 {
                     if (notification.getAction() == MuleContextNotification.CONTEXT_STARTED)
                     {
-                        startSubReceivers();
+                        try
+                        {
+                            startSubReceivers();
+                        }
+                        catch (MuleException e)
+                        {
+                            logger.error("Error starting subreceivers: " + e.getDetailedMessage());
+                        }
                     }
                 }
             });
