@@ -35,6 +35,8 @@ import com.rabbitmq.client.ReturnListener;
 import com.rabbitmq.client.ShutdownListener;
 import com.rabbitmq.client.ShutdownSignalException;
 
+import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -175,12 +177,12 @@ public class AmqpConnector extends AbstractConnector
         channelHandler = new ChannelHandler();
         receiveTransformer = new AmqpMessageToObject();
         receiveTransformer.setMuleContext(context);
-        receiverExecutor = this.getReceiverThreadingProfile().createPool("amqpReceiver");
     }
 
     @Override
     public void doInitialise() throws InitialisationException
     {
+        receiverExecutor = this.getReceiverThreadingProfile().createPool("amqpReceiver");
         if (connectionFactory == null)
         {
             connectionFactory = new ConnectionFactory();
@@ -300,6 +302,13 @@ public class AmqpConnector extends AbstractConnector
                 logger.info("Connected to AMQP host: " + brokerAddress.getHost() +
                         " and port: " + brokerAddress.getPort());
                 break;
+            }
+            catch (final SocketTimeoutException e)
+            {
+                logger.error("Error occurred when connecting to AMQP host: " + brokerAddress.getHost() +
+                             " and port: " + brokerAddress.getPort(), e);
+
+                lastException = new SocketTimeoutExceptionWrapper("SocketTimeoutException was triggered. Please check your network status.");
             }
             catch (final Exception e)
             {
@@ -583,5 +592,13 @@ public class AmqpConnector extends AbstractConnector
 
     public void setChannelHandler(ChannelHandler channelHandler) {
         this.channelHandler = channelHandler;
+    }
+
+    private class SocketTimeoutExceptionWrapper extends IOException
+    {
+        public SocketTimeoutExceptionWrapper(String message)
+        {
+            super(message);
+        }
     }
 }

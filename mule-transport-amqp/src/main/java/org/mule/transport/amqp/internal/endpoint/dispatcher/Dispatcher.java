@@ -85,13 +85,12 @@ public class Dispatcher extends AbstractMessageDispatcher
         {
             boolean activeDeclarationsOnly = amqpConnector.isActiveDeclarationsOnly();
             final String exchangeName = declarator.declareExchange(channel, endpoint, activeDeclarationsOnly);
-            final String routingKey = endpointUtil.getRoutingKey(endpoint);
             if (StringUtils.isNotEmpty(endpointUtil.getQueueName(endpoint.getAddress()))
-                    || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_DURABLE)
-                    || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_AUTO_DELETE)
-                    || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_EXCLUSIVE))
+                || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_DURABLE)
+                || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_AUTO_DELETE)
+                || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_EXCLUSIVE))
             {
-                declarator.declareEndpoint(channel, endpoint, activeDeclarationsOnly, exchangeName, routingKey);
+                declarator.declareEndpoint(channel, endpoint, activeDeclarationsOnly, exchangeName);
             }
         }
         catch (IOException e)
@@ -155,7 +154,7 @@ public class Dispatcher extends AbstractMessageDispatcher
             logger.debug("Reopening unexpectedly closed channel");
             channel = amqpConnector.getChannelHandler().getOrCreateChannel(getEndpoint());
         }
-        
+
         // If a transaction resource channel is present use it, otherwise use the dispatcher's channel
         Channel eventChannel = amqpConnector.getChannelHandler().getOrDefaultChannel(endpoint, event.getMessage(), channel);
 
@@ -196,6 +195,7 @@ public class Dispatcher extends AbstractMessageDispatcher
 
         final String eventExchange = endpointUtil.getExchangeName(endpoint, event);
         final String eventRoutingKey = endpointUtil.getRoutingKey(endpoint, event);
+
         final long timeout = getTimeOutForEvent(event);
 
         AmqpMessage result;

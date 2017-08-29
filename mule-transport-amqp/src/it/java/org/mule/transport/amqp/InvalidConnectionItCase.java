@@ -6,12 +6,13 @@
  */
 package org.mule.transport.amqp;
 
-import org.junit.Test;
-import org.mule.api.lifecycle.LifecycleException;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
 import org.mule.transport.amqp.harness.AbstractItCase;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.Test;
+
 
 public class InvalidConnectionItCase extends AbstractItCase
 {
@@ -31,14 +32,9 @@ public class InvalidConnectionItCase extends AbstractItCase
     @Test
     public void testInvalidQueueName() throws Exception
     {
-        try
-        {
-            muleContext.start();
-            fail("Should have failed to start the AMQP channel with invalid queue name");
-        }
-        catch (LifecycleException e)
-        {
-            assertTrue(muleContext.getRegistry().lookupConnector("NonPersistent").getLifecycleState().isStopped());
-        }
+        muleContext.start();
+        // An error is logged when the notification that the context is started arrives.
+        // That will stop the connector.
+        assertThat(muleContext.getRegistry().lookupConnector("NonPersistent").getLifecycleState().isStopped(), is(true));
     }
 }

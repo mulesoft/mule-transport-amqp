@@ -12,9 +12,12 @@ import com.rabbitmq.client.Channel;
 import org.mule.api.DefaultMuleException;
 import org.mule.api.MuleException;
 import org.mule.api.construct.FlowConstruct;
+import org.mule.api.context.notification.MuleContextNotificationListener;
+import org.mule.api.context.notification.ServerNotification;
 import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.api.lifecycle.CreateException;
 import org.mule.api.transport.Connector;
+import org.mule.context.notification.MuleContextNotification;
 import org.mule.transport.AbstractMessageReceiver;
 import org.mule.transport.amqp.internal.client.AmqpDeclarer;
 import org.mule.transport.amqp.internal.client.ChannelHandler;
@@ -56,6 +59,22 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
         numberOfChannels = new AmqpEndpointUtil().getNumberOfChannels(endpoint);
         subReceivers = new ArrayList<MultiChannelMessageSubReceiver>(numberOfChannels);
     }
+    
+    protected void startSubReceivers()
+    {
+        for (MultiChannelMessageSubReceiver channel : subReceivers)
+        {
+            try
+            {
+                channel.doStart();
+            }
+            catch (MuleException e)
+            {
+                logger.error("Error starting subreceivers: " + e.getDetailedMessage());
+                throw new RuntimeException(e);
+            }
+        }
+    }
 
     @Override
     protected synchronized void doConnect() throws Exception
@@ -73,11 +92,17 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
                 subReceivers.add(sub);
             }
 
-            for (MultiChannelMessageSubReceiver channel : subReceivers)
+            getEndpoint().getMuleContext().registerListener(new MuleContextNotificationListener()
             {
-                channel.doStart();
-            }
-
+                public void onNotification(ServerNotification notification)
+                {
+                    if (notification.getAction() == MuleContextNotification.CONTEXT_STARTED)
+                    {
+                        startSubReceivers();
+                    }
+                }
+            });
+            
             logger.info("Message receiver for endpoint " + endpoint.getEndpointURI() + " has been successfully connected.");
         }
         catch (Exception e)
@@ -112,7 +137,7 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
             final String exchangeName = declarator.declareExchange(channel, endpoint, true);
             String routingKey = declarator.getEndpointUtil().getRoutingKey(endpoint);
             final Map<String, Object> bindArgs = declarator.getEndpointUtil().getArguments(endpoint, AmqpConnector.ENDPOINT_BINDING_PREFIX);
-            declarator.declareBinding(channel, endpoint, exchangeName, routingKey, queueName, bindArgs);
+            declarator.declareBinding(channel, exchangeName, routingKey, queueName, bindArgs);
         }
     }
 
