@@ -16,7 +16,7 @@ public class AmqpConnectorFlowConstruct extends AbstractFlowConstruct
 {
     private final AmqpConnector connector;
 
-    public AmqpConnectorFlowConstruct(final AmqpConnector connector)
+    AmqpConnectorFlowConstruct(final AmqpConnector connector)
     {
         super(connector.getName(), connector.getMuleContext());
         this.connector = connector;
