@@ -15,9 +15,12 @@
     <properties>
         <mule.version>3.5.0</mule.version>
         <category>Select</category>
-        <licensePath>LICENSE.md</licensePath>
-        <mule.devkit.version>3.4.0</mule.devkit.version>
+        <!-- The license path property is used by the studio-us-signer plugin -->
+        <licensePath>${project.basedir}/LICENSE.md</licensePath>
+        <mule.devkit.version>${mule.version}</mule.devkit.version>
+        <devkit.studio.package.skip>true</devkit.studio.package.skip>
         <finalName>mule-transport-amqp-studio-${project.version}-studio-plugin</finalName>
+        <updateSiteName>${finalName}</updateSiteName>
     </properties>
 
     <build>
@@ -46,6 +49,37 @@
                 </configuration>
             </plugin>
             <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <configuration>
+                            <tasks>
+                                <echo message="unzipping update site to sign it" />
+                                <unzip src="${project.build.directory}\${finalName}.zip" dest="${project.build.directory}\update-site" />
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.mule.tooling</groupId>
+                <artifactId>studio-us-signer</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>sign-us</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <!-- AMQP-54: Added as a workaround to install/deploy the update-site with the 'studio-plugin' classifier.
                 For an unknown reason the tycho-p2-repository-plugin use the ${finalName} property in the package phase
                 but then in the install phase the maven-install-plugin use mule-transport-amqp-studio-${version}.zip -->
@@ -62,7 +96,7 @@
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                    <file>${project.build.directory}\${finalName}.zip</file>
+                                    <file>${project.build.directory}\${updateSiteName}.zip</file>
                                     <type>zip</type>
                                     <classifier>studio-plugin</classifier>
                                 </artifact>
@@ -73,4 +107,14 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <properties>
+                <devkit.studio.package.skip>false</devkit.studio.package.skip>
+                <updateSiteName>UpdateSite</updateSiteName>
+            </properties>
+            <id>update-site</id>
+        </profile>
+    </profiles>
 </project>
