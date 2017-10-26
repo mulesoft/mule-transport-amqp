@@ -10,11 +10,13 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
+
 import org.mule.DefaultMuleMessage;
+import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
 import org.mule.module.client.MuleClient;
+import org.mule.tck.probe.JUnitProbe;
 import org.mule.tck.probe.PollingProber;
 import org.mule.tck.probe.Probe;
 import org.mule.transport.amqp.harness.AbstractItCase;
@@ -38,6 +40,9 @@ import org.junit.ClassRule;
 import org.junit.Test;
 public class MessageDispatcherItCase extends AbstractItCase
 {
+    private static long POLLING_PROBER_TIMEOUT = 20000;
+    private static long POLLING_PROBER_DELAY = 2000;
+
 	@ClassRule
 	public static AmqpModelRule modelRule = new AmqpModelRule("message-dispatcher-tests-model.json");
 	
@@ -302,28 +307,71 @@ public class MessageDispatcherItCase extends AbstractItCase
                 getFunctionalTestComponent("amqpNewQueueFromGroovyScript"));
         new MuleClient(muleContext).dispatch("vm://amqpNewQueueFromGroovyScript.in", null, null);
         final String payload = RandomStringUtils.randomAlphanumeric(20);
-        try {
-            new PollingProber(getTestTimeoutSecs() * 1000, 2000).check(new Probe() {
-                public boolean isSatisfied() {
-                    try {
+        try
+        {
+            new PollingProber(POLLING_PROBER_TIMEOUT, POLLING_PROBER_DELAY).check(new Probe()
+            {
+                public boolean isSatisfied()
+                {
+                    try
+                    {
                         new MuleClient(muleContext).dispatch("vm://amqpNewQueueFromGroovyScriptEnqueue.in", payload, null);
                         return routedMessage.get(500, TimeUnit.MILLISECONDS) != null;
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
+                    }
+                    catch (Exception e)
+                    {
+                        return false;
                     }
                 }
 
-                public String describeFailure() {
+                public String describeFailure()
+                {
                     return "Queue was not created.";
                 }
             });
-        }catch (Exception e){
+        }
+        catch (Exception e)
+        {
             fail();
         }
 
         MuleMessage muleMessage = routedMessage.get(1,TimeUnit.SECONDS);
+        assertThat(muleMessage.getPayloadAsString(), is(payload));
+    }
 
-        assertThat(payload, is(muleMessage.getPayloadAsString()));
+    @Test
+    public void testReadExistingQueueFromMuleClient() throws Exception
+    {
+        final String payload = RandomStringUtils.randomAlphanumeric(20);
+        new MuleClient(muleContext).dispatch("vm://amqpNewQueueFromGroovyScriptEnqueue.in", payload, null);
+
+        new PollingProber(POLLING_PROBER_TIMEOUT, POLLING_PROBER_DELAY).check(new JUnitProbe()
+        {
+            @Override
+            public boolean test()
+            {
+                MuleMessage message = null;
+                try
+                {
+                    message = new MuleClient(muleContext).
+                            request("amqp://amqpNewQueueFromGroovyScript-exchange/"
+                                    + "amqp-queue.newProgrammatic-queue"
+                                    + "?connector=activeOnlyAmqpConnector&exchangeType=direct"
+                                    + "&queueDurable=true&exchangeDurable=true&queueAutoDelete=true", 1000L);
+                    assertThat(payload, is(message.getPayloadAsString()));
+                }
+                catch (Exception e)
+                {
+                    return false;
+                }
+                return true;
+            }
+
+            public String describeFailure()
+            {
+                return "The message was not read.";
+            }
+        });
     }
 
 }

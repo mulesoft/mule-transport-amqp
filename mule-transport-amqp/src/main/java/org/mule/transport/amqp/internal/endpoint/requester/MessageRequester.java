@@ -81,15 +81,7 @@ public class MessageRequester extends AbstractMessageRequester
     @Override
     protected MuleMessage doRequest(final long timeout) throws Exception
     {
-        boolean activeDeclarationsOnly = amqpConnector.isActiveDeclarationsOnly();
-        final String exchangeName = declarator.declareExchange(channel, endpoint, activeDeclarationsOnly);
-        if (StringUtils.isNotEmpty(endpointUtil.getQueueName(endpoint.getAddress()))
-                || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_DURABLE)
-                || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_AUTO_DELETE)
-                || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_EXCLUSIVE))
-        {
-            declarator.declareEndpoint(channel, endpoint, activeDeclarationsOnly, exchangeName);
-        }
+        declarator.declareExchangeAndEndpointIfNecessary(channel, endpoint, amqpConnector.isActiveDeclarationsOnly());
 
         final AmqpMessage amqpMessage = messageConsumer.consumeMessage(channel, getQueueName(),
                 amqpConnector.getAckMode().isAutoAck(), timeout);

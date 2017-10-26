@@ -303,4 +303,11 @@
                                 queueName="newProgrammatic-queue"/>
     </flow>
 
+    <flow name="amqpReadExistingQueueFromMuleClientEnqueue">
+        <vm:inbound-endpoint path="amqpReadExistingQueueFromMuleClientEnqueue.in" />
+        <amqp:outbound-endpoint exchangeName="amqpReadExistingQueueFromMuleClient-exchange"
+                                connector-ref="activeOnlyAmqpConnector"
+                                queueName="amqpReadExistingQueueFromMuleClient-queue"/>
+    </flow>
+
 </mule>
