@@ -1,0 +1,8 @@
+{
+	"queues": [{
+		"name": "testQueue"
+	},{
+		"name": "testQueue2",
+		"durable": true
+	}]
+}
