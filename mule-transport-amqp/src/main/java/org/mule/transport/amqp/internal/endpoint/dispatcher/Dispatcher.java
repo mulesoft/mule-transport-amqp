@@ -83,15 +83,7 @@ public class Dispatcher extends AbstractMessageDispatcher
     {
         try
         {
-            boolean activeDeclarationsOnly = amqpConnector.isActiveDeclarationsOnly();
-            final String exchangeName = declarator.declareExchange(channel, endpoint, activeDeclarationsOnly);
-            if (StringUtils.isNotEmpty(endpointUtil.getQueueName(endpoint.getAddress()))
-                || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_DURABLE)
-                || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_AUTO_DELETE)
-                || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_EXCLUSIVE))
-            {
-                declarator.declareEndpoint(channel, endpoint, activeDeclarationsOnly, exchangeName);
-            }
+            declarator.declareExchangeAndEndpointIfNecessary(channel, endpoint, amqpConnector.isActiveDeclarationsOnly());
         }
         catch (IOException e)
         {

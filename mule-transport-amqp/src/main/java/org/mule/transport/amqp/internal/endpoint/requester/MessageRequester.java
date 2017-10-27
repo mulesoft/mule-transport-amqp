@@ -11,6 +11,7 @@ import org.mule.api.MuleMessage;
 import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.transport.AbstractMessageRequester;
 import org.mule.transport.ConnectException;
+import org.mule.transport.amqp.internal.client.AmqpDeclarer;
 import org.mule.transport.amqp.internal.client.MessageConsumer;
 import org.mule.transport.amqp.internal.client.MessagePropertiesHandler;
 import org.mule.transport.amqp.internal.client.ChannelHandler;
@@ -19,6 +20,11 @@ import org.mule.transport.amqp.internal.connector.AmqpConnector;
 
 import com.rabbitmq.client.Channel;
 import org.mule.transport.amqp.internal.endpoint.AmqpEndpointUtil;
+import org.mule.util.StringUtils;
+
+import static org.mule.transport.amqp.internal.connector.AmqpConnector.ENDPOINT_PROPERTY_QUEUE_AUTO_DELETE;
+import static org.mule.transport.amqp.internal.connector.AmqpConnector.ENDPOINT_PROPERTY_QUEUE_DURABLE;
+import static org.mule.transport.amqp.internal.connector.AmqpConnector.ENDPOINT_PROPERTY_QUEUE_EXCLUSIVE;
 
 /**
  * The <code>MessageRequester</code> is used to consume individual messages from an AMQP broker.
@@ -31,6 +37,8 @@ public class MessageRequester extends AbstractMessageRequester
 
     protected MessagePropertiesHandler messagePropertiesHandler = new MessagePropertiesHandler();
 
+    private AmqpDeclarer declarator;
+
     private AmqpEndpointUtil endpointUtil;
 
     private InboundEndpoint endpoint;
@@ -42,6 +50,7 @@ public class MessageRequester extends AbstractMessageRequester
         super(endpoint);
         this.endpoint = endpoint;
         amqpConnector = (AmqpConnector) endpoint.getConnector();
+        declarator = new AmqpDeclarer();
         endpointUtil = new AmqpEndpointUtil();
     }
 
@@ -72,6 +81,8 @@ public class MessageRequester extends AbstractMessageRequester
     @Override
     protected MuleMessage doRequest(final long timeout) throws Exception
     {
+        declarator.declareExchangeAndEndpointIfNecessary(channel, endpoint, amqpConnector.isActiveDeclarationsOnly());
+
         final AmqpMessage amqpMessage = messageConsumer.consumeMessage(channel, getQueueName(),
                 amqpConnector.getAckMode().isAutoAck(), timeout);
 

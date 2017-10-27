@@ -6,15 +6,22 @@
  */
 package org.mule.transport.amqp;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+
 import org.mule.DefaultMuleMessage;
+import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
 import org.mule.module.client.MuleClient;
+import org.mule.tck.probe.JUnitProbe;
+import org.mule.tck.probe.PollingProber;
+import org.mule.tck.probe.Probe;
 import org.mule.transport.amqp.harness.AbstractItCase;
 import org.mule.transport.amqp.harness.rules.AmqpModelCleanupRule;
 import org.mule.transport.amqp.harness.rules.AmqpModelRule;
@@ -29,13 +36,15 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.ClassRule;
 import org.junit.Test;
 public class MessageDispatcherItCase extends AbstractItCase
 {
+    private static long POLLING_PROBER_TIMEOUT = 20000;
+    private static long POLLING_PROBER_DELAY = 2000;
+
 	@ClassRule
 	public static AmqpModelRule modelRule = new AmqpModelRule("message-dispatcher-tests-model.json");
 	
@@ -253,7 +262,7 @@ public class MessageDispatcherItCase extends AbstractItCase
         Future<MuleMessage> futureReturnedMessage = 
             amqpTestClient.setupFunctionTestComponentForFlow(getFunctionalTestComponent("returnedMessageProcessor"));
         new MuleClient(muleContext).dispatch("vm://amqpMandatoryDeliveryFailureWithHandler.in", payload, null);
-        MuleMessage returnedMessage = futureReturnedMessage.get(getTestTimeoutSecs(), TimeUnit.SECONDS);
+        MuleMessage returnedMessage = futureReturnedMessage.get(getTestTimeoutSecs(), SECONDS);
         assertThat(returnedMessage, is(notNullValue()));
         assertThat(returnedMessage.getPayloadAsString(), is(equalTo(payload)));
     }	
@@ -288,8 +297,83 @@ public class MessageDispatcherItCase extends AbstractItCase
 
         String payload = RandomStringUtils.randomAlphanumeric(20);
         new MuleClient(muleContext).dispatch("vm://amqpCustomArgumentsService.in", payload, null);
-        MuleMessage muleMessage = routedMessage.get(getTestTimeoutSecs(), TimeUnit.SECONDS);
+        MuleMessage muleMessage = routedMessage.get(getTestTimeoutSecs(), SECONDS);
 
         assertThat(muleMessage.getPayloadAsString(), is(equalTo(payload)));
     }
+
+    @Test
+    public void testNewQueueFromGroovyScript() throws Exception
+    {
+        final Future<MuleMessage> routedMessage = amqpTestClient.setupFunctionTestComponentForFlow(
+                getFunctionalTestComponent("amqpNewQueueFromGroovyScript"));
+        new MuleClient(muleContext).dispatch("vm://amqpNewQueueFromGroovyScript.in", null, null);
+        final String payload = RandomStringUtils.randomAlphanumeric(20);
+        try
+        {
+            new PollingProber(POLLING_PROBER_TIMEOUT, POLLING_PROBER_DELAY).check(new Probe()
+            {
+                public boolean isSatisfied()
+                {
+                    try
+                    {
+                        new MuleClient(muleContext).dispatch("vm://amqpNewQueueFromGroovyScriptEnqueue.in", payload, null);
+                        return routedMessage.get(500, MILLISECONDS) != null;
+                    }
+                    catch (Exception e)
+                    {
+                        return false;
+                    }
+                }
+
+                public String describeFailure()
+                {
+                    return "Queue was not created.";
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            fail();
+        }
+
+        MuleMessage muleMessage = routedMessage.get(1,SECONDS);
+        assertThat(muleMessage.getPayloadAsString(), is(payload));
+    }
+
+    @Test
+    public void testReadExistingQueueFromMuleClient() throws Exception
+    {
+        final String payload = RandomStringUtils.randomAlphanumeric(20);
+        new MuleClient(muleContext).dispatch("vm://amqpNewQueueFromGroovyScriptEnqueue.in", payload, null);
+
+        new PollingProber(POLLING_PROBER_TIMEOUT, POLLING_PROBER_DELAY).check(new JUnitProbe()
+        {
+            @Override
+            public boolean test()
+            {
+                MuleMessage message = null;
+                try
+                {
+                    message = new MuleClient(muleContext).
+                            request("amqp://amqpNewQueueFromGroovyScript-exchange/"
+                                    + "amqp-queue.newProgrammatic-queue"
+                                    + "?connector=activeOnlyAmqpConnector&exchangeType=direct"
+                                    + "&queueDurable=true&exchangeDurable=true&queueAutoDelete=true", 1000L);
+                    assertThat(payload, is(message.getPayloadAsString()));
+                }
+                catch (Exception e)
+                {
+                    return false;
+                }
+                return true;
+            }
+
+            public String describeFailure()
+            {
+                return "The message was not read.";
+            }
+        });
+    }
+
 }
