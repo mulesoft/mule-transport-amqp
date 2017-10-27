@@ -6,11 +6,14 @@
  */
 package org.mule.transport.amqp;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import org.mule.DefaultMuleMessage;
 import org.mule.api.MuleException;
@@ -33,7 +36,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.ClassRule;
@@ -260,7 +262,7 @@ public class MessageDispatcherItCase extends AbstractItCase
         Future<MuleMessage> futureReturnedMessage = 
             amqpTestClient.setupFunctionTestComponentForFlow(getFunctionalTestComponent("returnedMessageProcessor"));
         new MuleClient(muleContext).dispatch("vm://amqpMandatoryDeliveryFailureWithHandler.in", payload, null);
-        MuleMessage returnedMessage = futureReturnedMessage.get(getTestTimeoutSecs(), TimeUnit.SECONDS);
+        MuleMessage returnedMessage = futureReturnedMessage.get(getTestTimeoutSecs(), SECONDS);
         assertThat(returnedMessage, is(notNullValue()));
         assertThat(returnedMessage.getPayloadAsString(), is(equalTo(payload)));
     }	
@@ -295,7 +297,7 @@ public class MessageDispatcherItCase extends AbstractItCase
 
         String payload = RandomStringUtils.randomAlphanumeric(20);
         new MuleClient(muleContext).dispatch("vm://amqpCustomArgumentsService.in", payload, null);
-        MuleMessage muleMessage = routedMessage.get(getTestTimeoutSecs(), TimeUnit.SECONDS);
+        MuleMessage muleMessage = routedMessage.get(getTestTimeoutSecs(), SECONDS);
 
         assertThat(muleMessage.getPayloadAsString(), is(equalTo(payload)));
     }
@@ -316,7 +318,7 @@ public class MessageDispatcherItCase extends AbstractItCase
                     try
                     {
                         new MuleClient(muleContext).dispatch("vm://amqpNewQueueFromGroovyScriptEnqueue.in", payload, null);
-                        return routedMessage.get(500, TimeUnit.MILLISECONDS) != null;
+                        return routedMessage.get(500, MILLISECONDS) != null;
                     }
                     catch (Exception e)
                     {
@@ -335,7 +337,7 @@ public class MessageDispatcherItCase extends AbstractItCase
             fail();
         }
 
-        MuleMessage muleMessage = routedMessage.get(1,TimeUnit.SECONDS);
+        MuleMessage muleMessage = routedMessage.get(1,SECONDS);
         assertThat(muleMessage.getPayloadAsString(), is(payload));
     }
 

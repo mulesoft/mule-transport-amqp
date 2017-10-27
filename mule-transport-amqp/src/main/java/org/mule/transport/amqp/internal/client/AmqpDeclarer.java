@@ -237,7 +237,4 @@ public class AmqpDeclarer
         }
     }
 
-
-
-
 }
