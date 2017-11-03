@@ -5,13 +5,13 @@
     <parent>
         <groupId>org.mule.transports</groupId>
         <artifactId>mule-transport-amqp-parent</artifactId>
-        <version>3.7.4-SNAPSHOT</version>
+        <version>3.7.4</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.mule.transports</groupId>
     <artifactId>mule-transport-amqp-plugin-parent</artifactId>
-    <version>3.7.4-SNAPSHOT</version>
+    <version>3.7.4</version>
     <packaging>pom</packaging>
 
     <properties>
