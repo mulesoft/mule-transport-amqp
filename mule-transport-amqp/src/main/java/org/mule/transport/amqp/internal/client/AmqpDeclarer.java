@@ -24,6 +24,9 @@ import java.util.HashMap;
 
 import java.util.Map;
 
+import static org.mule.transport.amqp.internal.connector.AmqpConnector.ENDPOINT_PROPERTY_QUEUE_AUTO_DELETE;
+import static org.mule.transport.amqp.internal.connector.AmqpConnector.ENDPOINT_PROPERTY_QUEUE_DURABLE;
+import static org.mule.transport.amqp.internal.connector.AmqpConnector.ENDPOINT_PROPERTY_QUEUE_EXCLUSIVE;
 public class AmqpDeclarer
 {
     private static final Logger logger = LoggerFactory.getLogger(AmqpDeclarer.class);
@@ -225,4 +228,19 @@ public class AmqpDeclarer
             }
         }
     }
+
+    public void declareExchangeAndEndpointIfNecessary(final Channel channel,
+                                                      final ImmutableEndpoint endpoint,
+                                                      final boolean activeDeclarationsOnly) throws IOException
+    {
+        final String exchangeName = declareExchange(channel, endpoint, activeDeclarationsOnly);
+        if (StringUtils.isNotEmpty(endpointUtil.getQueueName(endpoint.getAddress()))
+                || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_DURABLE)
+                || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_AUTO_DELETE)
+                || endpoint.getProperties().containsKey(ENDPOINT_PROPERTY_QUEUE_EXCLUSIVE))
+        {
+            declareEndpoint(channel, endpoint, activeDeclarationsOnly, exchangeName);
+        }
+    }
+
 }

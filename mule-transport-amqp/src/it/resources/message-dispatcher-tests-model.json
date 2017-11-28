@@ -19,6 +19,8 @@
 		"name": "amqpMelOutboundEndpointService-queue"
 	},{
 		"name": "amqpExternalFactoryConnector-queue"
+	},{
+		"name": "amqpReadExistingQueueFromMuleClient-queue"
 	}],
 	
 	"exchanges": [{
@@ -47,6 +49,9 @@
 		"type": "fanout"
 	},{
 		"name": "amqpMelOutboundEndpointService-exchange",
+		"type": "direct"
+	},{
+		"name": "amqpReadExistingQueueFromMuleClient-exchange",
 		"type": "direct"
 	}],
 
@@ -80,6 +85,11 @@
 		"destination": "amqpMelOutboundEndpointService-queue",
 		"destination_type": "queue",
 		"routing_key": "amqpMelOutboundEndpointService-queue"
+	},{
+		"source": "amqpReadExistingQueueFromMuleClient-exchange",
+		"destination": "amqpReadExistingQueueFromMuleClient-queue",
+		"destination_type": "queue",
+		"routing_key": "amqpReadExistingQueueFromMuleClient-queue"
 	}]
 
 }
