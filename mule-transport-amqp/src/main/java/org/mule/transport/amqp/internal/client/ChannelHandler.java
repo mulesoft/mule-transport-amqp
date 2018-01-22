@@ -38,7 +38,7 @@ public class ChannelHandler
     {
         Channel ret;
 
-        ret = getTransactedResourceChannel(endpoint);
+        ret = getChannel(endpoint);
         if (ret != null)
         {
             return ret;
@@ -49,16 +49,11 @@ public class ChannelHandler
         return createChannel(endpoint);
     }
 
-    public Channel getOrDefaultChannel(ImmutableEndpoint endpoint, Channel defaultChannel) throws Exception
-    {
-        return getOrDefaultChannel(endpoint, null, defaultChannel);
-    }
-
-    public Channel getOrDefaultChannel(ImmutableEndpoint endpoint,  MuleMessage message, Channel defaultChannel) throws Exception
+    public Channel getOrDefaultChannel(ImmutableEndpoint endpoint,  Channel defaultChannel) throws Exception
     {
         Channel ret;
 
-        ret = getChannel(endpoint, message);
+        ret = getChannel(endpoint);
         if (ret != null)
         {
             return ret;
@@ -69,19 +64,16 @@ public class ChannelHandler
         return defaultChannel;
     }
 
-    public Channel getChannel(ImmutableEndpoint endpoint, MuleMessage message)
+    public Channel getChannel(ImmutableEndpoint endpoint)
             throws IOException, TransactionException
     {
         Channel ret;
 
-        if (endpoint.getTransactionConfig().isConfigured())
+        ret = getTransactedResourceChannel(endpoint);
+        if (ret != null)
         {
-            ret = getTransactedResourceChannel(endpoint);
-            if (ret != null)
-            {
-                LOGGER.debug("Found Channel as transaction resource");
-                return ret;
-            }
+            LOGGER.debug("Found Channel as transaction resource");
+            return ret;
         }
 
         return null;
@@ -94,6 +86,11 @@ public class ChannelHandler
 
     public Channel getTransactedResourceChannel(ImmutableEndpoint endpoint) throws IOException, TransactionException
     {
+        if (!endpoint.getTransactionConfig().isConfigured())
+        {
+            return null;
+        }
+
         final byte action = endpoint.getTransactionConfig().getAction();
 
         final boolean mayUseChannelFromTransaction = action == TransactionConfig.ACTION_BEGIN_OR_JOIN

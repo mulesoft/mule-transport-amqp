@@ -32,6 +32,7 @@
         <junitVersion>4.11</junitVersion>
         <jackson2Version>2.4.3</jackson2Version>
         <hamcrestVersion>1.3</hamcrestVersion>
+        <mockitoVersion>1.10.19</mockitoVersion>
     </properties>
 
     <scm>
@@ -288,6 +289,13 @@
             <artifactId>mule-tests-functional</artifactId>
             <version>${mule.version}</version>
             <scope>test</scope>
+            <!-- mockito all must be excluded since it's deprecated and causes classloading issues.-->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mockito</groupId>
+                    <artifactId>mockito-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.mule.modules</groupId>
@@ -318,6 +326,17 @@
             <artifactId>jackson-databind</artifactId>
             <version>${jackson2Version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockitoVersion}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hamcrest</groupId>
+                    <artifactId>hamcrest-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
