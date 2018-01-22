@@ -6,9 +6,6 @@
  */
 package org.mule.transport.amqp.internal.endpoint.dispatcher;
 
-import static org.mule.transport.amqp.internal.connector.AmqpConnector.ENDPOINT_PROPERTY_QUEUE_AUTO_DELETE;
-import static org.mule.transport.amqp.internal.connector.AmqpConnector.ENDPOINT_PROPERTY_QUEUE_DURABLE;
-import static org.mule.transport.amqp.internal.connector.AmqpConnector.ENDPOINT_PROPERTY_QUEUE_EXCLUSIVE;
 import org.mule.api.MuleEvent;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
@@ -26,7 +23,6 @@ import org.mule.transport.amqp.internal.confirm.DefaultConfirmsManager;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 import org.mule.transport.amqp.internal.domain.AmqpMessage;
 import org.mule.transport.amqp.internal.endpoint.AmqpEndpointUtil;
-import org.mule.util.StringUtils;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ReturnListener;
@@ -148,7 +144,7 @@ public class Dispatcher extends AbstractMessageDispatcher
         }
 
         // If a transaction resource channel is present use it, otherwise use the dispatcher's channel
-        Channel eventChannel = amqpConnector.getChannelHandler().getOrDefaultChannel(endpoint, event.getMessage(), channel);
+        Channel eventChannel = amqpConnector.getChannelHandler().getOrDefaultChannel(endpoint, channel);
 
         final MuleMessage message = event.getMessage();
 
