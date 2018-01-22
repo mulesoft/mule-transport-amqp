@@ -44,15 +44,18 @@ public class MessageDispatcherItCase extends AbstractItCase
 {
     private static long POLLING_PROBER_TIMEOUT = 20000;
     private static long POLLING_PROBER_DELAY = 2000;
+    private static Channel channel = null;
+    private static GetResponse response = null;
 
-	@ClassRule
+
+    @ClassRule
 	public static AmqpModelRule modelRule = new AmqpModelRule("message-dispatcher-tests-model.json");
-	
+
 	@ClassRule
 	public static AmqpModelCleanupRule modelCleanupRule = new AmqpModelCleanupRule(
 			new String[] {"amqpCustomArgumentsService-queue"},
 			new String[] {"amqpSendTargetService-exchange"});
-	
+
     @Override
     protected String getConfigResources()
     {
@@ -63,7 +66,7 @@ public class MessageDispatcherItCase extends AbstractItCase
     public void testDispatchToExistingExchange() throws Exception
     {
     	String flowName = "amqpExistingExchangeService";
-        vmTestClient.dispatchTestMessageAndAssertValidReceivedMessage(nameFactory.getVmName(flowName), 
+        vmTestClient.dispatchTestMessageAndAssertValidReceivedMessage(nameFactory.getVmName(flowName),
         		nameFactory.getQueueName(flowName), getTestTimeoutSecs());
     }
 
@@ -71,7 +74,7 @@ public class MessageDispatcherItCase extends AbstractItCase
     public void testDispatchToRedeclaredExistingExchange() throws Exception
     {
     	String flowName = "amqpRedeclaredExistingExchangeService";
-        vmTestClient.dispatchTestMessageAndAssertValidReceivedMessage(nameFactory.getVmName(flowName), 
+        vmTestClient.dispatchTestMessageAndAssertValidReceivedMessage(nameFactory.getVmName(flowName),
         		nameFactory.getQueueName(flowName), getTestTimeoutSecs());
     }
 
@@ -79,7 +82,7 @@ public class MessageDispatcherItCase extends AbstractItCase
     public void testDispatchToLegacyDefaultExchange() throws Exception
     {
     	String flowName = "amqpLegacyDefaultExchangeService";
-        vmTestClient.dispatchTestMessageAndAssertValidReceivedMessage(nameFactory.getVmName(flowName), 
+        vmTestClient.dispatchTestMessageAndAssertValidReceivedMessage(nameFactory.getVmName(flowName),
         		nameFactory.getQueueName(flowName), getTestTimeoutSecs());
     }
 
@@ -87,7 +90,7 @@ public class MessageDispatcherItCase extends AbstractItCase
     public void testDispatchToLegacyGlobalDefaultExchange() throws Exception
     {
     	String flowName = "amqpLegacyGlobalDefaultExchangeService";
-        vmTestClient.dispatchTestMessageAndAssertValidReceivedMessage(nameFactory.getVmName(flowName), 
+        vmTestClient.dispatchTestMessageAndAssertValidReceivedMessage(nameFactory.getVmName(flowName),
         		nameFactory.getQueueName(flowName), getTestTimeoutSecs());
     }
 
@@ -95,7 +98,7 @@ public class MessageDispatcherItCase extends AbstractItCase
     public void testDispatchToDefaultExchange() throws Exception
     {
     	String flowName = "amqpDefaultExchangeService";
-        vmTestClient.dispatchTestMessageAndAssertValidReceivedMessage(nameFactory.getVmName(flowName), 
+        vmTestClient.dispatchTestMessageAndAssertValidReceivedMessage(nameFactory.getVmName(flowName),
         		nameFactory.getQueueName(flowName), getTestTimeoutSecs());
     }
 
@@ -103,7 +106,7 @@ public class MessageDispatcherItCase extends AbstractItCase
     public void testDispatchToGlobalDefaultExchange() throws Exception
     {
     	String flowName = "amqpGlobalDefaultExchangeService";
-        vmTestClient.dispatchTestMessageAndAssertValidReceivedMessage(nameFactory.getVmName(flowName), 
+        vmTestClient.dispatchTestMessageAndAssertValidReceivedMessage(nameFactory.getVmName(flowName),
         		nameFactory.getQueueName(flowName), getTestTimeoutSecs());
     }
 
@@ -111,7 +114,7 @@ public class MessageDispatcherItCase extends AbstractItCase
     public void testMessageLevelOverrideService() throws Exception
     {
     	String flowName = "amqpMessageLevelOverrideService";
-        vmTestClient.dispatchTestMessageAndAssertValidReceivedMessage(nameFactory.getVmName(flowName), 
+        vmTestClient.dispatchTestMessageAndAssertValidReceivedMessage(nameFactory.getVmName(flowName),
         		nameFactory.getQueueName(flowName), getTestTimeoutSecs());
     }
 
@@ -126,7 +129,7 @@ public class MessageDispatcherItCase extends AbstractItCase
             Collections.singletonMap("myRoutingKey", queueName), payload1);
 
          String payload2 = "payload2::" + RandomStringUtils.randomAlphanumeric(20);
-        	vmTestClient.dispatchTestMessage(nameFactory.getVmName(flowName), 
+        	vmTestClient.dispatchTestMessage(nameFactory.getVmName(flowName),
         		Collections.singletonMap("myRoutingKey", "_somewhere_else_"), payload2);
 
          String payload3 = "payload3::" + RandomStringUtils.randomAlphanumeric(20);
@@ -138,19 +141,19 @@ public class MessageDispatcherItCase extends AbstractItCase
         // consumes all the messages but only returns one
         for (int i = 0; i < 2; i++)
         {
-            GetResponse getResponse = amqpTestClient.waitUntilGetMessageWithAmqp(queueName,
+            response = amqpTestClient.waitUntilGetMessageWithAmqp(queueName,
                 getTestTimeoutSecs() * 1000L);
-            assertThat(getResponse, is(notNullValue()));
+            assertThat(response, is(notNullValue()));
 
-            if (Arrays.equals(payload1.getBytes(), getResponse.getBody()))
+            if (Arrays.equals(payload1.getBytes(), response.getBody()))
             {
-            	amqpTestClient.validateAmqpDeliveredMessage(payload1, customHeaderValue1, getResponse.getBody(),
-                    getResponse.getProps());
+            	amqpTestClient.validateAmqpDeliveredMessage(payload1, customHeaderValue1, response.getBody(),
+                    response.getProps());
             }
             else
             {
-            	amqpTestClient.validateAmqpDeliveredMessage(payload3, customHeaderValue3, getResponse.getBody(),
-                    getResponse.getProps());
+            	amqpTestClient.validateAmqpDeliveredMessage(payload3, customHeaderValue3, response.getBody(),
+                    response.getProps());
             }
 
         }
@@ -170,7 +173,6 @@ public class MessageDispatcherItCase extends AbstractItCase
         int attempts = 0;
         while (attempts++ < getTestTimeoutSecs())
         {
-            Channel channel = null;
             try
             {
                 channel = testConnectionManager.getChannel();
@@ -195,37 +197,46 @@ public class MessageDispatcherItCase extends AbstractItCase
     @Test
     public void testOutboundQueueCreation() throws Exception
     {
-        String flowName = "amqpOutBoundQueue";
+        final String flowName = "amqpOutBoundQueue";
         String testPayload = "payload";
-        GetResponse response = null;
-        new MuleClient(muleContext).dispatch(nameFactory.getVmName(flowName),testPayload , null);
-
-        // test to see if there is a message on the queue.
-        int attempts = 0;
-        while (attempts++ < getTestTimeoutSecs())
+        muleContext.getClient().dispatch(nameFactory.getVmName(flowName), testPayload, null);
+        PollingProber pollingProber = new PollingProber(10000, 1000);
+        try
         {
-            Channel channel = null;
-            try
+            pollingProber.check(
+                    new Probe()
+                    {
+                        public boolean isSatisfied()
+                        {
+                            try
+                            {
+                                channel = testConnectionManager.getChannel();
+                                response = channel.basicGet(nameFactory.getQueueName(flowName), true);
+                                return response != null;
+                            }
+                            catch (Exception e)
+                            {
+                                testConnectionManager.disposeChannel(channel);
+                                return false;
+                            }
+                        }
+
+                        public String describeFailure()
+                        {
+                            return "Queue wasn't created.";
+                        }
+                    }
+            );
+        }
+        finally
+        {
+            if (channel != null)
             {
-                channel = testConnectionManager.getChannel();
-                response = channel.basicGet(nameFactory.getQueueName(flowName), true);
-                if (response != null )
-                {
-                    break;
-                }
-            }
-            catch ( IOException ioe)
-            {
-                Thread.sleep(500L);
-            }
-            finally
-            {
-                if (channel != null && channel.isOpen())
-                {
-                    testConnectionManager.disposeChannel(channel);
-                }
+                channel.queueDelete(nameFactory.getQueueName(flowName));
+                testConnectionManager.disposeChannel(channel);
             }
         }
+
         assertThat(response, is(notNullValue()));
         assertThat(response.getBody(), is(testPayload.getBytes()));
     }
