@@ -46,14 +46,7 @@ public class AmqpModelCleanupRule extends ExternalResource
     protected void after() 
     {
     	cleanAll(queues, exchanges, channel);
-		try 
-		{
-			connectionFactory.disposeChannel(channel);
-		} 
-		catch (IOException e)
-		{}
-		catch (TimeoutException e)
-		{}
+		connectionFactory.disposeChannel(channel);
 	}
     
     protected void cleanAll(String[] queues, String[] exchanges, Channel channel)
