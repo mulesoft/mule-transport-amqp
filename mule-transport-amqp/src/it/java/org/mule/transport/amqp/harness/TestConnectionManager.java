@@ -58,18 +58,36 @@ public class TestConnectionManager
 		
         return connection.createChannel();
 	}
-	
-	public void disposeChannel(Channel channel) throws IOException, TimeoutException
+
+	public void disposeChannel(Channel channel)
 	{
 		if (channel == null)
 		{
 			return;
 		}
-		
-		channel.close();
-		if (channelCount.decrementAndGet() == 0)
+
+		try
 		{
-			connection.close();
+			channel.close();
+		}
+		catch (Exception e)
+		{
+			// Ignore exception
+		}
+		finally
+		{
+			if (channelCount.decrementAndGet() == 0)
+			{
+				try
+				{
+					connection.close();
+				}
+				catch (Exception e)
+				{
+					// Ignore exception.
+				}
+			}
 		}
 	}
+
 }
