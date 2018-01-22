@@ -53,20 +53,16 @@ public class AmqpModelRule extends ExternalResource
     @Override
     protected void after() 
     {
-    	try 
+    	try
     	{
     		undoConfiguration(configuration, channel);
     		connectionFactory.disposeChannel(channel);
-		} 
-    	catch (IOException e) 
+		}
+    	catch (IOException e)
     	{
 			throw new RuntimeException(e);
 		}
-		catch (TimeoutException e)
-		{
-			throw new RuntimeException(e);
-		}
-	};
+	}
     
     protected void applyConfiguration(Configuration configuration, Channel channel) throws IOException
     {
