@@ -44,8 +44,11 @@ public class MessageDispatcherItCase extends AbstractItCase
 {
     private static long POLLING_PROBER_TIMEOUT = 20000;
     private static long POLLING_PROBER_DELAY = 2000;
+    private static Channel channel = null;
+    private static GetResponse response = null;
 
-	@ClassRule
+
+    @ClassRule
 	public static AmqpModelRule modelRule = new AmqpModelRule("message-dispatcher-tests-model.json");
 
 	@ClassRule
@@ -138,19 +141,19 @@ public class MessageDispatcherItCase extends AbstractItCase
         // consumes all the messages but only returns one
         for (int i = 0; i < 2; i++)
         {
-            GetResponse getResponse = amqpTestClient.waitUntilGetMessageWithAmqp(queueName,
+            response = amqpTestClient.waitUntilGetMessageWithAmqp(queueName,
                 getTestTimeoutSecs() * 1000L);
-            assertThat(getResponse, is(notNullValue()));
+            assertThat(response, is(notNullValue()));
 
-            if (Arrays.equals(payload1.getBytes(), getResponse.getBody()))
+            if (Arrays.equals(payload1.getBytes(), response.getBody()))
             {
-            	amqpTestClient.validateAmqpDeliveredMessage(payload1, customHeaderValue1, getResponse.getBody(),
-                    getResponse.getProps());
+            	amqpTestClient.validateAmqpDeliveredMessage(payload1, customHeaderValue1, response.getBody(),
+                    response.getProps());
             }
             else
             {
-            	amqpTestClient.validateAmqpDeliveredMessage(payload3, customHeaderValue3, getResponse.getBody(),
-                    getResponse.getProps());
+            	amqpTestClient.validateAmqpDeliveredMessage(payload3, customHeaderValue3, response.getBody(),
+                    response.getProps());
             }
 
         }
@@ -170,7 +173,6 @@ public class MessageDispatcherItCase extends AbstractItCase
         int attempts = 0;
         while (attempts++ < getTestTimeoutSecs())
         {
-            Channel channel = null;
             try
             {
                 channel = testConnectionManager.getChannel();
@@ -197,8 +199,6 @@ public class MessageDispatcherItCase extends AbstractItCase
     {
         final String flowName = "amqpOutBoundQueue";
         String testPayload = "payload";
-        final Channel channel [] = {null} ;
-        final GetResponse[] response = {null};
         muleContext.getClient().dispatch(nameFactory.getVmName(flowName), testPayload, null);
         PollingProber pollingProber = new PollingProber(10000, 1000);
         try
@@ -210,13 +210,13 @@ public class MessageDispatcherItCase extends AbstractItCase
                         {
                             try
                             {
-                                channel[0] = testConnectionManager.getChannel();
-                                response[0] = channel[0].basicGet(nameFactory.getQueueName(flowName), true);
-                                return response[0] != null;
+                                channel = testConnectionManager.getChannel();
+                                response = channel.basicGet(nameFactory.getQueueName(flowName), true);
+                                return response != null;
                             }
                             catch (Exception e)
                             {
-                                testConnectionManager.disposeChannel(channel[0]);
+                                testConnectionManager.disposeChannel(channel);
                                 return false;
                             }
                         }
@@ -230,15 +230,15 @@ public class MessageDispatcherItCase extends AbstractItCase
         }
         finally
         {
-            if (channel[0] != null)
+            if (channel != null)
             {
-                channel[0].queueDelete(nameFactory.getQueueName(flowName));
-                testConnectionManager.disposeChannel(channel[0]);
+                channel.queueDelete(nameFactory.getQueueName(flowName));
+                testConnectionManager.disposeChannel(channel);
             }
         }
 
-        assertThat(response[0], is(notNullValue()));
-        assertThat(response[0].getBody(), is(testPayload.getBytes()));
+        assertThat(response, is(notNullValue()));
+        assertThat(response.getBody(), is(testPayload.getBytes()));
     }
 
     @Test
