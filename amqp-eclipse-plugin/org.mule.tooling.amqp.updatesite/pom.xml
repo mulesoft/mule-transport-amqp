@@ -9,7 +9,7 @@
     <parent>
         <artifactId>mule-transport-amqp-plugin-parent</artifactId>
         <groupId>org.mule.transports</groupId>
-        <version>3.7.5-SNAPSHOT</version>
+        <version>3.7.5</version>
     </parent>
 
     <properties>
