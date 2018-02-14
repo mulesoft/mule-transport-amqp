@@ -28,8 +28,8 @@ import java.util.List;
 
 /**
  * In Mule an endpoint corresponds to a single receiver. It's up to the receiver to do multithreaded consumption and
- * resource allocation, if needed. This class honors the <code>numberOfConcurrentTransactedReceivers</code> strictly
- * and will create exactly this number of consumers.
+ * resource allocation, if needed. This class honors the <code>numberOfConcurrentTransactedReceivers</code> strictly and
+ * will create exactly this number of consumers.
  */
 public class MultiChannelMessageReceiver extends AbstractMessageReceiver
 {
@@ -64,25 +64,49 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
 
         try
         {
-            for (int i = 0; i < numberOfChannels; i++)
+            synchronized (subReceivers)
             {
-                MultiChannelMessageSubReceiver sub = new MultiChannelMessageSubReceiver(this);
-                sub.initialise();
-                sub.setListener(listener);
-                subReceivers.add(sub);
+                clearSubreceivers();
+
+                for (int i = 0; i < numberOfChannels; i++)
+                {
+                    MultiChannelMessageSubReceiver sub = new MultiChannelMessageSubReceiver(this);
+                    sub.initialise();
+                    sub.setListener(listener);
+                    subReceivers.add(sub);
+                }
+
+                for (MultiChannelMessageSubReceiver channel : subReceivers)
+                {
+                    channel.doStart();
+                }
+
+                logger.info("Message receiver for endpoint " + endpoint.getEndpointURI() + " has been successfully connected.");
             }
 
-            for (MultiChannelMessageSubReceiver channel : subReceivers)
-            {
-                channel.doStart();
-            }
-
-            logger.info("Message receiver for endpoint " + endpoint.getEndpointURI() + " has been successfully connected.");
         }
         catch (Exception e)
         {
             throw new DefaultMuleException(e);
         }
+    }
+
+    private void clearSubreceivers() throws MuleException
+    {
+        if (subReceivers == null)
+        {
+            return;
+        }
+
+        for (MultiChannelMessageSubReceiver channel : subReceivers)
+        {
+            if (!channel.isStopped())
+            {
+                channel.stop();
+            }
+        }
+
+        subReceivers.clear();
     }
 
     @Override
@@ -91,12 +115,10 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
         super.doStop();
         logger.debug("doDisconnect()");
 
-        for (MultiChannelMessageSubReceiver sub : subReceivers)
+        synchronized (subReceivers)
         {
-            sub.doStop();
+            clearSubreceivers();
         }
-
-        subReceivers.clear();
     }
 
     protected void declareEndpoint(Channel channel) throws IOException
@@ -120,7 +142,7 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
         if (StringUtils.isEmpty(queueName))
         {
             queueName = new AmqpEndpointUtil().getQueueName(endpoint.getAddress());
-            logger.debug("queue: " + queueName + "found for " +  endpoint.getAddress());
+            logger.debug("queue: " + queueName + "found for " + endpoint.getAddress());
         }
         return queueName;
     }
