@@ -23,8 +23,7 @@ This release consists of bug fixes.
 
 === Version 3.7.6 - Fixed in This Release
 
-* Revert AMQP-67 where subreceivers in AMQP begin to receive messages before the app is fully started. (AMQP-80)
-
+* AMQP-85: Race condition can result in more subreceivers created than the number of channels.
 
 
 == Version 3.7.5 - February 9, 2018
@@ -33,7 +32,8 @@ This release consists of bug fixes.
 
 === Version 3.7.5 - Fixed in This Release
 
-* AMQP-85: Race condition can result in more subreceivers created than the number of channels.
+* AMQP-72: Fix MessageDispatcherItCase#testOutboundQueueCreation.
+* AMQP-83: AMQP is using transactional channels for non-transactional endpoints.
 
 
 == Version 3.7.4 - December 28, 2017
@@ -42,8 +42,7 @@ This release consists of bug fixes.
 
 === Version 3.7.4 - Fixed in This Release
 
-* AMQP-72: Fix MessageDispatcherItCase#testOutboundQueueCreation.
-* AMQP-83: AMQP is using transactional channels for non-transactional endpoints.
+* Revert AMQP-67 where subreceivers in AMQP begin to receive messages before the app is fully started. (AMQP-80)
 
 
 == Version 3.7.3 - October 31, 2017
