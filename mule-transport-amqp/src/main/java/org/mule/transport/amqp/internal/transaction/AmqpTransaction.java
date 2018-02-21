@@ -6,18 +6,25 @@
  */
 package org.mule.transport.amqp.internal.transaction;
 
+import static org.mule.transport.amqp.internal.processor.ChannelUtils.NACK_CHANNEL_ACTION;
+import static org.mule.transport.amqp.internal.processor.ChannelUtils.getDeliveryTagOrFail;
 import static org.mule.transport.amqp.internal.transaction.AmqpTransaction.RecoverStrategy.NONE;
 
 import java.io.IOException;
 
 import org.apache.commons.lang.Validate;
+
+import org.mule.RequestContext;
 import org.mule.api.MuleContext;
+import org.mule.api.MuleException;
+import org.mule.api.MuleMessage;
 import org.mule.api.transaction.TransactionException;
 import org.mule.config.i18n.CoreMessages;
 import org.mule.transaction.AbstractSingleResourceTransaction;
 import org.mule.transaction.IllegalTransactionStateException;
 
 import com.rabbitmq.client.Channel;
+
 import org.mule.transport.amqp.internal.client.ChannelHandler;
 
 /**
@@ -122,26 +129,34 @@ public class AmqpTransaction extends AbstractSingleResourceTransaction
 
             applyRecoverStrategy(channel);
         }
+        catch (MuleException e)
+        {
+            throw new TransactionException(e);
+        }
         finally
         {
             closeChannelIfNeeded(channel);
         }
     }
 
-    protected void applyRecoverStrategy(final Channel channel)
+    protected void applyRecoverStrategy(final Channel channel) throws MuleException
     {
+        MuleMessage currentMessage = RequestContext.getEvent().getMessage();
+        Long deliveryTag = getDeliveryTagOrFail(currentMessage, NACK_CHANNEL_ACTION);
         try
         {
             switch (recoverStrategy)
             {
                 case NONE :
-                    // NOOP
+                    // NO-OP
                     break;
                 case NO_REQUEUE :
-                    channel.basicRecover(false);
+                    channel.basicReject(deliveryTag,false);
+                    channel.txCommit();
                     break;
                 case REQUEUE :
-                    channel.basicRecover(true);
+                    channel.basicReject(deliveryTag, true);
+                    channel.txCommit();
                     break;
             }
 

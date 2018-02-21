@@ -57,4 +57,33 @@
             </on-redelivery-attempts-exceeded>
         </rollback-exception-strategy>
     </flow>
+
+    <flow name="amqpTransactedRedeliveryWithRollbackExceptionStrategyWithManualAck">
+        <amqp:inbound-endpoint
+                queueName="amqpTransactedRedeliveryWithRollbackExceptionStrategyWithManualAck-queue">
+            <amqp:transaction action="ALWAYS_BEGIN"
+                              recoverStrategy="REQUEUE" />
+        </amqp:inbound-endpoint>
+
+        <component class="org.mule.transport.amqp.ExceptionStrategyItCase$PayloadVerifier" />
+
+        <vm:outbound-endpoint
+                path="amqpTransactedRedeliveryWithRollbackExceptionStrategy.ok"
+                exchange-pattern="one-way">
+            <vm:transaction action="NONE" />
+        </vm:outbound-endpoint>
+
+        <rollback-exception-strategy
+                maxRedeliveryAttempts="1">
+            <on-redelivery-attempts-exceeded>
+                <vm:outbound-endpoint
+                        path="amqpTransactedRedeliveryWithRollbackExceptionStrategy.exceeded"
+                        exchange-pattern="one-way">
+                    <vm:transaction action="NONE" />
+                </vm:outbound-endpoint>
+                <amqp:acknowledge-message/>
+            </on-redelivery-attempts-exceeded>
+        </rollback-exception-strategy>
+    </flow>
+
 </mule>
