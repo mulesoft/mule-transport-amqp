@@ -6,10 +6,13 @@
  */
 package org.mule.transport.amqp.internal.processor;
 
+import static org.mule.transport.amqp.internal.processor.ChannelUtils.getChannelOrFail;
+import static org.mule.transport.amqp.internal.processor.ChannelUtils.getDeliveryTagOrFail;
 import org.mule.api.DefaultMuleException;
 import org.mule.api.MuleEvent;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
+import org.mule.api.processor.MessageProcessor;
 
 import com.rabbitmq.client.Channel;
 import org.slf4j.Logger;
@@ -21,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * property. If the former is missing, it logs a warning. If the former is present but not the
  * latter, it throws an exception.
  */
-public class Rejecter extends AbstractChannelMessageProcessor
+public class Rejecter implements MessageProcessor
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(Rejecter.class);
 

@@ -6,10 +6,14 @@
  */
 package org.mule.transport.amqp.internal.processor;
 
+import static org.mule.transport.amqp.internal.processor.ChannelUtils.ACK_CHANNEL_ACTION;
+import static org.mule.transport.amqp.internal.processor.ChannelUtils.getChannelOrFail;
+import static org.mule.transport.amqp.internal.processor.ChannelUtils.getDeliveryTagOrFail;
 import org.mule.api.DefaultMuleException;
 import org.mule.api.MuleEvent;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
+import org.mule.api.processor.MessageProcessor;
 
 import com.rabbitmq.client.Channel;
 import org.slf4j.Logger;
@@ -21,11 +25,9 @@ import org.slf4j.LoggerFactory;
  * property. If the former is missing, it logs a warning. If the former is present but not the
  * latter, it throws an exception.
  */
-public class Acknowledger extends AbstractChannelMessageProcessor
+public class Acknowledger implements MessageProcessor
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(Acknowledger.class);
-
-    private static final String CHANNEL_ACTION = "ack";
 
     protected boolean multiple = false;
 
@@ -47,8 +49,8 @@ public class Acknowledger extends AbstractChannelMessageProcessor
 
     public void ack(final MuleMessage message, final boolean multiple) throws MuleException
     {
-        final Long deliveryTag = getDeliveryTagOrFail(message, CHANNEL_ACTION);
-        final Channel channel = getChannelOrFail(message, CHANNEL_ACTION);
+        final Long deliveryTag = getDeliveryTagOrFail(message, ACK_CHANNEL_ACTION);
+        final Channel channel = getChannelOrFail(message, ACK_CHANNEL_ACTION);
 
         try
         {
