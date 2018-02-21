@@ -6,30 +6,35 @@
  */
 package org.mule.transport.amqp.internal.processor;
 
+import static org.mule.transport.amqp.internal.connector.AmqpConnector.AMQP_DELIVERY_TAG;
+import static org.mule.transport.amqp.internal.connector.AmqpConnector.MESSAGE_PROPERTY_DELIVERY_TAG;
 import org.mule.api.DefaultMuleException;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
-import org.mule.api.processor.MessageProcessor;
 
 import com.rabbitmq.client.Channel;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 import org.mule.transport.amqp.internal.client.ChannelHandler;
 
 /**
- * Provides common logic to all channel aware message processors.
+ * Provides common logic to all channel aware components.
  */
-public abstract class AbstractChannelMessageProcessor implements MessageProcessor
+public class ChannelUtils
 {
-    protected ChannelHandler channelHandler = new ChannelHandler();
+    private static ChannelHandler channelHandler = new ChannelHandler();
 
-    protected Long getDeliveryTagOrFail(final MuleMessage muleMessage, final String channelAction)
+    public static final String ACK_CHANNEL_ACTION = "ack";
+
+    public static final String NACK_CHANNEL_ACTION = "nack";
+
+    public static Long getDeliveryTagOrFail(final MuleMessage muleMessage, final String channelAction)
         throws MuleException
     {
         final Long deliveryTag = getDeliveryTagFromMessage(muleMessage);
 
         if (deliveryTag == null)
         {
-            throw new DefaultMuleException("No " + AmqpConnector.AMQP_DELIVERY_TAG
+            throw new DefaultMuleException("No " + AMQP_DELIVERY_TAG
                                            + " invocation property found, impossible to " + channelAction
                                            + " message: " + muleMessage);
         }
@@ -37,7 +42,7 @@ public abstract class AbstractChannelMessageProcessor implements MessageProcesso
         return deliveryTag;
     }
 
-    protected Channel getChannelOrFail(final MuleMessage muleMessage, final String channelAction)
+    public static Channel getChannelOrFail(final MuleMessage muleMessage, final String channelAction)
         throws MuleException
     {
         final Channel channel = channelHandler.getFlowVariableChannel(muleMessage);
@@ -52,10 +57,10 @@ public abstract class AbstractChannelMessageProcessor implements MessageProcesso
         return channel;
     }
 
-    public Long getDeliveryTagFromMessage(final MuleMessage message)
+    public static Long getDeliveryTagFromMessage(final MuleMessage message)
     {
-        return message.getInvocationProperty(AmqpConnector.AMQP_DELIVERY_TAG,
-                message.<Long> getInboundProperty(AmqpConnector.MESSAGE_PROPERTY_DELIVERY_TAG));
+        return message.getInvocationProperty(AMQP_DELIVERY_TAG,
+                                             message.<Long> getInboundProperty(MESSAGE_PROPERTY_DELIVERY_TAG));
     }
 
 }
