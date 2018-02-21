@@ -112,6 +112,21 @@ public class AmqpTransaction extends AbstractSingleResourceTransaction
 
         try
         {
+            try
+            {
+                channel.txRollback();
+
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Rolled back AMQP transaction (" + recoverStrategy + ") on channel: "
+                                 + channel);
+                }
+            }
+            catch (final IOException ioe)
+            {
+                throw new TransactionException(CoreMessages.transactionRollbackFailed(), ioe);
+            }
+
             applyRecoverStrategy(channel);
         }
         catch (MuleException e)
@@ -133,20 +148,7 @@ public class AmqpTransaction extends AbstractSingleResourceTransaction
             switch (recoverStrategy)
             {
                 case NONE :
-                    try
-                    {
-                        channel.txRollback();
-
-                        if (logger.isDebugEnabled())
-                        {
-                            logger.debug("Rolled back AMQP transaction (" + recoverStrategy + ") on channel: "
-                                         + channel);
-                        }
-                    }
-                    catch (final IOException ioe)
-                    {
-                        throw new TransactionException(CoreMessages.transactionRollbackFailed(), ioe);
-                    }
+                    // NO-OP
                     break;
                 case NO_REQUEUE :
                     channel.basicReject(deliveryTag,false);
