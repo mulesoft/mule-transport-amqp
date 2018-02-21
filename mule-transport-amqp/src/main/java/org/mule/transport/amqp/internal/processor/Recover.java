@@ -6,10 +6,12 @@
  */
 package org.mule.transport.amqp.internal.processor;
 
+import static org.mule.transport.amqp.internal.processor.ChannelUtils.getChannelOrFail;
 import org.mule.api.DefaultMuleException;
 import org.mule.api.MuleEvent;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
+import org.mule.api.processor.MessageProcessor;
 
 import com.rabbitmq.client.Channel;
 import org.slf4j.Logger;
@@ -18,9 +20,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Used to manually perform a basic recover of the current channel.
  */
-public class Recover extends AbstractChannelMessageProcessor
+public class Recover implements MessageProcessor
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractChannelMessageProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Recover.class);
 
     private static final String CHANNEL_ACTION = "recover";
 

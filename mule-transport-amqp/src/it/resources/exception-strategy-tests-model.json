@@ -2,11 +2,15 @@
 	"queues": [{
 		"name": "amqpRejectingExceptionStrategy-queue",
 		"durable": false,
-		"auto_delete": true
+		"auto_delete": false
 	},{
 		"name": "amqpTransactedRedeliveryWithRollbackExceptionStrategy-queue",
 		"durable": false,
-		"auto_delete": true
+		"auto_delete": false
+	},{
+		"name": "amqpTransactedRedeliveryWithRollbackExceptionStrategyWithManualAck-queue",
+		"durable": false,
+		"auto_delete": false
 	}],
 	"exchanges": [{
 		"name": "amqpRejectingExceptionStrategy-exchange",
@@ -14,7 +18,11 @@
 	},{
 		"name": "amqpTransactedRedeliveryWithRollbackExceptionStrategy-exchange",
 		"type": "fanout"
-	}],
+	},{
+		"name": "amqpTransactedRedeliveryWithRollbackExceptionStrategyWithManualAck-exchange",
+		"type": "fanout"
+	}
+	],
 	"bindings": [{
 		"source": "amqpRejectingExceptionStrategy-exchange",
 		"destination": "amqpRejectingExceptionStrategy-queue",
@@ -24,6 +32,11 @@
 	{
 		"source": "amqpTransactedRedeliveryWithRollbackExceptionStrategy-exchange",
 		"destination": "amqpTransactedRedeliveryWithRollbackExceptionStrategy-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpTransactedRedeliveryWithRollbackExceptionStrategyWithManualAck-exchange",
+		"destination": "amqpTransactedRedeliveryWithRollbackExceptionStrategyWithManualAck-queue",
 		"destination_type": "queue",
 		"routing_key": ""
 	}
