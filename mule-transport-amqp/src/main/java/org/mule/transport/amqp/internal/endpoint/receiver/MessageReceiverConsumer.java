@@ -29,9 +29,8 @@ public final class MessageReceiverConsumer extends DefaultConsumer
     public void handleCancel(final String consumerTag) throws IOException
     {
         logger.warn("Received external cancellation of consumer tag: " + consumerTag
-                + ", the message receiver will try to restart.");
-
-        messageReceiver.restart(false);
+                + ", the message receiver will try to restart using the consumer recover thread.");
+        this.messageReceiver.cancelConsumer();
     }
 
     @Override
