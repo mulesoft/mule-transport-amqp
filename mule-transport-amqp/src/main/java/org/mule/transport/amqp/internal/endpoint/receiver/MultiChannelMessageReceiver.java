@@ -6,9 +6,15 @@
  */
 package org.mule.transport.amqp.internal.endpoint.receiver;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mule.api.DefaultMuleException;
 import org.mule.api.MuleException;
 import org.mule.api.construct.FlowConstruct;
@@ -17,14 +23,12 @@ import org.mule.api.lifecycle.CreateException;
 import org.mule.api.transport.Connector;
 import org.mule.transport.AbstractMessageReceiver;
 import org.mule.transport.amqp.internal.client.AmqpDeclarer;
-import org.mule.transport.amqp.internal.client.ChannelHandler;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 import org.mule.transport.amqp.internal.endpoint.AmqpEndpointUtil;
 import org.mule.util.StringUtils;
+import org.mule.util.concurrent.DaemonThreadFactory;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import com.rabbitmq.client.Channel;
 
 /**
  * In Mule an endpoint corresponds to a single receiver. It's up to the receiver to do multithreaded consumption and
@@ -33,17 +37,21 @@ import java.util.List;
  */
 public class MultiChannelMessageReceiver extends AbstractMessageReceiver
 {
+    public static int DEFAULT_CONSUMER_RECOVERY_INTERVAL = 10000;
+
     protected final AmqpConnector amqpConnector;
 
     protected AmqpDeclarer declarator;
 
-    protected final List<MultiChannelMessageSubReceiver> subReceivers;
+    protected final List<MultiChannelMessageSubReceiver> subReceivers = new ArrayList<MultiChannelMessageSubReceiver>();
 
     protected int numberOfChannels;
     protected String queueName;
 
     private boolean started = false;
     private boolean declared = false;
+
+    protected ScheduledThreadPoolExecutor scheduler;
 
 
     public MultiChannelMessageReceiver(Connector connector, FlowConstruct flowConstruct, InboundEndpoint endpoint) throws CreateException
@@ -53,7 +61,6 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
         this.amqpConnector = (AmqpConnector) connector;
         declarator = new AmqpDeclarer();
         numberOfChannels = new AmqpEndpointUtil().getNumberOfChannels(endpoint);
-        subReceivers = new ArrayList<MultiChannelMessageSubReceiver>(numberOfChannels);
     }
 
     @Override
@@ -84,10 +91,23 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
                 logger.info("Message receiver for endpoint " + endpoint.getEndpointURI() + " has been successfully connected.");
             }
 
+            triggerScheduler();
+
         }
         catch (Exception e)
         {
             throw new DefaultMuleException(e);
+        }
+    }
+
+    private void triggerScheduler()
+    {
+        if (scheduler == null)
+        {
+            this.scheduler = new ScheduledThreadPoolExecutor(1);
+            scheduler.setThreadFactory(
+                    new DaemonThreadFactory("ConsumerRecreationMonitor", this.getClass().getClassLoader()));
+            scheduler.scheduleWithFixedDelay(new ConsumerRecoveryMonitor(subReceivers), 0, DEFAULT_CONSUMER_RECOVERY_INTERVAL, MILLISECONDS);
         }
     }
 
@@ -119,6 +139,17 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
         {
             clearSubreceivers();
         }
+
+        stopScheduler();
+    }
+
+    private void stopScheduler()
+    {
+        if (scheduler != null)
+        {
+            scheduler.shutdown();
+            scheduler = null;
+        }
     }
 
     protected void declareEndpoint(Channel channel) throws IOException
@@ -146,4 +177,43 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
         }
         return queueName;
     }
+
+    private static class ConsumerRecoveryMonitor implements Runnable
+    {
+
+        protected transient Log logger = LogFactory.getLog(getClass());
+        private List<MultiChannelMessageSubReceiver> subReceivers;
+
+        public ConsumerRecoveryMonitor(List<MultiChannelMessageSubReceiver> subReceivers)
+        {
+            this.subReceivers = subReceivers;
+        }
+
+        public void run()
+        {
+
+            synchronized (subReceivers)
+            {
+                for (MultiChannelMessageSubReceiver subReceiver : subReceivers)
+                {
+                    try
+                    {
+                        if (subReceiver.isCancelled())
+                        {
+                            subReceiver.consume();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        logger.info("The scheduled recovery couldn't restart the consumer");
+                        // Ensure the release resources which where taken in
+                        // in the recreation attempt.
+                        subReceiver.cancelConsumer();
+                    }
+                }
+            }
+        }
+
+    }
+
 }
