@@ -6,7 +6,9 @@
  */
 package org.mule.transport.amqp.internal.endpoint.receiver;
 
-import com.rabbitmq.client.Channel;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.mule.api.MuleException;
 import org.mule.api.endpoint.ImmutableEndpoint;
 import org.mule.api.lifecycle.CreateException;
@@ -16,6 +18,8 @@ import org.mule.transport.AbstractMessageReceiver;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 import org.mule.transport.amqp.internal.endpoint.AmqpEndpointUtil;
 import org.mule.util.StringUtils;
+
+import com.rabbitmq.client.Channel;
 
 /**
  * In Mule an endpoint corresponds to a single receiver. It's up to the receiver to do multithreaded consumption and
@@ -33,6 +37,7 @@ public class MultiChannelMessageSubReceiver extends AbstractMessageReceiver
     protected volatile String consumerTag;
     protected Channel channel;
     protected String queueName;
+    private final AtomicBoolean cancelled;
 
 
     public MultiChannelMessageSubReceiver(MultiChannelMessageReceiver parentReceiver) throws CreateException
@@ -42,6 +47,7 @@ public class MultiChannelMessageSubReceiver extends AbstractMessageReceiver
         amqpConnector = (AmqpConnector) parentReceiver.getConnector();
         endpoint = parentReceiver.getEndpoint();
         endpointUtil = new AmqpEndpointUtil();
+        cancelled = new AtomicBoolean();
     }
 
     @Override
@@ -49,32 +55,7 @@ public class MultiChannelMessageSubReceiver extends AbstractMessageReceiver
     {
         try
         {
-        	logger.debug("Starting subreceiver on queue: " + getQueueName() + " on channel: " + getChannel());
-
-            super.doStart();
-
-            channel = amqpConnector.getChannelHandler().getOrCreateChannel(endpoint);
-            parentReceiver.declareEndpoint(channel);
-
-            if (logger.isDebugEnabled())
-            {
-                logger.debug("Connected queue: " + getQueueName() + " on channel: " + getChannel());
-            }
-
-            if (endpoint.getTransactionConfig().isTransacted())
-            {
-                channel.txSelect();
-            }
-
-            queueName = parentReceiver.getQueueOrCreateTemporaryQueue(channel);
-
-            consumerTag = channel.basicConsume(getQueueName(), amqpConnector.getAckMode().isAutoAck(),
-                    getClientConsumerTag(), amqpConnector.isNoLocal(), amqpConnector.isExclusiveConsumers(),
-                    null, new MessageReceiverConsumer(this, channel));
-
-            logger.info("Started subscription: " + consumerTag + " on "
-                    + (endpoint.getTransactionConfig().isTransacted() ? "transacted " : "") + "channel: "
-                    + channel);
+        		consume();
         }
         catch (final Exception e)
         {
@@ -93,17 +74,43 @@ public class MultiChannelMessageSubReceiver extends AbstractMessageReceiver
         logger.debug("Started subreceiver on queue: " + getQueueName() + " on channel: " + getChannel());
     }
 
+    public void consume() throws MuleException, Exception, IOException
+    {
+        logger.debug("Starting subreceiver on queue: " + getQueueName() + " on channel: " + getChannel());
+
+        super.doStart();
+
+        channel = amqpConnector.getChannelHandler().getOrCreateChannel(endpoint);
+        parentReceiver.declareEndpoint(channel);
+
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Connected queue: " + getQueueName() + " on channel: " + getChannel());
+        }
+
+        if (endpoint.getTransactionConfig().isTransacted())
+        {
+            channel.txSelect();
+        }
+
+        queueName = parentReceiver.getQueueOrCreateTemporaryQueue(channel);
+
+        consumerTag = channel.basicConsume(getQueueName(), amqpConnector.getAckMode().isAutoAck(),
+                getClientConsumerTag(), amqpConnector.isNoLocal(), amqpConnector.isExclusiveConsumers(), null,
+                new MessageReceiverConsumer(this, channel));
+
+        logger.info("Started subscription: " + consumerTag + " on "
+                    + (endpoint.getTransactionConfig().isTransacted() ? "transacted " : "") + "channel: " + channel);
+
+        cancelled.set(false);
+    }
+
     @Override
     public void doStop()
     {
         logger.debug("Stopping subreceiver " + getQueueName() + " on channel: " + getChannel());
         try
         {
-            if (channel == null)
-            {
-                return;
-            }
-
             super.doStop();
 
             if (consumerTag != null)
@@ -139,6 +146,30 @@ public class MultiChannelMessageSubReceiver extends AbstractMessageReceiver
         }
     }
 
+    /**
+     * Recreates consumer due to cancellation. For example in HA environment, where a non-mirrored queue disappears
+     * because the node where it is created went down. The same occurs if a queue is deleted
+     */
+    public void cancelConsumer()
+    {
+        consumerTag = null;
+        try
+        {
+            if (channel != null)
+            {
+                amqpConnector.getChannelHandler().closeChannel(channel);
+                cancelled.set(true);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.warn(
+                    MessageFactory.createStaticMessage("Failed to cancel subscription: " + consumerTag
+                                                       + " on channel: " + channel),
+                    e);
+        }
+    }
+	
     /**
      * Attempts to restart this consumer only. If an error happens on retry, a full reconnection will be forced to
      * restart the cycle of declarations.
@@ -182,6 +213,11 @@ public class MultiChannelMessageSubReceiver extends AbstractMessageReceiver
     private String getConsumerTag(final ImmutableEndpoint endpoint)
     {
         return StringUtils.defaultString((String) endpoint.getProperty(CONSUMER_TAG));
+    }
+
+    public boolean isCancelled()
+    {
+        return cancelled.get();
     }
 
 }
