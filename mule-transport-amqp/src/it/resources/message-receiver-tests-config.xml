@@ -101,6 +101,16 @@
     <test:component />
   </flow>
   
+    
+  <flow name="amqpReceiverTestQueueToDeleteService">
+    <!-- Create a new queue and bind it to a new exchange  --> 
+    <amqp:inbound-endpoint exchangeName="amqpReceiverTestQueueToDeleteService-exchange"
+                           exchangeType="fanout"
+                           queueName="amqpReceiverTestQueueToDeleteService-queue"
+                           connector-ref="amqpReceiverTestAutoAckLocalhostConnector" />
+    <test:component />
+  </flow>
+  
   <flow name="amqpReceiverTestClientConsumerTagService">
     <!-- Set a custom consumer tag -->
     <amqp:inbound-endpoint queueName="amqpReceiverTestClientConsumerTagService-queue"
