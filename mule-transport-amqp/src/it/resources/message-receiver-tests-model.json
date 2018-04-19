@@ -17,6 +17,8 @@
 		"name": "amqpReceiverTestManualRecoverService-queue"
 	},{
 		"name": "amqpReceiverTestExclusiveConsumerService-queue"
+	},{
+		"name": "amqpReceiverTestQueueToDeleteService-queue"
 	}],
 
 
@@ -56,6 +58,9 @@
 	},{
 		"name": "amqpReceiverTestAlternateExchange-exchange",
 		"type": "fanout"
+	},{
+		"name": "amqpReceiverTestQueueToDeleteService-exchange",
+		"type": "fanout"
 	}],
 
 
@@ -92,6 +97,11 @@
 	},{
 		"source": "amqpReceiverTestExclusiveConsumerService-exchange",
 		"destination": "amqpReceiverTestExclusiveConsumerService-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpReceiverTestQueueToDeleteService-exchange",
+		"destination": "amqpReceiverTestQueueToDeleteService-queue",
 		"destination_type": "queue",
 		"routing_key": ""
 	}]

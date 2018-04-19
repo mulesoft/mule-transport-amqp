@@ -10,7 +10,10 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import java.util.HashMap;
+
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mule.transport.amqp.harness.AbstractItCase;
 import org.mule.transport.amqp.harness.rules.AmqpModelCleanupRule;
@@ -43,6 +46,25 @@ public class MessageReceiverItCase extends AbstractItCase
     		getFunctionalTestComponent(flowName), getTestTimeoutSecs());
     }
 
+    @Test
+    public void testDeletedAndRecovered() throws Exception
+    {
+        String flowName = "amqpReceiverTestQueueToDeleteService";
+        
+        // mule should have created the queue so let's bind it and use it
+        channel.queueBind(nameFactory.getQueueName(flowName), 
+                nameFactory.getExchangeName(flowName), "");
+        channel.queuePurge(nameFactory.getQueueName(flowName));
+        // We delete a queue
+        channel.queueDelete("amqpReceiverTestQueueToDeleteService-queue");
+        // The queue is redeclared
+        channel.queueDeclare("amqpReceiverTestQueueToDeleteService-queue", false, false, false, new HashMap<String, Object>());
+        channel.queueBind("amqpReceiverTestQueueToDeleteService-queue", "amqpReceiverTestQueueToDeleteService-exchange", "");
+        // The consumer will eventually be recreated.
+        amqpTestClient.dispatchTestMessageAndAssertValidReceivedMessageWithAmqp(nameFactory.getExchangeName(flowName),
+            getFunctionalTestComponent(flowName), getTestTimeoutSecs());
+    }
+    
     @Test
     public void testUnboundQueue() throws Exception
     {
