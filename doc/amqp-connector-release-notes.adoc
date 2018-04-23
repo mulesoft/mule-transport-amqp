@@ -16,6 +16,14 @@ _Select_
 |Anypoint Studio |3.5 and later
 |===
 
+== Version 3.7.8 - April 23, 2018
+
+This release consists of bug fixes.
+
+=== Version 3.7.8 - Fixed in This Release
+
+* AMQP-94: Consumers are not recovered when a queue is temporary unavailable/deleted.
+
 == Version 3.7.7 - March 01, 2018
 
 This release consists of bug fixes.
