@@ -17,7 +17,7 @@ import org.mule.transport.amqp.harness.rules.AmqpModelCleanupRule;
 import org.mule.transport.amqp.harness.rules.AmqpModelRule;
 import org.mule.util.UUID;
 
-import com.rabbitmq.client.QueueingConsumer.Delivery;
+import com.rabbitmq.client.Delivery;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.ClassRule;

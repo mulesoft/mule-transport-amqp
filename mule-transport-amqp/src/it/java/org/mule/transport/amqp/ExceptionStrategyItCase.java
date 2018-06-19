@@ -22,7 +22,7 @@ import org.mule.api.lifecycle.Callable;
 import org.mule.transport.amqp.harness.AbstractItCase;
 import org.mule.transport.amqp.harness.rules.AmqpModelRule;
 
-import com.rabbitmq.client.QueueingConsumer.Delivery;
+import com.rabbitmq.client.Delivery;
 
 import java.util.ArrayList;
 import java.util.Collection;
