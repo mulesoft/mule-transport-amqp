@@ -20,7 +20,7 @@ import org.mule.DefaultMuleMessage;
 import org.mule.transport.amqp.harness.AbstractItCase;
 import org.mule.transport.amqp.harness.rules.AmqpModelRule;
 
-import com.rabbitmq.client.QueueingConsumer.Delivery;
+import com.rabbitmq.client.Delivery;
 
 public class TransactionalItCase extends AbstractItCase
 {
