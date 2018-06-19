@@ -23,7 +23,7 @@
 
     <properties>
         <mule.version>3.5.0</mule.version>
-        <rabbitmq.amqp-client.version>3.6.1</rabbitmq.amqp-client.version>
+        <rabbitmq.amqp-client.version>4.6.0</rabbitmq.amqp-client.version>
         <!-- Tools properties -->
         <vmtype>org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType</vmtype>
         <jdk5Name>JavaSE-1.6</jdk5Name>
