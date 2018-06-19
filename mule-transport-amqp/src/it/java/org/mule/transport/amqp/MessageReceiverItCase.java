@@ -19,7 +19,7 @@ import org.mule.transport.amqp.harness.AbstractItCase;
 import org.mule.transport.amqp.harness.rules.AmqpModelCleanupRule;
 import org.mule.transport.amqp.harness.rules.AmqpModelRule;
 
-import com.rabbitmq.client.QueueingConsumer.Delivery;
+import com.rabbitmq.client.Delivery;
 
 public class MessageReceiverItCase extends AbstractItCase
 {

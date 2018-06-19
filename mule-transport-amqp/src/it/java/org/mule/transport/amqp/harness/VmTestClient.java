@@ -25,7 +25,7 @@ import org.mule.tck.MuleTestUtils;
 import org.mule.util.UUID;
 
 import com.rabbitmq.client.AMQP.BasicProperties;
-import com.rabbitmq.client.QueueingConsumer.Delivery;
+import com.rabbitmq.client.Delivery;
 
 public class VmTestClient 
 {

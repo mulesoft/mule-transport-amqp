@@ -9,7 +9,6 @@ package org.mule.transport.amqp.internal.client;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Envelope;
-import com.rabbitmq.client.QueueingConsumer;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
