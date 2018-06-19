@@ -7,7 +7,7 @@
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <spring:beans>
-        <spring:bean name="nullTrustManager" class="com.rabbitmq.client.NullTrustManager" />
+        <spring:bean name="trustEverythingTrustManager" class="com.rabbitmq.client.TrustEverythingTrustManager" />
     </spring:beans>
 
     <amqps:amqpmessage-to-object-transformer
@@ -21,10 +21,10 @@
     <amqps:connector name="amqpsTlsConnector" sslProtocol="${amqpSslProtocol}" />
 
     <amqps:connector name="amqpsTrustManagerConnector"
-        sslTrustManager-ref="nullTrustManager" />
+        sslTrustManager-ref="trustEverythingTrustManager" />
 
     <amqps:connector name="amqpsTlsTrustManagerConnector"
-        sslProtocol="${amqpSslProtocol}" sslTrustManager-ref="nullTrustManager" />
+        sslProtocol="${amqpSslProtocol}" sslTrustManager-ref="trustEverythingTrustManager" />
 
     <amqps:connector name="amqpsTlsKeyStores">
         <amqps:ssl-key-store type="jks" storePassword="aPass"

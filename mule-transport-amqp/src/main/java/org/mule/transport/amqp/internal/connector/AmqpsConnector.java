@@ -14,7 +14,7 @@ import org.mule.api.security.tls.TlsConfiguration;
 import org.mule.config.i18n.MessageFactory;
 
 import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.NullTrustManager;
+import com.rabbitmq.client.TrustEverythingTrustManager;
 import com.thoughtworks.xstream.InitializationException;
 
 import java.io.IOException;
@@ -91,7 +91,7 @@ public class AmqpsConnector extends AmqpConnector
             }
             else if (sslTrustManager == null)
             {
-                setUpSslWithTrustManager(new NullTrustManager());
+                setUpSslWithTrustManager(new TrustEverythingTrustManager());
             }
             else
             {

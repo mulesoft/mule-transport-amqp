@@ -32,6 +32,7 @@ import org.mule.api.MuleEventContext;
 import org.mule.api.MuleMessage;
 import org.mule.tck.functional.EventCallback;
 import org.mule.tck.functional.FunctionalTestComponent;
+import org.mule.transport.amqp.internal.client.QueueingConsumer;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 import org.mule.util.UUID;
 import org.slf4j.Logger;
@@ -40,9 +41,8 @@ import org.slf4j.LoggerFactory;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Delivery;
 import com.rabbitmq.client.GetResponse;
-import com.rabbitmq.client.QueueingConsumer;
-import com.rabbitmq.client.QueueingConsumer.Delivery;
 
 
 public class AmqpTestClient 
