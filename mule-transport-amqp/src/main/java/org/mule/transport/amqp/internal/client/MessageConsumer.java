@@ -7,8 +7,11 @@
 package org.mule.transport.amqp.internal.client;
 
 import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Delivery;
 import com.rabbitmq.client.GetResponse;
-import com.rabbitmq.client.QueueingConsumer;
+import com.rabbitmq.client.RpcServer.RpcConsumer;
+
 import org.mule.transport.amqp.internal.domain.AmqpMessage;
 import org.mule.util.StringUtils;
 import org.slf4j.Logger;
@@ -51,7 +54,7 @@ public class MessageConsumer
         final String consumerTag = channel.basicConsume(queue, false, consumer);
         try
         {
-            final QueueingConsumer.Delivery delivery = consumer.nextDelivery(actualTimeOut);
+            final Delivery delivery = consumer.nextDelivery(actualTimeOut);
 
             if (delivery == null)
             {
