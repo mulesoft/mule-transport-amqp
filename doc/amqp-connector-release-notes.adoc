@@ -16,6 +16,10 @@ _Select_
 |Anypoint Studio |3.5 and later
 |===
 
+== Version 3.7.9 - June 21, 2018
+
+* AMQP-95: Update rabbitmq client version to 4.6
+
 == Version 3.7.8 - April 23, 2018
 
 This release consists of bug fixes.
