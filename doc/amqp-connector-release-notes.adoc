@@ -1,6 +1,11 @@
-== 3.8.0
+= AMQP Connector Release Notes
+:keywords: amqp, release, notes
 
-*June 21, 2018*
+*June 2018*
+
+_Select_
+
+*Note:* This minor version required java 8 or greater.
 
 === Compatibility
 
@@ -9,6 +14,10 @@
 |Mule Runtime |3.9 and later
 |Anypoint Studio |3.5 and later
 |===
+
+== 3.8.0
+
+*June 21, 2018*
 
 === Fixed in This Release
 
