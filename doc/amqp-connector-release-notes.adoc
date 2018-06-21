@@ -1,22 +1,15 @@
-= AMQP Connector Release Notes
-:keywords: amqp, release, notes
+== 3.8.0
 
-*June 2018*
+*June 21, 2018*
 
-_Select_
-
-*Note:* This minor version required java 8 or greater.
-
-== AMQP Compatibility
+=== Compatibility
 
 [%header%autowidth.spread]
 |===
-|Software |Version
-|Mule Runtime |3.5 and later
+|Mule Runtime |3.9 and later
 |Anypoint Studio |3.5 and later
 |===
 
-=== Version 3.8.0 
+=== Fixed in This Release
 
-* AMQP-96: Update rabbitmq client version to 5.3
-
+* Update rabbitmq client version to 5.3. (AMQP-95)
