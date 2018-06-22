@@ -7,16 +7,16 @@
   </Appenders>
 
   <Loggers>
-  	<logger name="org.mule" level="DEBUG">
+  	<logger name="org.mule" level="WARN">
       <AppenderRef ref="Console"/>
     </logger>
-    <logger name="org.mule.transport.amqp" level="DEBUG">
+    <logger name="org.mule.transport.amqp" level="WARN">
       <AppenderRef ref="Console"/> 
     </logger>
-    <logger name="org.mule.transport.amqp.internal.transformer" level="INFO">
+    <logger name="org.mule.transport.amqp.internal.transformer" level="WARN">
       <AppenderRef ref="Console"/>
     </logger>
-    <Root level="debug">
+    <Root level="WARN">
       <AppenderRef ref="Console"/>
     </Root>
   </Loggers>
