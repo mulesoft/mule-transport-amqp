@@ -4,7 +4,7 @@
     xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.mule.transports</groupId>
-    <artifactId>org.mule.tooling.ui.extension.mule-transport-amqp-tooling.3.5.0</artifactId>
+    <artifactId>org.mule.tooling.ui.extension.mule-transport-amqp-tooling.3.9.0</artifactId>
     <packaging>eclipse-feature</packaging>
     <parent>
         <artifactId>mule-transport-amqp-plugin-parent</artifactId>

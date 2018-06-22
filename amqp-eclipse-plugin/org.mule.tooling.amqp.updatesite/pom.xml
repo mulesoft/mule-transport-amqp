@@ -13,7 +13,7 @@
     </parent>
 
     <properties>
-        <mule.version>3.5.0</mule.version>
+        <mule.version>3.9.0</mule.version>
         <category>Select</category>
         <!-- The license path property is used by the studio-us-signer plugin -->
         <licensePath>${project.basedir}/LICENSE.md</licensePath>
