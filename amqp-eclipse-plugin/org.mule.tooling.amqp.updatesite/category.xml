@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-    <feature id="org.mule.tooling.ui.extension.mule-transport-amqp-tooling.3.5.0">
+    <feature id="org.mule.tooling.ui.extension.mule-transport-amqp-tooling.3.9.0">
       <category name="mule-transport-amqp-contribution"/>
     </feature>
    <category-def name="mule-transport-amqp-contribution" label="Select">
