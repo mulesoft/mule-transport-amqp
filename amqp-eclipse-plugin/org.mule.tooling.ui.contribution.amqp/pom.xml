@@ -42,14 +42,14 @@
                                     <artifactId>mule-transport-amqp</artifactId>
                                     <version>${project.version}</version>
                                     <type>jar</type>
-                                    <outputDirectory>${home.dir}</outputDirectory>
+                                    <outputDirectory>${home.dir}/target</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.mule.transports</groupId>
                                     <artifactId>mule-transport-amqp</artifactId>
                                     <version>${project.version}</version>
                                     <type>zip</type>
-                                    <outputDirectory>${home.dir}</outputDirectory>
+                                    <outputDirectory>${home.dir}/target</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -78,6 +78,12 @@
             <groupId>org.mule.transports</groupId>
             <artifactId>mule-transport-amqp</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mule.transports</groupId>
+            <artifactId>mule-transport-amqp</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
         </dependency>
     </dependencies>
 
