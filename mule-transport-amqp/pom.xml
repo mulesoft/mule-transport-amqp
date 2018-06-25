@@ -124,6 +124,7 @@
                         <descriptor>assembly.xml</descriptor>
                     </descriptors>
                     <appendAssemblyId>false</appendAssemblyId>
+                    <skipAssembly>false</skipAssembly>
                 </configuration>
                 <executions>
                     <execution>
