@@ -211,6 +211,11 @@ public class Dispatcher extends AbstractMessageDispatcher
                         outboundAction, eventChannel, eventExchange, eventRoutingKey, event, result));
             }
         }
+        catch (AmqpBlockedBrokerException e)
+        {
+            throw new DispatchException(
+                    MessageFactory.createStaticMessage(e.getMessage()), event, getEndpoint(), e);
+        }
         finally
         {
             confirmsManager.forget(event);
