@@ -28,12 +28,16 @@ import org.mule.util.NumberUtils;
 import org.mule.util.StringUtils;
 
 import com.rabbitmq.client.Address;
+import com.rabbitmq.client.BlockedListener;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.ReturnListener;
 import com.rabbitmq.client.ShutdownListener;
 import com.rabbitmq.client.ShutdownSignalException;
+
+import static java.lang.Boolean.parseBoolean;
+import static java.lang.System.getProperty;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -47,6 +51,8 @@ import java.util.concurrent.ExecutorService;
  */
 public class AmqpConnector extends AbstractConnector
 {
+    public static final String MULE_FAIL_ON_RABBITMQ_BLOCKED_BROKER = "mule.amqp.failOnRabbitmqBlockedBroker";
+
     /**
       * Default number of channels
       */
@@ -161,12 +167,17 @@ public class AmqpConnector extends AbstractConnector
     private boolean exclusiveConsumers;
     private boolean requestBrokerConfirms = false;
     private int numberOfChannels = DEFAULT_NUMBER_OF_CHANNELS;
+    private boolean failOnBlockedBroker = parseBoolean(getProperty(MULE_FAIL_ON_RABBITMQ_BLOCKED_BROKER, "false"));
 
     private ConnectionFactory connectionFactory;
     private Connection connection;
     private ChannelHandler channelHandler;
 
     private ExecutorService receiverExecutor;
+
+    private boolean blocked;
+
+    private String blockedReason;
 
 
     public AmqpConnector(final MuleContext context)
@@ -295,6 +306,21 @@ public class AmqpConnector extends AbstractConnector
                         }
 
                         forceReconnect("Connection shutdown detected for: " + getName(), sse);
+                    }
+                });
+
+                connection.addBlockedListener(new BlockedListener()
+                {
+
+                    public synchronized void handleUnblocked() throws IOException
+                    {
+                        blocked = false;
+                    }
+
+                    public synchronized void handleBlocked(String reason) throws IOException
+                    {
+                        blockedReason = reason;
+                        blocked = true;
                     }
                 });
                 logger.info("Connected to AMQP host: " + brokerAddress.getHost() +
@@ -598,5 +624,20 @@ public class AmqpConnector extends AbstractConnector
         {
             super(message);
         }
+    }
+
+    public boolean isBlocked()
+    {
+        return blocked;
+    }
+
+    public String getBlockedReason()
+    {
+        return blockedReason;
+    }
+
+    public boolean isFailOnBlockedBroker()
+    {
+        return failOnBlockedBroker;
     }
 }
