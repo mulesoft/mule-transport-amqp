@@ -6,12 +6,16 @@
  */
 package org.mule.transport.amqp.internal.endpoint;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mule.tck.junit4.AbstractMuleContextTestCase;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 import org.mule.transport.amqp.internal.domain.AmqpMessage;
@@ -22,13 +26,18 @@ import com.rabbitmq.client.Channel;
 
 public class DispatcherActionDispatchTestCase extends AbstractMuleContextTestCase
 {
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
+    private static final String EXCEPTION_MESSAGE = "No publishing in AQMP broker can be done. A notification was received indicating the broker is blocked.";
     private static final String DUMMY_ROUTING_KEY = "routing-key";
     private static final String DUMMY_EXCHANGE = "dummy-exchange";
 
-    @Test(expected = AmqpBlockedBrokerException.class)
+    @Test
     public void dispatchWithBlockingServerAndFailOnBlockedServer() throws Exception
     {
+        expectedException.expect(isA(AmqpBlockedBrokerException.class));
+        expectedException.expectMessage(containsString(EXCEPTION_MESSAGE));
         testWith(true, true);
     }
 
