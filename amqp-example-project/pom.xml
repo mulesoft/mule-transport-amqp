@@ -297,7 +297,7 @@
 		<dependency>
 		  <groupId>org.mule.transports</groupId>
 		  <artifactId>mule-transport-amqp</artifactId>
-		  <version>3.7.10-SNAPSHOT</version>
+		  <version>3.7.10</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mule.transports</groupId>
