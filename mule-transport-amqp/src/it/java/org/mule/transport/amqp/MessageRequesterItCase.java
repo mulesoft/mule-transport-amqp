@@ -12,7 +12,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mule.transport.amqp.internal.processor.ChannelUtils.ACK_CHANNEL_ACTION;
-import static org.mule.transport.amqp.internal.processor.ChannelUtils.getChannelMessageProperty;
 import static org.mule.transport.amqp.internal.processor.ChannelUtils.getChannelOrFail;
 
 import java.util.Collections;
@@ -55,9 +54,8 @@ public class MessageRequesterItCase extends AbstractItCase
     {
         MuleMessage receivedMessage = dispatchTestMessageAndAssertValidReceivedMessage(
                 "amqpManualAckRequester", "amqpManualAckLocalhostConnector");
-        ChannelMessageProperty channelMessageProperty = getChannelMessageProperty(receivedMessage);
-        assertThat(channelMessageProperty, is(not(nullValue())));
-        assertThat(channelMessageProperty.getChannel(), is(not(nullValue())));
+        Channel channel = getChannelOrFail(receivedMessage, ACK_CHANNEL_ACTION);
+        assertThat(channel, is(not(nullValue())));
     }
     
     @Test

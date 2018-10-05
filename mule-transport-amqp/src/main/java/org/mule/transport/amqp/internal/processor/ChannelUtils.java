@@ -46,21 +46,16 @@ public class ChannelUtils
     public static Channel getChannelOrFail(final MuleMessage muleMessage, final String channelAction)
         throws MuleException
     {
-        final ChannelMessageProperty channelProperty = getChannelMessageProperty(muleMessage);
+        final Channel channel = channelHandler.getFlowVariableChannel(muleMessage);
 
-        if (channelProperty == null || channelProperty.getChannel() == null)
+        if (channel == null)
         {
             throw new DefaultMuleException("No " + AmqpConnector.MESSAGE_PROPERTY_CHANNEL
                                            + " invocation property found, impossible to " + channelAction
                                            + " message: " + muleMessage);
         }
 
-        return channelProperty.getChannel();
-    }
-
-    public static ChannelMessageProperty getChannelMessageProperty(final MuleMessage muleMessage)
-    {
-        return channelHandler.getFlowVariableChannel(muleMessage);
+        return channel;
     }
 
     public static Long getDeliveryTagFromMessage(final MuleMessage message)
