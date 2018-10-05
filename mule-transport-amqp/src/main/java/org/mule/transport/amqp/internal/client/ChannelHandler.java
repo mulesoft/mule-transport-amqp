@@ -81,7 +81,14 @@ public class ChannelHandler
 
     public Channel getFlowVariableChannel(final MuleMessage message)
     {
-        return message.getInvocationProperty(AmqpConnector.MESSAGE_PROPERTY_CHANNEL);
+        ChannelMessageProperty channelMessageProperty = message.getInvocationProperty(AmqpConnector.MESSAGE_PROPERTY_CHANNEL);
+        
+        if (channelMessageProperty != null)
+        {
+            return channelMessageProperty.getChannel();
+        }
+        
+        return null;
     }
 
     public Channel getTransactedResourceChannel(ImmutableEndpoint endpoint) throws IOException, TransactionException
