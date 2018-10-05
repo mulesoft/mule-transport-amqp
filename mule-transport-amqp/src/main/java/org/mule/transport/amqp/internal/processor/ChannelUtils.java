@@ -15,7 +15,6 @@ import org.mule.api.MuleMessage;
 import com.rabbitmq.client.Channel;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 import org.mule.transport.amqp.internal.client.ChannelHandler;
-import org.mule.transport.amqp.internal.client.ChannelMessageProperty;
 
 /**
  * Provides common logic to all channel aware components.
