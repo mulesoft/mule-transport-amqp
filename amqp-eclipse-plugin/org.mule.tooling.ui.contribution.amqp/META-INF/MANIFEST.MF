@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: AMQP Transport
 Bundle-SymbolicName: mule-transport-amqp-contribution;singleton:=true
-Bundle-Version: 3.8.2.qualifier
+Bundle-Version: 3.8.2
 Bundle-Activator: org.mule.tooling.ui.contribution.amqp.Activator
 Bundle-Vendor: Mulesoft Inc.
 Require-Bundle: org.eclipse.ui,
