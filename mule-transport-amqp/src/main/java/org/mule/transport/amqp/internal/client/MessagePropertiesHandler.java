@@ -47,7 +47,7 @@ public class MessagePropertiesHandler
                                         final AmqpConnector connector)
     {
         // in manual AckMode, the channel will be needed to ack the message
-        muleMessage.setProperty(AmqpConnector.MESSAGE_PROPERTY_CHANNEL, channel, PropertyScope.INVOCATION);
+        muleMessage.setProperty(AmqpConnector.MESSAGE_PROPERTY_CHANNEL, new ChannelMessageProperty(channel), PropertyScope.INVOCATION);
         // so will the consumer tag (which is already added in the inbound properties
         // for the end user but that we also add here in the invocation scope for
         // internal needs)
