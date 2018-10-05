@@ -15,6 +15,7 @@ import org.mule.api.MuleMessage;
 import com.rabbitmq.client.Channel;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 import org.mule.transport.amqp.internal.client.ChannelHandler;
+import org.mule.transport.amqp.internal.client.ChannelMessageProperty;
 
 /**
  * Provides common logic to all channel aware components.
@@ -45,16 +46,21 @@ public class ChannelUtils
     public static Channel getChannelOrFail(final MuleMessage muleMessage, final String channelAction)
         throws MuleException
     {
-        final Channel channel = channelHandler.getFlowVariableChannel(muleMessage);
+        final ChannelMessageProperty channelProperty = getChannelMessageProperty(muleMessage);
 
-        if (channel == null)
+        if (channelProperty == null || channelProperty.getChannel() == null)
         {
             throw new DefaultMuleException("No " + AmqpConnector.MESSAGE_PROPERTY_CHANNEL
                                            + " invocation property found, impossible to " + channelAction
                                            + " message: " + muleMessage);
         }
 
-        return channel;
+        return channelProperty.getChannel();
+    }
+
+    public static ChannelMessageProperty getChannelMessageProperty(final MuleMessage muleMessage)
+    {
+        return channelHandler.getFlowVariableChannel(muleMessage);
     }
 
     public static Long getDeliveryTagFromMessage(final MuleMessage message)

@@ -7,9 +7,13 @@
 package org.mule.transport.amqp;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mule.transport.amqp.internal.processor.ChannelUtils.ACK_CHANNEL_ACTION;
+import static org.mule.transport.amqp.internal.processor.ChannelUtils.getChannelMessageProperty;
+import static org.mule.transport.amqp.internal.processor.ChannelUtils.getChannelOrFail;
 
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -21,8 +25,12 @@ import org.mule.api.MuleMessage;
 import org.mule.module.client.MuleClient;
 import org.mule.transport.amqp.harness.AbstractItCase;
 import org.mule.transport.amqp.harness.rules.AmqpModelRule;
+import org.mule.transport.amqp.internal.client.ChannelMessageProperty;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
 import org.mule.transport.amqp.internal.processor.Acknowledger;
+import org.mule.transport.amqp.internal.processor.ChannelUtils;
+
+import com.rabbitmq.client.Channel;
 
 public class MessageRequesterItCase extends AbstractItCase
 {
@@ -43,6 +51,16 @@ public class MessageRequesterItCase extends AbstractItCase
     }
 
     @Test
+    public void testChannelMessagePropertyCorrectlyPropagated() throws Exception
+    {
+        MuleMessage receivedMessage = dispatchTestMessageAndAssertValidReceivedMessage(
+                "amqpManualAckRequester", "amqpManualAckLocalhostConnector");
+        ChannelMessageProperty channelMessageProperty = getChannelMessageProperty(receivedMessage);
+        assertThat(channelMessageProperty, is(not(nullValue())));
+        assertThat(channelMessageProperty.getChannel(), is(not(nullValue())));
+    }
+    
+    @Test
     public void testMuleAcknowledgment() throws Exception
     {
         dispatchTestMessageAndAssertValidReceivedMessage("amqpMuleAckRequester",
@@ -53,8 +71,8 @@ public class MessageRequesterItCase extends AbstractItCase
     public void testManualAcknowledgment() throws Exception
     {
         MuleMessage receivedMessage = dispatchTestMessageAndAssertValidReceivedMessage(
-            "amqpManualAckRequester", "amqpManualAckLocalhostConnector");
-
+                "amqpManualAckRequester", "amqpManualAckLocalhostConnector");
+        Channel channel = getChannelOrFail(receivedMessage, ACK_CHANNEL_ACTION);
         new Acknowledger().ack(receivedMessage, false);
     }
 

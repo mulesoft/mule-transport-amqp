@@ -79,7 +79,7 @@ public class ChannelHandler
         return null;
     }
 
-    public Channel getFlowVariableChannel(final MuleMessage message)
+    public ChannelMessageProperty getFlowVariableChannel(final MuleMessage message)
     {
         return message.getInvocationProperty(AmqpConnector.MESSAGE_PROPERTY_CHANNEL);
     }
