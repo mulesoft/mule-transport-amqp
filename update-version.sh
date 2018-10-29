@@ -22,8 +22,8 @@ if [ -z "$AVOID_MVN_SET_VERSIONS" ] || [ "$AVOID_MVN_SET_VERSIONS" != "true" ]; 
     mvn versions:set versions:commit -DnewVersion="${MAVEN_VERSION_TO}"
 fi
 if [ "$MAC_OSX_SED" = "true" ]; then
-    sed -e "s/target\/mule-transport-amqp-${MAVEN_VERSION_FROM}.jar/target\/mule-transport-amqp-${MAVEN_VERSION_TO}.jar/g" -i '' ${MAC_OSX_SED_INLINE_BACKUP_FILE} amqp-eclipse-plugin/org.mule.tooling.ui.contribution.amqp/build.properties
-    sed -e "s/target\/mule-transport-amqp-${MAVEN_VERSION_FROM}.zip/target\/mule-transport-amqp-${MAVEN_VERSION_TO}.zip/g" -i '' amqp-eclipse-plugin/org.mule.tooling.ui.contribution.amqp/build.properties
+    sed -e "s/mule-transport-amqp-${MAVEN_VERSION_FROM}.jar/mule-transport-amqp-${MAVEN_VERSION_TO}.jar/g" -i '' ${MAC_OSX_SED_INLINE_BACKUP_FILE} amqp-eclipse-plugin/org.mule.tooling.ui.contribution.amqp/build.properties
+    sed -e "s/mule-transport-amqp-${MAVEN_VERSION_FROM}.zip/mule-transport-amqp-${MAVEN_VERSION_TO}.zip/g" -i '' amqp-eclipse-plugin/org.mule.tooling.ui.contribution.amqp/build.properties
     find . -name MANIFEST.MF -exec sed -e "s/Bundle-Version:.*/Bundle-Version: ${OSGI_VERSION_TO}/g" -i '' {} \;
     find . -name feature.xml -exec sed -e "s/version=.*${OSGI_VERSION_FROM}/version=\"${OSGI_VERSION_TO}/g" -i '' {} \;
     sed -e "s/contributionJar=\"mule-transport-amqp-${MAVEN_VERSION_FROM}.jar\"/contributionJar=\"mule-transport-amqp-${MAVEN_VERSION_TO}.jar\"/g" -i '' amqp-eclipse-plugin/org.mule.tooling.ui.contribution.amqp/plugin.xml
@@ -31,8 +31,8 @@ if [ "$MAC_OSX_SED" = "true" ]; then
     sed -e "s/version=\"*${MAVEN_VERSION_FROM}\"/version=\"${MAVEN_VERSION_TO}\"/g" -i '' amqp-eclipse-plugin/org.mule.tooling.ui.contribution.amqp/plugin.xml
     sed -e "s/version=\"${OSGI_VERSION_FROM}\"/version=\"${OSGI_VERSION_TO}\"/g" -i '' amqp-eclipse-plugin/org.mule.tooling.amqp/feature.xml.template
 else
-    sed -e "s/target\/mule-transport-amqp-${MAVEN_VERSION_FROM}.jar/target\/mule-transport-amqp-${MAVEN_VERSION_TO}.jar/g" -i amqp-eclipse-plugin/org.mule.tooling.ui.contribution.amqp/build.properties
-    sed -e "s/target\/mule-transport-amqp-${MAVEN_VERSION_FROM}.zip/target\/mule-transport-amqp-${MAVEN_VERSION_TO}.zip/g" -i amqp-eclipse-plugin/org.mule.tooling.ui.contribution.amqp/build.properties
+    sed -e "s/mule-transport-amqp-${MAVEN_VERSION_FROM}.jar/mule-transport-amqp-${MAVEN_VERSION_TO}.jar/g" -i amqp-eclipse-plugin/org.mule.tooling.ui.contribution.amqp/build.properties
+    sed -e "s/mule-transport-amqp-${MAVEN_VERSION_FROM}.zip/mule-transport-amqp-${MAVEN_VERSION_TO}.zip/g" -i amqp-eclipse-plugin/org.mule.tooling.ui.contribution.amqp/build.properties
     find . -name MANIFEST.MF -exec sed -e "s/Bundle-Version:.*/Bundle-Version: ${OSGI_VERSION_TO}/g" -i {} \;
     find . -name feature.xml -exec sed -e "s/version=.*${OSGI_VERSION_FROM}/version=\"${OSGI_VERSION_TO}/g" -i {} \;
     sed -e "s/contributionJar=\"mule-transport-amqp-${MAVEN_VERSION_FROM}.jar\"/contributionJar=\"mule-transport-amqp-${MAVEN_VERSION_TO}.jar\"/g" -i amqp-eclipse-plugin/org.mule.tooling.ui.contribution.amqp/plugin.xml
