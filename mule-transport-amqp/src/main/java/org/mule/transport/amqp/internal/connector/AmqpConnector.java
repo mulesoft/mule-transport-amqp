@@ -51,6 +51,13 @@ import java.util.concurrent.ExecutorService;
  */
 public class AmqpConnector extends AbstractConnector
 {
+    /**
+     * Default prefetch count. It will set according to
+     * the max number of active threads.
+     */
+    public static final int DEFAULT_PREFETCH_COUNT = -1;
+
+    
     public static final String MULE_FAIL_ON_RABBITMQ_BLOCKED_BROKER = "mule.amqp.failOnRabbitmqBlockedBroker";
 
     /**
@@ -162,7 +169,7 @@ public class AmqpConnector extends AbstractConnector
     private ReturnListener defaultReturnListener;
     private EndpointBuilder defaultReturnEndpointBuilder;
     private int prefetchSize;
-    private int prefetchCount;
+    private int prefetchCount = DEFAULT_PREFETCH_COUNT;
     private boolean noLocal;
     private boolean exclusiveConsumers;
     private boolean requestBrokerConfirms = false;
@@ -199,6 +206,7 @@ public class AmqpConnector extends AbstractConnector
             connectionFactory.setUsername(username);
             connectionFactory.setPassword(password);
             connectionFactory.setRequestedHeartbeat(requestedHeartbeat);
+            resolvePrefetchCount(this.getReceiverThreadingProfile().getMaxThreadsActive());
         }
         else
         {
@@ -345,6 +353,14 @@ public class AmqpConnector extends AbstractConnector
         if (lastException != null)
         {
             throw lastException;
+        }
+    }
+
+    private void resolvePrefetchCount(int defaultValue)
+    {
+        if (this.getPrefetchCount() == -1)
+        {
+            this.prefetchCount = defaultValue;
         }
     }
 

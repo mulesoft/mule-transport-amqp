@@ -6,7 +6,8 @@
  */
 package org.mule.transport.amqp.internal.connector;
 
-import junit.framework.Assert;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Test;
 import org.mule.api.transport.Connector;
@@ -43,8 +44,9 @@ public class AmqpConnectorTestCase extends AbstractConnectorTestCase
         final AmqpConnector amqpConnector = (AmqpConnector) getConnector();
         amqpConnector.setAckMode(AckMode.MULE_AUTO);
         amqpConnector.setRequestedHeartbeat(requestHeartBeat);
-        Assert.assertEquals(AckMode.MULE_AUTO, amqpConnector.getAckMode());
-        Assert.assertEquals(requestHeartBeat, amqpConnector.getRequestedHeartbeat());
+        assertThat(amqpConnector.getAckMode(), equalTo(AckMode.MULE_AUTO));
+        assertThat(amqpConnector.getRequestedHeartbeat(), equalTo(requestHeartBeat));
+        assertThat(amqpConnector.getReceiverThreadingProfile().getMaxThreadsActive(), equalTo(amqpConnector.getPrefetchCount()));
     }
 
     @Override

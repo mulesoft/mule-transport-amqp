@@ -241,7 +241,7 @@
                     </xsd:annotation>
                 </xsd:attribute>
                 <xsd:attribute name="prefetchCount" type="mule:substitutableInt"
-                    default="0">
+                    default="-1">
                     <xsd:annotation>
                         <xsd:documentation>
                             The maximum number of messages that

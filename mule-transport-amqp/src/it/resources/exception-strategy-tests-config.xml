@@ -14,6 +14,7 @@
         password="${amqpPassword}"
         host="${amqpHost}"
         port="${amqpPort}"
+		prefetchCount="0"    
         ackMode="MANUAL" />
 
     <flow name="amqpRejectingExceptionStrategy" processingStrategy="synchronous">
