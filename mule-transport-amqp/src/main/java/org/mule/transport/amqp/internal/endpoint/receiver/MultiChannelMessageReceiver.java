@@ -6,20 +6,26 @@
  */
 package org.mule.transport.amqp.internal.endpoint.receiver;
 
+import static java.lang.System.getProperty;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.apache.commons.lang.BooleanUtils.toBoolean;
+import static org.mule.api.config.MuleProperties.SYSTEM_PROPERTY_PREFIX;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mule.api.DefaultMuleException;
 import org.mule.api.MuleException;
+import org.mule.api.config.MuleProperties;
 import org.mule.api.construct.FlowConstruct;
 import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.api.lifecycle.CreateException;
+import org.mule.api.lifecycle.InitialisationException;
 import org.mule.api.transport.Connector;
 import org.mule.transport.AbstractMessageReceiver;
 import org.mule.transport.amqp.internal.client.AmqpDeclarer;
@@ -39,6 +45,8 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
 {
     public static int DEFAULT_CONSUMER_RECOVERY_INTERVAL = 10000;
 
+    public static final String MULE_ASYNC_CONSUMERS_STARTUP = SYSTEM_PROPERTY_PREFIX + "async.consumers.startup";
+
     protected final AmqpConnector amqpConnector;
 
     protected AmqpDeclarer declarator;
@@ -53,11 +61,13 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
 
     protected ScheduledThreadPoolExecutor scheduler;
 
+    private boolean asyncConsumersStartup;
+
 
     public MultiChannelMessageReceiver(Connector connector, FlowConstruct flowConstruct, InboundEndpoint endpoint) throws CreateException
     {
         super(connector, flowConstruct, endpoint);
-
+        asyncConsumersStartup = toBoolean(getProperty(MULE_ASYNC_CONSUMERS_STARTUP, "false"));
         this.amqpConnector = (AmqpConnector) connector;
         declarator = new AmqpDeclarer();
         numberOfChannels = new AmqpEndpointUtil().getNumberOfChannels(endpoint);
@@ -75,17 +85,14 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
             {
                 clearSubreceivers();
 
-                for (int i = 0; i < numberOfChannels; i++)
-                {
-                    MultiChannelMessageSubReceiver sub = new MultiChannelMessageSubReceiver(this);
-                    sub.initialise();
-                    sub.setListener(listener);
-                    subReceivers.add(sub);
-                }
+                createSubreceivers();
 
-                for (MultiChannelMessageSubReceiver channel : subReceivers)
+                // If the async consumers startup flag is set, the consumers recovery thread
+                // will recreates the subreceivers asynchronously, not blocking the context
+                // startup process.
+                if (!asyncConsumersStartup)
                 {
-                    channel.doStart();
+                    startSubReceivers();
                 }
 
                 logger.info("Message receiver for endpoint " + endpoint.getEndpointURI() + " has been successfully connected.");
@@ -97,6 +104,25 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
         catch (Exception e)
         {
             throw new DefaultMuleException(e);
+        }
+    }
+
+    protected void createSubreceivers() throws CreateException, InitialisationException
+    {
+        for (int i = 0; i < numberOfChannels; i++)
+        {
+            MultiChannelMessageSubReceiver sub = new MultiChannelMessageSubReceiver(this, asyncConsumersStartup);
+            sub.initialise();
+            sub.setListener(listener);
+            subReceivers.add(sub);
+        }
+    }
+
+    protected void startSubReceivers() throws MuleException
+    {
+        for (MultiChannelMessageSubReceiver channel : subReceivers)
+        {
+            channel.doStart();
         }
     }
 
