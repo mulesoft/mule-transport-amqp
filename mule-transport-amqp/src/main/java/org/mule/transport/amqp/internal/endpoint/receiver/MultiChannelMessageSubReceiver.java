@@ -50,6 +50,12 @@ public class MultiChannelMessageSubReceiver extends AbstractMessageReceiver
         cancelled = new AtomicBoolean();
     }
 
+    public MultiChannelMessageSubReceiver(MultiChannelMessageReceiver multiChannelMessageReceiver, boolean asyncConsumersStartup) throws CreateException
+    {
+        this(multiChannelMessageReceiver);
+        cancelled.set(asyncConsumersStartup);
+    }
+
     @Override
     public void doStart() throws MuleException
     {
