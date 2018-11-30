@@ -18,9 +18,6 @@ import org.mule.api.transport.Connector;
  */
 public class TestMultiChannelMessageReceiver extends MultiChannelMessageReceiver
 {
-
-    private boolean subReceiversStarted = false;
-
     private MultiChannelMessageSubReceiver mockSubreceiver;
 
     public TestMultiChannelMessageReceiver(Connector connector, FlowConstruct flowConstruct, InboundEndpoint endpoint, MultiChannelMessageSubReceiver mockSubreceiver) throws CreateException
@@ -33,10 +30,5 @@ public class TestMultiChannelMessageReceiver extends MultiChannelMessageReceiver
     protected void createSubreceivers() throws CreateException, InitialisationException
     {
         this.subReceivers.add(mockSubreceiver);
-    }
-
-    public MultiChannelMessageSubReceiver getMockSubreceiver()
-    {
-        return mockSubreceiver;
     }
 }

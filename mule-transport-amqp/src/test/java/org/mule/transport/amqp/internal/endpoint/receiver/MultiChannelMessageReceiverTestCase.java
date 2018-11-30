@@ -7,13 +7,13 @@
 package org.mule.transport.amqp.internal.endpoint.receiver;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mule.transport.amqp.internal.endpoint.receiver.MultiChannelMessageReceiver.MULE_ASYNC_CONSUMERS_STARTUP;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.tck.junit4.AbstractMuleContextTestCase;
@@ -41,9 +41,9 @@ public class MultiChannelMessageReceiverTestCase extends AbstractMuleContextTest
     private static long POLLING_PROBER_DELAY = 2000;
 
     @Test
-    public void testCreateFromFactory() throws Exception
+    public void testSubreceiversAreStarted() throws Exception
     {
-        Mockito.when(mockSubreceiver.isCancelled()).thenReturn(true);
+        when(mockSubreceiver.isCancelled()).thenReturn(true);
         final InboundEndpoint endpoint = muleContext.getEndpointFactory().getInboundEndpoint(getEndpointURI());
         final TestMultiChannelMessageReceiver receiver = new TestMultiChannelMessageReceiver(endpoint.getConnector(),
                 new AmqpConnectorFlowConstruct((AmqpConnector) endpoint.getConnector()), endpoint, mockSubreceiver);

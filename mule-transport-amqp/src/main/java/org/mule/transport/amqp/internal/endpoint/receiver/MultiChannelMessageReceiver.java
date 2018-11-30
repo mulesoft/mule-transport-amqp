@@ -6,9 +6,9 @@
  */
 package org.mule.transport.amqp.internal.endpoint.receiver;
 
+import static java.lang.Boolean.getBoolean;
 import static java.lang.System.getProperty;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.apache.commons.lang.BooleanUtils.toBoolean;
 import static org.mule.api.config.MuleProperties.SYSTEM_PROPERTY_PREFIX;
 
 import java.io.IOException;
@@ -16,12 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mule.api.DefaultMuleException;
 import org.mule.api.MuleException;
-import org.mule.api.config.MuleProperties;
 import org.mule.api.construct.FlowConstruct;
 import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.api.lifecycle.CreateException;
@@ -67,7 +65,7 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
     public MultiChannelMessageReceiver(Connector connector, FlowConstruct flowConstruct, InboundEndpoint endpoint) throws CreateException
     {
         super(connector, flowConstruct, endpoint);
-        asyncConsumersStartup = toBoolean(getProperty(MULE_ASYNC_CONSUMERS_STARTUP, "false"));
+        asyncConsumersStartup = getBoolean(MULE_ASYNC_CONSUMERS_STARTUP);
         this.amqpConnector = (AmqpConnector) connector;
         declarator = new AmqpDeclarer();
         numberOfChannels = new AmqpEndpointUtil().getNumberOfChannels(endpoint);
