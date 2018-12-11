@@ -56,7 +56,7 @@ public class MultiChannelMessageReceiverTestCase extends AbstractMuleContextTest
                 {
                     verify(mockSubreceiver).consume();
                 }
-                catch (Exception e)
+                catch (Throwable e)
                 {
                     return false;
                 }
