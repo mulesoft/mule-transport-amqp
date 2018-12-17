@@ -17,9 +17,9 @@ import org.mule.transport.amqp.internal.connector.AmqpConnector;
 
 public class AmqpReceiverExecutorServiceItCase extends FunctionalTestCase
 {
-	@ClassRule
-	public static AmqpModelRule modelRule = new AmqpModelRule("receiver-executor-service-config.json");
-	
+    @ClassRule
+    public static AmqpModelRule modelRule = new AmqpModelRule("receiver-executor-service-config.json");
+
     @Override
     protected String getConfigResources()
     {
@@ -29,9 +29,9 @@ public class AmqpReceiverExecutorServiceItCase extends FunctionalTestCase
     @Test
     public void testBothExecutorServiceNames() throws Exception
     {
-		assertThat(((AmqpConnector) muleContext.getRegistry().lookupConnector("amqpConnector1")).getExecutorName(),
-				equalTo("amqpConnector1-amqpReceiver"));
-		assertThat(((AmqpConnector) muleContext.getRegistry().lookupConnector("amqpConnector2")).getExecutorName(),
-				equalTo("amqpConnector2-amqpReceiver"));
+        assertThat(((AmqpConnector) muleContext.getRegistry().lookupConnector("amqpConnector1")).getExecutorName(),
+                equalTo("amqpConnector1-amqpReceiver"));
+        assertThat(((AmqpConnector) muleContext.getRegistry().lookupConnector("amqpConnector2")).getExecutorName(),
+                equalTo("amqpConnector2-amqpReceiver"));
     }
 }

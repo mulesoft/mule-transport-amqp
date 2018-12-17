@@ -198,8 +198,8 @@ public class AmqpConnector extends AbstractConnector
     @Override
     public void doInitialise() throws InitialisationException
     {
-    	// The executor must have a unique name to avoid registry overriding in case a monitored thread pool factory
-    	// is used.
+        // The executor must have a unique name to avoid registry overriding in case a monitored thread pool factory
+        // is used.
         receiverExecutor = this.getReceiverThreadingProfile().createPool(getExecutorName());
         if (connectionFactory == null)
         {
@@ -659,8 +659,9 @@ public class AmqpConnector extends AbstractConnector
         return failOnBlockedBroker;
     }
 
-	public String getExecutorName() {
-		return this.getName() + "-amqpReceiver";
-	}
+    public String getExecutorName()
+    {
+        return this.getName() + "-amqpReceiver";
+    }
     
 }
