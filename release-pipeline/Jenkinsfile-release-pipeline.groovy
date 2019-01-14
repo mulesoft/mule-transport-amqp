@@ -159,11 +159,13 @@ try {
 
         def avoid_deploy_param = true
         def add_maven_debug_flag = true
+        def dry_run = true
+
         releaseArtifacts(
                 repo_branch_to_arg,
                 deploy_to_alt_repo_arg,
                 alt_deployment_repo_arg,
-                dry_run_arg,
+                dry_run,
                 avoid_deploy_param,
                 add_maven_debug_flag,
                 keystoreId)
