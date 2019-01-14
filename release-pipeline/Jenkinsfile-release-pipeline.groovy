@@ -8,6 +8,7 @@ properties([
                                                                                                 
                                                                                               Check this doc for more details: <a href="https://docs.google.com/document/d/17oVKSEqZY4hPi9yB0CvlEqTPEfDrJbsvxP9AFiBgJcI/edit#heading=h.bukd5eto4253">Extensions Release Doc</a>'''),
                 booleanParam(name: 'update_version_param', defaultValue: true, description: "In case it is disabled it won't update the version of the poms inside the project (mvn versions:set ...)"),
+                string(name: 'repo_version_from_param', defaultValue: '', description: 'Dev version'),
                 string(name: 'repo_version_to_param', defaultValue: '', description: 'Version to release'),
                 string(name: 'new_dev_version_in_from_branch_param', defaultValue: '', description: 'Next version to use in the dev branch'),
                 booleanParam(name: 'skipTests', defaultValue: true, description: 'Check to skip the Run Tests Stage'),
@@ -63,6 +64,7 @@ try {
 
     def repo_branch_from_arg = repo_branch_from_param
 
+    def repo_version_from_arg = repo_version_from_param
     def repo_branch_to_arg = repo_version_to_param
     if ("${use_different_branch_param}".toBoolean()) {
         repo_branch_to_arg = repo_branch_to_param
@@ -130,7 +132,7 @@ try {
         if (update_version_arg) {
             build job: jobsNamePrefix + 'mule-transport-amqp-update-version' + jobsNameSuffix,
                     parameters: [string(name: 'branch_param', value: "${repo_branch_to_arg}"),
-                                 string(name: 'version_from_param', value: "${repo_version_to_arg}-SNAPSHOT"),
+                                 string(name: 'version_from_param', value: "${repo_version_from_arg}"),
                                  string(name: 'new_version_param', value: "${repo_version_to_arg}"),
                                  string(name: 'slack_channel', value: "${slack_channel_arg}")]
 
@@ -195,7 +197,7 @@ try {
 
             build job: jobsNamePrefix + 'mule-transport-amqp-update-version' + jobsNameSuffix,
                     parameters: [string(name: 'branch_param', value: "${repo_branch_from_arg}"),
-                                 string(name: 'version_from_param', value: "${repo_version_to_arg}-SNAPSHOT"),
+                                 string(name: 'version_from_param', value: "${repo_version_from_arg}"),
                                  string(name: 'new_version_param', value: "${new_dev_version_in_from_branch_arg}"),
                                  string(name: 'slack_channel', value: "${slack_channel_arg}")]
 
