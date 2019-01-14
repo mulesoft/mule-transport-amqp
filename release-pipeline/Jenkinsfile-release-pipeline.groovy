@@ -95,12 +95,13 @@ try {
         repo_branch_to_arg = "${repo_branch_to_arg}-DRY-RUN"
 
         tagRelease = false
+        deploy_to_alt_repo_arg = true
 
         currentBuild.displayName = currentBuild.displayName + " (dry-run)"
 
         def nexus_test_instance_url = "http://ec2-52-70-89-52.compute-1.amazonaws.com:8081/nexus/content/repositories/releases/"
         def nexus_test_instance_deployment_repo = "nexus-test-instance::default::${nexus_test_instance_url}"
-        alt_deployment_repo_arg = "-DaltDeploymentRepository=${nexus_test_instance_deployment_repo}"
+        alt_deployment_repo_arg = nexus_test_instance_deployment_repo
     }
 
     if (dry_run_arg) {
@@ -158,17 +159,8 @@ try {
     stage('Release artifacts') {
 
         def avoid_deploy_param = true
-        def add_maven_debug_flag = true
-        def dry_run = true
 
-        releaseArtifacts(
-                repo_branch_to_arg,
-                deploy_to_alt_repo_arg,
-                alt_deployment_repo_arg,
-                dry_run,
-                avoid_deploy_param,
-                add_maven_debug_flag,
-                keystoreId)
+        releaseArtifacts(repo_branch_to_arg, deploy_to_alt_repo_arg, alt_deployment_repo_arg, avoid_deploy_param, keystoreId)
     }
 
     if (!dry_run_arg) {
@@ -222,7 +214,7 @@ try {
     notifySlack(currentBuild.result)
 }
 
-def releaseArtifacts(branch_param, deploy_to_alt_repo, alt_deployment_repo, dry_run_release, avoid_deploy_param, add_maven_debug_flag, keystore_id) {
+def releaseArtifacts(branch_param, deploy_to_alt_repo, alt_deployment_repo, avoid_deploy_param, keystore_id) {
     node('hi-speed||ubuntu-14.04') {
         workspaceLocation = pwd()
         repositoryLocation = workspaceLocation + '/.repository'
@@ -232,12 +224,8 @@ def releaseArtifacts(branch_param, deploy_to_alt_repo, alt_deployment_repo, dry_
             deployment_repo = "-DaltDeploymentRepository=${alt_deployment_repo}"
         }
 
-        String mvn_goal = "deploy"
-
-        if ("${dry_run_release}".toBoolean()) {
-            def nexus_test_instance_deployment_repo = "nexus-test-instance::default::http://ec2-52-70-89-52.compute-1.amazonaws.com:8081/nexus/content/repositories/releases/"
-            deployment_repo = "-DaltDeploymentRepository=${nexus_test_instance_deployment_repo}"
-        }
+        // TODO: this should be deploy, it has been changed just for testing purposes
+        String mvn_goal = "verify"
 
         if ("${avoid_deploy_param}".toBoolean()) {
             mvn_goal = "install"
@@ -245,9 +233,7 @@ def releaseArtifacts(branch_param, deploy_to_alt_repo, alt_deployment_repo, dry_
 
         withCredentials([file(credentialsId: keystore_id, variable: 'keystore')]) {
 
-            String mvn_args = "-e -U -Dkeystore.path=${keystore} -Dalias=mulesoft -Dstorepass='mulemani\$here' -Dkeypass='mulemani\$here' -Dsignature.key=8233e4ce-a587-4eeb-b1c6-7ac25f12adef -Pupdate-site ${deployment_repo}"
-
-            mvn_args = "${add_maven_debug_flag}".toBoolean() ? mvn_args + " -X" : mvn_args
+            String mvn_args = "-X -e -U -Dkeystore.path=${keystore} -Dalias=mulesoft -Dstorepass='mulemani\$here' -Dkeypass='mulemani\$here' -Dsignature.key=8233e4ce-a587-4eeb-b1c6-7ac25f12adef -Pupdate-site ${deployment_repo}"
 
             stage('Prepare workspace') { // for display purposes
                 deleteDir()
