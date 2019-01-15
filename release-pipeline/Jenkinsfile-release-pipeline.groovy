@@ -89,19 +89,16 @@ try {
         alt_deployment_repo_arg = "${alt_deployment_repo_param}"
     }
 
+    def avoid_deploy = false
+
     currentBuild.displayName = "${BUILD_NUMBER} - version: '${repo_version_to_arg}'"
 
     if (dry_run_arg) {
         repo_branch_to_arg = "${repo_branch_to_arg}-DRY-RUN"
 
         tagRelease = false
-        deploy_to_alt_repo_arg = true
-
+        avoid_deploy = true
         currentBuild.displayName = currentBuild.displayName + " (dry-run)"
-
-        def nexus_test_instance_url = "http://ec2-52-70-89-52.compute-1.amazonaws.com:8081/nexus/content/repositories/releases/"
-        def nexus_test_instance_deployment_repo = "nexus-test-instance::default::${nexus_test_instance_url}"
-        alt_deployment_repo_arg = nexus_test_instance_deployment_repo
     }
 
     if (dry_run_arg) {
@@ -158,9 +155,7 @@ try {
     }
     stage('Release artifacts') {
 
-        def avoid_deploy_param = true
-
-        releaseArtifacts(repo_branch_to_arg, deploy_to_alt_repo_arg, alt_deployment_repo_arg, avoid_deploy_param, keystoreId)
+        releaseArtifacts(repo_branch_to_arg, deploy_to_alt_repo_arg, alt_deployment_repo_arg, avoid_deploy, keystoreId)
     }
 
     if (!dry_run_arg) {
