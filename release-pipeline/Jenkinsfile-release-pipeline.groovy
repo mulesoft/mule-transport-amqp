@@ -131,7 +131,7 @@ try {
     stage('Update Version') {
 
         if (update_version_arg) {
-            build job: jobsNamePrefix + 'mule-transport-amqp-update-version' + jobsNameSuffix,
+            build job: jobsNamePrefix + 'Mule-3-AMQP-Transport-Update-Version' + jobsNameSuffix,
                     parameters: [string(name: 'branch_param', value: "${repo_branch_to_arg}"),
                                  string(name: 'version_from_param', value: "${repo_version_from_arg}"),
                                  string(name: 'new_version_param', value: "${repo_version_to_arg}"),
@@ -189,7 +189,7 @@ try {
 
         stage('Update Dev Branch Version') {
 
-            build job: jobsNamePrefix + 'mule-transport-amqp-update-version' + jobsNameSuffix,
+            build job: jobsNamePrefix + 'Mule-3-AMQP-Transport-Update-Version' + jobsNameSuffix,
                     parameters: [string(name: 'branch_param', value: "${repo_branch_from_arg}"),
                                  string(name: 'version_from_param', value: "${repo_version_from_arg}"),
                                  string(name: 'new_version_param', value: "${new_dev_version_in_from_branch_arg}"),
