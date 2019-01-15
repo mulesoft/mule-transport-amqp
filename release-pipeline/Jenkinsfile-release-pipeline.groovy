@@ -200,7 +200,7 @@ try {
         waitForInput("release notes", "Don't forget the Release Notes of mule-transport-amqp version: '${repo_version_to_arg}'. \nUse this link ${env.BUILD_URL}/input to send the Release notification when they are ready.", slack_user)
 
         if ("${send_notification_on_completion_arg}".toBoolean()) {
-            String displayNameWithRepoNameInSlackBold = "${currentBuild.displayName.replaceAll(repo_name_arg, "*${repo_name_arg}*")}"
+            String displayNameWithRepoNameInSlackBold = "${currentBuild.displayName.replaceAll("mule-transport-amqp", "*mule-transport-amqp*")}"
             slackSend(channel: "${slack_channel_on_completion_arg}", color: 'good', message: "SUCCESS: `${env.JOB_NAME}` ${displayNameWithRepoNameInSlackBold}:\n${env.BUILD_URL}")
         }
 
