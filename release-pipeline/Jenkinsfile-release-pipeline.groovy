@@ -224,8 +224,7 @@ def releaseArtifacts(branch_param, deploy_to_alt_repo, alt_deployment_repo, avoi
             deployment_repo = "-DaltDeploymentRepository=${alt_deployment_repo}"
         }
 
-        // TODO: this should be deploy, it has been changed just for testing purposes
-        String mvn_goal = "verify"
+        String mvn_goal = "deploy"
 
         if ("${avoid_deploy_param}".toBoolean()) {
             mvn_goal = "install"
