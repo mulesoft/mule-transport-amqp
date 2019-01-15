@@ -302,7 +302,7 @@
 		<dependency>
 		  <groupId>org.mule.transports</groupId>
 		  <artifactId>mule-transport-amqp</artifactId>
-		  <version>3.7.13-SNAPSHOT</version>
+		  <version>3.7.13</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mule.transports</groupId>
