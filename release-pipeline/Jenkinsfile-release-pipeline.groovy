@@ -13,7 +13,7 @@ properties([
                 string(name: 'new_dev_version_in_from_branch_param', defaultValue: '', description: 'Next version to use in the dev branch'),
                 booleanParam(name: 'skipTests', defaultValue: true, description: 'Check to skip the Run Tests Stage'),
                 string(name: 'mvn_test_args_param', defaultValue: 'clean verify -Djarsigner.skip', description: ''),
-                booleanParam(name: 'tagRelease', defaultValue: true, description: '<hr>'),
+                booleanParam(name: 'tag_release_param', defaultValue: true, description: '<hr>'),
                 booleanParam(name: 'deploy_to_alt_repo_param', defaultValue: false, description: 'Boolean in case to want to change the repository to deploy.'),
                 string(name: 'alt_deployment_repo_param', defaultValue: '', description: '''deployment repo URL:
 
@@ -82,6 +82,7 @@ try {
     def pipeline_branch_arg = pipeline_branch_param
 
     def dry_run_arg = "${dry_run_param}".toBoolean()
+    def tag_release_arg = "${tag_release_param}".toBoolean()
     def deploy_to_alt_repo_arg = "${deploy_to_alt_repo_param}".toBoolean()
 
     def alt_deployment_repo_arg = ""
@@ -96,7 +97,7 @@ try {
     if (dry_run_arg) {
         repo_branch_to_arg = "${repo_branch_to_arg}-DRY-RUN"
 
-        tagRelease = false
+        tag_release_arg = false
         avoid_deploy = true
         currentBuild.displayName = currentBuild.displayName + " (dry-run)"
     }
@@ -160,7 +161,7 @@ try {
 
     if (!dry_run_arg) {
 
-        if (tagRelease) {
+        if (tag_release_arg) {
             stage('Tag release') {
 
                 build job: jobsNamePrefix + 'Mule-4-Single-Project-Tag-Release' + jobsNameSuffix,
