@@ -5,9 +5,9 @@
          point="org.mule.tooling.core.contribution">
     
       <externalContribution
-            contributionJar="mule-transport-amqp-3.8.5-SNAPSHOT.jar"
+            contributionJar="mule-transport-amqp-3.8.5.jar"
             contributionLibPathInMule="/plugins"
-            contributionLibs="mule-transport-amqp-3.8.5-SNAPSHOT.zip"
+            contributionLibs="mule-transport-amqp-3.8.5.zip"
             contributionNamespace="http://www.mulesoft.org/schema/mule/amqp"
             contributionNamespaceFile="http://www.mulesoft.org/schema/mule/amqp/current/mule-amqp.xsd"
             contributionNamespacePrefix="amqp"
@@ -16,7 +16,7 @@
             icon="icons/small/amqp-endpoint-24x16.png"
             name="AMQP-0-9"
             path="amqp.xml"
-            version="3.8.5-SNAPSHOT">
+            version="3.8.5">
       </externalContribution>
         <module
                 description="Core endpoints and patterns for Mule Tooling"
@@ -37,9 +37,9 @@
             point="org.mule.tooling.core.contribution">
 
         <externalContribution
-                contributionJar="mule-transport-amqp-3.8.5-SNAPSHOT.jar"
+                contributionJar="mule-transport-amqp-3.8.5.jar"
                 contributionLibPathInMule="/plugins"
-                contributionLibs="mule-transport-amqp-3.8.5-SNAPSHOT.zip"
+                contributionLibs="mule-transport-amqp-3.8.5.zip"
                 contributionNamespace="http://www.mulesoft.org/schema/mule/amqps"
                 contributionNamespaceFile="http://www.mulesoft.org/schema/mule/amqps/current/mule-amqps.xsd"
                 contributionNamespacePrefix="amqps"
@@ -48,7 +48,7 @@
                 icon="icons/small/amqp-endpoint-24x16.png"
                 name="AMQPS-0-9"
                 path="amqps.xml"
-                version="3.8.5-SNAPSHOT">
+                version="3.8.5">
         </externalContribution>
         <module
                 description="Core endpoints and patterns for Mule Tooling"
