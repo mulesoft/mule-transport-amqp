@@ -9,7 +9,7 @@ properties([
         [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/mulesoft/mule-runtime-release/'],
 ])
 
-node('hi-speed||ubuntu-14.04||ubuntu-18.04') {
+node('ubuntu-14.04') {
 
     try {
 

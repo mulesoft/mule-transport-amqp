@@ -37,7 +37,7 @@ properties([
 
 slack_channel = "mule-4-test-release"
 slack_user = ""
-node('docker||ubuntu-14.04||ubuntu-18.04') {
+node('ubuntu-14.04') {
 
     // Using the wrap BuildUser without a node fails with MissingContextVariableException: Required context class hudson.FilePath is missing
     wrap([$class: 'BuildUser']) {
@@ -211,7 +211,7 @@ try {
 }
 
 def releaseArtifacts(branch_param, deploy_to_alt_repo, alt_deployment_repo, avoid_deploy_param, keystore_id) {
-    node('hi-speed||ubuntu-14.04') {
+    node('ubuntu-14.04') {
         workspaceLocation = pwd()
         repositoryLocation = workspaceLocation + '/.repository'
 
