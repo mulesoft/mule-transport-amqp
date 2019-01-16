@@ -49,12 +49,14 @@ node('ubuntu-14.04') {
 }
 
 String jobsNamePrefix = ""
+String singleProjectJobsNameSuffix = ""
 String jobsNameSuffix = ""
 String keystoreId = ""
 
 if (isJenkinsOnPrem()) {
     jobsNamePrefix = getMuleRuntimeReleaseJobFolderPreffix()
-    jobsNameSuffix = "/${pipeline_branch_param}"
+    singleProjectJobsNameSuffix = "/${pipeline_branch_param}"
+    jobsNameSuffix = "/${repo_branch_from_param}"
     keystoreId = "mule-runtime-secret-file-muelsoft-keystore"
 }
 
@@ -106,7 +108,7 @@ try {
 
         stage('Delete Remote Dry Run Branches') {
 
-            build job: jobsNamePrefix + 'Mule-4-Single-Project-Delete-Remote-Branch' + jobsNameSuffix,
+            build job: jobsNamePrefix + 'Mule-4-Single-Project-Delete-Remote-Branch' + singleProjectJobsNameSuffix,
                     parameters: [string(name: 'repo_name_param', value: "mule-transport-amqp"),
                                  string(name: 'repo_branch_param', value: "${repo_branch_to_arg}"),
                                  string(name: 'slack_channel', value: "${slack_channel_arg}"),
@@ -117,7 +119,7 @@ try {
 
     stage('Create Branch') {
 
-        build job: jobsNamePrefix + 'Mule-4-Single-Project-Create-Branch' + jobsNameSuffix,
+        build job: jobsNamePrefix + 'Mule-4-Single-Project-Create-Branch' + singleProjectJobsNameSuffix,
                 parameters: [string(name: 'repo_name_param', value: "mule-transport-amqp"),
                              string(name: 'branch_from_param', value: "${repo_branch_from_arg}"),
                              string(name: 'branch_to_param', value: "${repo_branch_to_arg}"),
@@ -145,7 +147,7 @@ try {
     if (!"${skipTests}".toBoolean()) {
         stage('Run Tests') {
 
-            build job: jobsNamePrefix + 'Mule-4-Single-Project-Tests' + jobsNameSuffix,
+            build job: jobsNamePrefix + 'Mule-4-Single-Project-Tests' + singleProjectJobsNameSuffix,
                     parameters: [string(name: 'repo_name_param', value: "mule-transport-amqp"),
                                  string(name: 'branch_param', value: "${repo_branch_to_arg}"),
                                  string(name: 'mvn_test_args', value: "${mvn_test_args}"),
@@ -164,7 +166,7 @@ try {
         if (tag_release_arg) {
             stage('Tag release') {
 
-                build job: jobsNamePrefix + 'Mule-4-Single-Project-Tag-Release' + jobsNameSuffix,
+                build job: jobsNamePrefix + 'Mule-4-Single-Project-Tag-Release' + singleProjectJobsNameSuffix,
                         parameters: [string(name: 'repo_name_param', value: "mule-transport-amqp"),
                                      string(name: 'branch_param', value: "${repo_branch_to_arg}"),
                                      string(name: 'release_version_param', value: "${repo_version_to_arg}"),
@@ -175,7 +177,7 @@ try {
 
         stage('Delete Remote Branch') {
 
-            build job: jobsNamePrefix + 'Mule-4-Single-Project-Delete-Remote-Branch' + jobsNameSuffix,
+            build job: jobsNamePrefix + 'Mule-4-Single-Project-Delete-Remote-Branch' + singleProjectJobsNameSuffix,
                     parameters: [string(name: 'repo_name_param', value: "mule-transport-amqp"),
                                  string(name: 'repo_branch_param', value: "${repo_branch_to_arg}"),
                                  string(name: 'slack_channel', value: "${slack_channel_arg}"),
