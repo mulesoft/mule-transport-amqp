@@ -6,11 +6,11 @@
     <parent>
         <artifactId>mule-transport-amqp-plugin-parent</artifactId>
         <groupId>org.mule.transports</groupId>
-        <version>3.8.5-SNAPSHOT</version>
+        <version>3.8.6-SNAPSHOT</version>
     </parent>
 
     <artifactId>mule-transport-amqp-contribution</artifactId>
-    <version>3.8.5-SNAPSHOT</version>
+    <version>3.8.6-SNAPSHOT</version>
     <packaging>eclipse-plugin</packaging>
 
     <properties>
