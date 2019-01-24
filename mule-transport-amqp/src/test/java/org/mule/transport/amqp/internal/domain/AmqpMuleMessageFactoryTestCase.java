@@ -95,7 +95,7 @@ public class AmqpMuleMessageFactoryTestCase extends AbstractMuleContextTestCase
 
         final Envelope envelope = amqpMessage.getEnvelope();
         assertEquals(envelope.getDeliveryTag(),
-            muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_DELIVERY_TAG, PropertyScope.INBOUND));
+            (long) muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_DELIVERY_TAG, PropertyScope.INBOUND));
         assertEquals(envelope.isRedeliver(),
             muleMessage.getProperty(AmqpConnector.MESSAGE_PROPERTY_REDELIVER, PropertyScope.INBOUND));
         assertEquals(envelope.getExchange(),
