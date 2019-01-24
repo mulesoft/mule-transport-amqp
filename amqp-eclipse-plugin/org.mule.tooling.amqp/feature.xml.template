@@ -2,7 +2,7 @@
 <feature
       id="org.mule.tooling.ui.extension.mule-transport-amqp-tooling.3.9.0"
       label="Mule AMQP Transport"
-      version="3.9.0.qualifier"
+      version="3.9.0"
       provider-name="MuleSoft Inc."
       plugin="mule-transport-amqp-contribution"
       exclusive="true">
