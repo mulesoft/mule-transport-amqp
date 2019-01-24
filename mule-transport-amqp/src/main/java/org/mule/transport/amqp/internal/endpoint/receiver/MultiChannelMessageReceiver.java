@@ -7,9 +7,9 @@
 package org.mule.transport.amqp.internal.endpoint.receiver;
 
 import static java.lang.Boolean.getBoolean;
-import static java.lang.System.getProperty;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.mule.api.config.MuleProperties.SYSTEM_PROPERTY_PREFIX;
+import static org.mule.context.notification.ClusterNodeNotification.PRIMARY_CLUSTER_NODE_SELECTED;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,12 +23,10 @@ import org.mule.api.MuleContext;
 import org.mule.api.MuleException;
 import org.mule.api.MuleRuntimeException;
 import org.mule.api.construct.FlowConstruct;
-import org.mule.api.context.notification.ClusterNodeNotificationListener;
 import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.api.lifecycle.CreateException;
 import org.mule.api.lifecycle.InitialisationException;
 import org.mule.api.transport.Connector;
-import org.mule.context.notification.ClusterNodeNotification;
 import org.mule.transport.AbstractMessageReceiver;
 import org.mule.transport.amqp.internal.client.AmqpDeclarer;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
@@ -91,6 +89,8 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
         {
             muleContext.registerListener(notification -> {
 
+                if (notification.getAction() == PRIMARY_CLUSTER_NODE_SELECTED)
+                {
                     // Notification thread is bound to the MuleContainerSystemClassLoader, save it
                     // so we can restore it later
                     ClassLoader notificationClassLoader = Thread.currentThread().getContextClassLoader();
@@ -111,6 +111,7 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
                         // usage of this thread
                         Thread.currentThread().setContextClassLoader(notificationClassLoader);
                     }
+                }
 
                 }
 
