@@ -23,10 +23,12 @@ import org.mule.api.MuleContext;
 import org.mule.api.MuleException;
 import org.mule.api.MuleRuntimeException;
 import org.mule.api.construct.FlowConstruct;
+import org.mule.api.context.notification.ClusterNodeNotificationListener;
 import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.api.lifecycle.CreateException;
 import org.mule.api.lifecycle.InitialisationException;
 import org.mule.api.transport.Connector;
+import org.mule.context.notification.ClusterNodeNotification;
 import org.mule.transport.AbstractMessageReceiver;
 import org.mule.transport.amqp.internal.client.AmqpDeclarer;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
@@ -87,35 +89,7 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
         }
         else
         {
-            muleContext.registerListener(notification -> {
-
-                if (notification.getAction() == PRIMARY_CLUSTER_NODE_SELECTED)
-                {
-                    // Notification thread is bound to the MuleContainerSystemClassLoader, save it
-                    // so we can restore it later
-                    ClassLoader notificationClassLoader = Thread.currentThread().getContextClassLoader();
-                    try
-                    {
-                        // The connection should use instead the ApplicationClassloader
-                        Thread.currentThread().setContextClassLoader(muleContext.getExecutionClassLoader());
-                        generateSubreceivers();
-
-                    }
-                    catch (Exception e)
-                    {
-                        throw new MuleRuntimeException(e);
-                    }
-                    finally
-                    {
-                        // Restore the notification original class loader so we don't interfere in any later
-                        // usage of this thread
-                        Thread.currentThread().setContextClassLoader(notificationClassLoader);
-                    }
-                }
-
-                }
-
-            );
+            muleContext.registerListener(new AmqpClusterNodeNotificationListener(muleContext));
         }
     }
 
@@ -244,6 +218,44 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
             logger.debug("queue: " + queueName + "found for " + endpoint.getAddress());
         }
         return queueName;
+    }
+
+    private final class AmqpClusterNodeNotificationListener implements ClusterNodeNotificationListener<ClusterNodeNotification>
+    {
+        private final MuleContext muleContext;
+
+        private AmqpClusterNodeNotificationListener(MuleContext muleContext)
+        {
+            this.muleContext = muleContext;
+        }
+
+        @Override
+        public void onNotification(ClusterNodeNotification notification)
+        {
+            if (notification.getAction() == PRIMARY_CLUSTER_NODE_SELECTED)
+            {
+                // Notification thread is bound to the MuleContainerSystemClassLoader, save it
+                // so we can restore it later
+                ClassLoader notificationClassLoader = Thread.currentThread().getContextClassLoader();
+                try
+                {
+                    // The connection should use instead the ApplicationClassloader
+                    Thread.currentThread().setContextClassLoader(muleContext.getExecutionClassLoader());
+
+                    generateSubreceivers();
+                }
+                catch (Exception e)
+                {
+                    throw new MuleRuntimeException(e);
+                }
+                finally
+                {
+                    // Restore the notification original class loader so we don't interfere in any later
+                    // usage of this thread
+                    Thread.currentThread().setContextClassLoader(notificationClassLoader);
+                }
+            }
+        }
     }
 
     private static class ConsumerRecoveryMonitor implements Runnable
