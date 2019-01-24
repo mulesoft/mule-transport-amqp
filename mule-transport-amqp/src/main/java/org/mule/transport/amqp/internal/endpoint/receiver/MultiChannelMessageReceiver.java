@@ -7,9 +7,9 @@
 package org.mule.transport.amqp.internal.endpoint.receiver;
 
 import static java.lang.Boolean.getBoolean;
-import static java.lang.System.getProperty;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.mule.api.config.MuleProperties.SYSTEM_PROPERTY_PREFIX;
+import static org.mule.context.notification.ClusterNodeNotification.PRIMARY_CLUSTER_NODE_SELECTED;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,7 +19,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mule.api.DefaultMuleException;
+import org.mule.api.MuleContext;
 import org.mule.api.MuleException;
+import org.mule.api.MuleRuntimeException;
 import org.mule.api.construct.FlowConstruct;
 import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.api.lifecycle.CreateException;
@@ -77,6 +79,48 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
         started = true;
         logger.info("Connecting message receiver for endpoint " + endpoint.getEndpointURI());
 
+        final MuleContext muleContext = amqpConnector.getMuleContext();
+
+        if (muleContext.isPrimaryPollingInstance() || !amqpConnector.isListenOnPrimaryNodeOnly())
+        {
+            generateSubreceivers();
+        }
+        else
+        {
+            muleContext.registerListener(notification -> {
+
+                if (notification.getAction() == PRIMARY_CLUSTER_NODE_SELECTED)
+                {
+                    // Notification thread is bound to the MuleContainerSystemClassLoader, save it
+                    // so we can restore it later
+                    ClassLoader notificationClassLoader = Thread.currentThread().getContextClassLoader();
+                    try
+                    {
+                        // The connection should use instead the ApplicationClassloader
+                        Thread.currentThread().setContextClassLoader(muleContext.getExecutionClassLoader());
+                        generateSubreceivers();
+
+                    }
+                    catch (Exception e)
+                    {
+                        throw new MuleRuntimeException(e);
+                    }
+                    finally
+                    {
+                        // Restore the notification original class loader so we don't interfere in any later
+                        // usage of this thread
+                        Thread.currentThread().setContextClassLoader(notificationClassLoader);
+                    }
+                }
+
+                }
+
+            );
+        }
+    }
+
+    private void generateSubreceivers() throws DefaultMuleException
+    {
         try
         {
             synchronized (subReceivers)

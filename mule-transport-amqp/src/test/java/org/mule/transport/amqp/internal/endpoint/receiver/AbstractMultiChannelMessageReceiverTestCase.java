@@ -6,18 +6,18 @@
  */
 package org.mule.transport.amqp.internal.endpoint.receiver;
 
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mule.transport.amqp.internal.endpoint.receiver.MultiChannelMessageReceiver.MULE_ASYNC_CONSUMERS_STARTUP;
 
-import org.junit.Rule;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mule.api.MuleContext;
+import org.mule.api.MuleException;
 import org.mule.api.endpoint.InboundEndpoint;
+import org.mule.api.lifecycle.CreateException;
 import org.mule.tck.junit4.AbstractMuleContextTestCase;
-import org.mule.tck.junit4.rule.SystemProperty;
 import org.mule.tck.probe.PollingProber;
 import org.mule.tck.probe.Probe;
 import org.mule.transport.amqp.internal.connector.AmqpConnector;
@@ -28,27 +28,18 @@ import org.mule.transport.amqp.internal.connector.AmqpConnectorFlowConstruct;
  * that they are started after the app is fully deployed.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class MultiChannelMessageReceiverTestCase extends AbstractMuleContextTestCase
+public class AbstractMultiChannelMessageReceiverTestCase extends AbstractMuleContextTestCase
 {
-
-    @Rule
-    public SystemProperty verbose = new SystemProperty(MULE_ASYNC_CONSUMERS_STARTUP, "true");
-
     @Mock
     public MultiChannelMessageSubReceiver mockSubreceiver;
 
-    private static long POLLING_PROBER_TIMEOUT = 20000;
+    private static long TIMEOUT = 20000;
     private static long POLLING_PROBER_DELAY = 2000;
 
-    @Test
-    public void testSubreceiversAreStarted() throws Exception
+    protected void testSubreceiversAreStarted(boolean primaryPollingInstance, boolean listenOnPrimaryNodeOnly) throws MuleException, CreateException, Exception
     {
-        when(mockSubreceiver.isCancelled()).thenReturn(true);
-        final InboundEndpoint endpoint = muleContext.getEndpointFactory().getInboundEndpoint(getEndpointURI());
-        final TestMultiChannelMessageReceiver receiver = new TestMultiChannelMessageReceiver(endpoint.getConnector(),
-                new AmqpConnectorFlowConstruct((AmqpConnector) endpoint.getConnector()), endpoint, mockSubreceiver);
-        receiver.doConnect();
-        new PollingProber(POLLING_PROBER_TIMEOUT, POLLING_PROBER_DELAY).check(new Probe()
+        setupConnector(primaryPollingInstance, listenOnPrimaryNodeOnly);
+        new PollingProber(TIMEOUT, POLLING_PROBER_DELAY).check(new Probe()
         {
             public boolean isSatisfied()
             {
@@ -70,8 +61,21 @@ public class MultiChannelMessageReceiverTestCase extends AbstractMuleContextTest
                 return "Subreceivers were not started";
             }
         });
-
     }
+
+    protected void setupConnector(boolean primaryPollingInstance, boolean listenOnPrimaryNodeOnly) throws MuleException, CreateException, Exception
+    {
+        when(mockSubreceiver.isCancelled()).thenReturn(true);
+        MuleContext spiedMuleContext = spy(muleContext);
+        when(spiedMuleContext.isPrimaryPollingInstance()).thenReturn(primaryPollingInstance);
+        final InboundEndpoint endpoint = spiedMuleContext.getEndpointFactory().getInboundEndpoint(getEndpointURI());
+        AmqpConnector connector = new AmqpConnector(spiedMuleContext);
+        connector.setListenOnPrimaryNodeOnly(listenOnPrimaryNodeOnly);
+        final TestMultiChannelMessageReceiver receiver = new TestMultiChannelMessageReceiver(connector,
+                new AmqpConnectorFlowConstruct(connector), endpoint, mockSubreceiver);
+        receiver.doConnect();
+    }
+
 
     public String getEndpointURI()
     {

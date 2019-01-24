@@ -175,6 +175,7 @@ public class AmqpConnector extends AbstractConnector
     private boolean requestBrokerConfirms = false;
     private int numberOfChannels = DEFAULT_NUMBER_OF_CHANNELS;
     private boolean failOnBlockedBroker = parseBoolean(getProperty(MULE_FAIL_ON_RABBITMQ_BLOCKED_BROKER, "false"));
+    private boolean listenOnPrimaryNodeOnly = false;
 
     private ConnectionFactory connectionFactory;
     private Connection connection;
@@ -662,6 +663,16 @@ public class AmqpConnector extends AbstractConnector
     public String getExecutorName()
     {
         return this.getName() + "-amqpReceiver";
+    }
+
+    public boolean isListenOnPrimaryNodeOnly()
+    {
+        return listenOnPrimaryNodeOnly;
+    }
+
+    public void setListenOnPrimaryNodeOnly(boolean listenOnPrimaryNodeOnly)
+    {
+        this.listenOnPrimaryNodeOnly = listenOnPrimaryNodeOnly;
     }
     
 }
