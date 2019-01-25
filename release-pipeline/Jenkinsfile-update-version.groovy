@@ -6,7 +6,7 @@ properties([
                 choice(name: 'slack_channel', choices: getDefaultChoiceSlackChannelsList().join("\n"), description: 'Slack channel to send the job notifications')
         ]),
         buildDiscarder(logRotator(artifactDaysToKeepStr: '14', artifactNumToKeepStr: '3', daysToKeepStr: '60', numToKeepStr: '')),
-        [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/mulesoft/mule-runtime-release/'],
+        [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/mulesoft/mule-transport-amqp'],
 ])
 
 node('ubuntu-14.04') {

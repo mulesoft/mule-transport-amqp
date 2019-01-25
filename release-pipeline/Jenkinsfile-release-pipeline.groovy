@@ -14,6 +14,8 @@ properties([
                 booleanParam(name: 'skipTests', defaultValue: true, description: 'Check to skip the Run Tests Stage'),
                 string(name: 'mvn_test_args_param', defaultValue: 'clean verify -Djarsigner.skip', description: ''),
                 booleanParam(name: 'tag_release_param', defaultValue: true, description: '<hr>'),
+                string(name: 'exchange_env_param_list', defaultValue: 'qax,stgx', description: '''<p>Comma separated Exchange environments where the Extension is going to be deployed.</p>
+                                                                                                  <p>Exchange Envs: "devx,qax,stgx,prod,prod-eu"</p>'''),
                 booleanParam(name: 'deploy_to_alt_repo_param', defaultValue: false, description: 'Boolean in case to want to change the repository to deploy.'),
                 string(name: 'alt_deployment_repo_param', defaultValue: '', description: '''deployment repo URL:
 
@@ -31,7 +33,7 @@ properties([
                 string(name: 'pipeline_branch_param', defaultValue: '4.x', description: 'mule-runtime-release repo branch where the Jenkins file is going to be use'),
         ]),
         buildDiscarder(logRotator(artifactDaysToKeepStr: '14', artifactNumToKeepStr: '3', daysToKeepStr: '60', numToKeepStr: '')),
-        [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/mulesoft/mule-runtime-release/'],
+        [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/mulesoft/mule-transport-amqp'],
 ])
 
 
@@ -90,6 +92,10 @@ try {
     def alt_deployment_repo_arg = ""
     if (deploy_to_alt_repo_arg) {
         alt_deployment_repo_arg = "${alt_deployment_repo_param}"
+    }
+
+    def exchange_env_arg_list = (exchange_env_param_list.trim() == "") ? [] : exchange_env_param_list.split(",").collect {
+        it.trim()
     }
 
     def avoid_deploy = false
@@ -172,6 +178,19 @@ try {
                                      string(name: 'release_version_param', value: "${repo_version_to_arg}"),
                                      string(name: 'slack_channel', value: "${slack_channel_arg}"),
                                      string(name: 'pipeline_branch', value: "${pipeline_branch_arg}")]
+            }
+        }
+
+        exchange_env_arg_list.each { exchangeEnv ->
+
+            stage("Upload to Exchange ${exchangeEnv}") {
+                retry(3) {
+
+                    build job: jobsNamePrefix + 'Mule-3-AMQP-Transport-Upload-To-Exchange' + jobsNameSuffix,
+                            parameters: [string(name: 'deployment_environment_param', value: "${exchangeEnv}"),
+                                         string(name: 'new_version_param', value: "${repo_version_to_arg}"),
+                                         string(name: 'slack_channel', value: "${slack_channel_arg}")]
+                }
             }
         }
 
