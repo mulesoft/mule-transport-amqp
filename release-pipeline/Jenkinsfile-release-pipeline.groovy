@@ -14,7 +14,7 @@ properties([
                 booleanParam(name: 'skipTests', defaultValue: true, description: 'Check to skip the Run Tests Stage'),
                 string(name: 'mvn_test_args_param', defaultValue: 'clean verify -Djarsigner.skip', description: ''),
                 booleanParam(name: 'tag_release_param', defaultValue: true, description: '<hr>'),
-                string(name: 'exchange_env_param_list', defaultValue: 'qax,stgx', description: '''<p>Comma separated Exchange environments where the Extension is going to be deployed.</p>
+                string(name: 'exchange_env_param_list', defaultValue: 'qax,stgx,prod,produ-eu', description: '''<p>Comma separated Exchange environments where the Extension is going to be deployed.</p>
                                                                                                   <p>Exchange Envs: "devx,qax,stgx,prod,prod-eu"</p>'''),
                 booleanParam(name: 'deploy_to_alt_repo_param', defaultValue: false, description: 'Boolean in case to want to change the repository to deploy.'),
                 string(name: 'alt_deployment_repo_param', defaultValue: '', description: '''deployment repo URL:
