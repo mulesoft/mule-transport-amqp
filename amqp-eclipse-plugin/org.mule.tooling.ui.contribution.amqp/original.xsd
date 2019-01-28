@@ -217,6 +217,15 @@
                             existence.</xsd:documentation>
                </xsd:annotation>
             </xsd:attribute>
+            <xsd:attribute name="listenOnPrimaryNodeOnly"
+               type="mule:substitutableBoolean" default="false">
+               <xsd:annotation>
+                  <xsd:documentation>
+                            Defines if the listener must only consume messages on the
+                            primary node in a clustered environment
+                  </xsd:documentation>
+               </xsd:annotation>
+            </xsd:attribute>
          </xsd:extension>
       </xsd:complexContent>
    </xsd:complexType>
