@@ -24,6 +24,7 @@
 				</enum>
 				<integer step="1" min="0" javaType="int" required="false" defaultValue="0" description="The maximum amount of content (measured in octets) that the server will deliver, 0 if unlimited" caption="Prefetch Size" name="prefetchSize" />
 				<integer step="1" min="0" javaType="int" required="false" defaultValue="0" description="The maximum number of messages that the server will deliver, 0 if unlimited" caption="Prefetch Count" name="prefetchCount" />
+				<boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="false" description="Defines if the listeners must only consume messages on the primary node in a clustered environment" caption="Only listen on primary node" name="listenOnPrimaryNodeOnly" />
 				<boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="true" description="Defines if the connector should only do active exchange and queue declarations or can also perform passive declarations to enforce their existence" caption="Active Declarations Only" name="activeDeclarationsOnly" />
 				<boolean javaType="boolean" required="false" defaultValue="false" supportsExpressions="true" description="Set to true if the connector should only create exclusive consumers" caption="Exclusive Consumers" name="exclusiveConsumers" />
 				<integer step="1" min="0" javaType="int" required="false" defaultValue="4" description="Set number of concurrent channels that will be used to receive AMQP-0-9 messages" caption="Number of channels" name="numberOfChannels" />
