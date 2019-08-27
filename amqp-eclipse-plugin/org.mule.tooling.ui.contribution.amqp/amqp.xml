@@ -65,16 +65,16 @@
 			</group>
 		</attribute-category>
 		<attribute-category caption="Advanced" description="Advanced properties">
-            <group caption="Exchange Patterns" id="allExchangePatterns">
-                <enum description="" name="exchange-pattern" defaultValue="request-response"
-                    xsdType=""
-                    transformer="org.mule.tooling.ui.modules.core.widgets.meta.ExchangePatternTransformer"
-                    asRadioGroup="true" horizontal="true" removeEmptyOption="true">
-                    <option value="one-way" />
-                    <option value="request-response" />
-                </enum>
-            </group>
-        </attribute-category>
+		    <group caption="Exchange Patterns" id="allExchangePatterns">
+			<enum description="" name="exchange-pattern" defaultValue="request-response"
+			    xsdType=""
+			    transformer="org.mule.tooling.ui.modules.core.widgets.meta.ExchangePatternTransformer"
+			    asRadioGroup="true" horizontal="true" removeEmptyOption="true">
+			    <option value="one-way" />
+			    <option value="request-response" />
+			</enum>
+		    </group>
+		</attribute-category>
 		<attribute-category caption="References" description="References">
 			<group caption="Global References" id="abstractConnectorReferences">
 				<globalRef caption="Connector Reference" name="connector-ref" requiredType="http://www.mulesoft.org/schema/mule/amqp/connector" description="The name of the connector associated with this endpoint. This must be specified if more than one connector is defined for this transport." />
