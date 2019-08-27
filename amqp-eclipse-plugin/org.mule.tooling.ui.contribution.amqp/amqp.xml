@@ -39,7 +39,7 @@
 
 	<!-- ENDPOINT DEFINITION -->
 
-	<endpoint localId="endpoint" caption="AMQP-0-9" icon="icons/small/amqp-endpoint-24x16.png" image="icons/large/amqp-endpoint-48x32.png" extends="http://www.mulesoft.org/schema/mule/core/endPointType" defaultMep="RequestResponse" doNotInherit="ref,connector-ref,transformer-refs,responseTransformer-refs" description="The AMQP-0-9 Endpoint allows Mule applications to send or receive messages to an AMQP-0-9 Broker">
+	<endpoint localId="endpoint" caption="AMQP-0-9" icon="icons/small/amqp-endpoint-24x16.png" image="icons/large/amqp-endpoint-48x32.png" extends="http://www.mulesoft.org/schema/mule/core/endPointTypeWithoutExchangePattern" defaultMep="RequestResponse" doNotInherit="ref,connector-ref,transformer-refs,responseTransformer-refs" description="The AMQP-0-9 Endpoint allows Mule applications to send or receive messages to an AMQP-0-9 Broker">
 		<attribute-category caption="General" description="General properties">
 			<group caption="Address Attributes" id="addressAttributes">
 				<string name="exchangeName" xsdType="string" caption="Exchange Name" alwaysFill="false" description="The exchange to publish to or bind queues to. Leave blank or omit for the default exchange" />
@@ -64,6 +64,17 @@
 				<integer step="1" min="0" javaType="int" required="false" description="Set number of concurrent channels that will be used to receive AMQP-0-9 messages. If set this value will be used instead on the one defined in the connector." caption="Number of channels" name="numberOfChannels" />
 			</group>
 		</attribute-category>
+		<attribute-category caption="Advanced" description="Advanced properties">
+            <group caption="Exchange Patterns" id="allExchangePatterns">
+                <enum description="" name="exchange-pattern" defaultValue="request-response"
+                    xsdType=""
+                    transformer="org.mule.tooling.ui.modules.core.widgets.meta.ExchangePatternTransformer"
+                    asRadioGroup="true" horizontal="true" removeEmptyOption="true">
+                    <option value="one-way" />
+                    <option value="request-response" />
+                </enum>
+            </group>
+        </attribute-category>
 		<attribute-category caption="References" description="References">
 			<group caption="Global References" id="abstractConnectorReferences">
 				<globalRef caption="Connector Reference" name="connector-ref" requiredType="http://www.mulesoft.org/schema/mule/amqp/connector" description="The name of the connector associated with this endpoint. This must be specified if more than one connector is defined for this transport." />
