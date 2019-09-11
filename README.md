@@ -47,10 +47,70 @@ If you have a different configuration, you can use the following arguments:
 
     -DamqpPort=6666 -DamqpSslPort=6665 -DamqpVirtualHost=/ -DamqpUserName=guest \
     -DamqpPassword=guest -DamqpHost=localhost
+    
+    
+SSL Support
+-------------
 
 If you have configured SSL support on RabbitMQ as detailed [here](http://www.rabbitmq.com/ssl.html) on the default port you can include the SSL tests by running:
 
     mvn -Pit -DrunAmqpsTests=true clean verify
+
+You have to create your own self signed certificates for testing purposes.
+
+You can follow the next steps:
+
+1. Create a public and a private key.
+
+	keytool -genkeypair \
+	-keystore trustStore.jks \
+	-storepass rabbitstore \
+	-keyalg RSA \
+	-validity 365 \
+	-keypass MySecretPassword \
+	-alias rabbitmq \
+	-dname "CN=*.corp-ext.local,OU=Test, O=Corp, L=Buenos Aires S=BA C=AR"
+
+
+2. Import the RabbitMQ key pair to the PKCS12 trust store.
+
+	 keytool -importkeystore -srckeystore trustStore.jks \
+	-destkeystore keycert.p12 -deststoretype pkcs12 \
+	-srcstorepass MySecretPassword -deststorepass MySecretPassword \
+	-alias rabbitmq
+
+When prompted use MySecretPassword
+
+3. Convert the key pair file to PEM format
+
+	openssl pkcs12 -in keycert.p12 \
+	-out foo.pem -passin pass:MySecretPassword \
+	-passout pass:MySecretPassword
+
+
+4. Extract the encrypted private key
+
+	sed -n '/-----BEGIN ENCRYPTED PRIVATE KEY-----/,/-----END ENCRYPTED PRIVATE KEY-----/p' \
+	foo.pem > enc.pem
+
+5. Decrypt the private key
+
+	openssl rsa  -in enc.pem  \
+	-out unenc.pem  -passin pass:MySecretPassword
+
+6. Extract the certificate
+
+	sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' \
+	foo.pem > cert.pem
+
+7. Copy the certs to the following folders
+
+	cp cert.pem <PROJECT_FOLDER>/src/it/ssl/testca/cacert.pem 
+	cp cert.pem <PROJECT_FOLDER>/src/it/ssl/server/cert.pem 
+	cp unenc.pem <PROJECT_FOLDER>/src/it/ssl/server/key.pem 
+	cp cert.pem <PROJECT_FOLDER>/src/it/ssl/client/cert.pem 
+	cp unenc.pem <PROJECT_FOLDER>/src/it/ssl/client/key.pem 
+	cp trustStore.jks <PROJECT_FOLDER>/src/it/ssl/client/trustStore.jks
 
 Maven Support
 -------------
