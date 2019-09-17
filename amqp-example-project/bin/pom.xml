@@ -11,11 +11,11 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<mule.version>3.9.0</mule.version>
+		<mule.version>3.5.0</mule.version>
 		<eclipsePluginVersion>2.8</eclipsePluginVersion>
 		<jdkName>JavaSE-1.6</jdkName>
 		<jdk.version>1.6</jdk.version>
-		<junit.version>4.12</junit.version>
+		<junit.version>4.9</junit.version>
 	</properties>
 
 	<build>
@@ -99,7 +99,6 @@
 					<descriptorRefs>
 						<descriptorRef>project</descriptorRef>
 					</descriptorRefs>
-					<skipAssembly>false</skipAssembly>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -179,7 +178,7 @@
                                 <artifactItem>
                                     <groupId>com.cloveretl</groupId>
                                     <artifactId>cloveretl-engine</artifactId>
-                                    <version>3.5.0</version>
+                                    <version>${mule.version}</version>
                                     <type>zip</type>
                                 </artifactItem>
                             </artifactItems>
@@ -303,7 +302,7 @@
 		<dependency>
 		  <groupId>org.mule.transports</groupId>
 		  <artifactId>mule-transport-amqp</artifactId>
-		  <version>3.9.5-SNAPSHOT</version>
+		  <version>3.7.14-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mule.transports</groupId>
@@ -371,7 +370,7 @@
 		<dependency>
 			<groupId>com.cloveretl</groupId>
 			<artifactId>cloveretl-engine</artifactId>
-			<version>3.5.0</version>
+			<version>${mule.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

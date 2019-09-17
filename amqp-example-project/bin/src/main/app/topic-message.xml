@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.4.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/amqp http://www.mulesoft.org/schema/mule/amqp/current/mule-amqp.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+	
+	<flow name="Send_Message_Topic" doc:name="Send_Message_Topic">
+        <http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="8090" doc:name="HTTP" path="topic"/>
+        <set-payload value="#['im a Topic message'.getBytes()]" doc:name="Set payload for amqp message as ByteArray"/>
+        <amqp:outbound-endpoint responseTimeout="10000"  doc:name="Send Topic Message" connector-ref="amqp_config" ref="amqp_topic_endpoint"/>
+        <set-payload value="#['Message Sended']" doc:name="Set payload as String"/>
+        <logger message="Topic message sended" level="INFO" doc:name="Logger"/>
+    </flow>
+    
+    <flow name="Recive_Message_Topic_1" doc:name="Recive_Message_Topic_1">
+        <amqp:inbound-endpoint responseTimeout="10000"  doc:name="Recive Topic Message" connector-ref="amqp_config" ref="amqp_topic_endpoint" routingKey="#"/>
+        <byte-array-to-string-transformer doc:name="Transform bytearray message to String"/>
+        <logger message="Recived message on Queue{topicQ} with Key {#}: #[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+    
+    <flow name="Recive_Message_Topic_2" doc:name="Recive_Message_Topic_2">
+        <amqp:inbound-endpoint responseTimeout="10000"  doc:name="Recive Topic Message" connector-ref="amqp_config"  routingKey="#.#" queueName="topicQB" exchangeName="topicEx" exchangeType="topic" queueDurable="true"/>
+        <byte-array-to-string-transformer doc:name="Transform bytearray message to String"/>
+        <logger message="Recived message on Queue{topicQB} with Key {#.#}: #[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+    
+    <flow name="Recive_Message_Topic_3" doc:name="Recive_Message_Topic_3">
+        <amqp:inbound-endpoint responseTimeout="10000"  doc:name="Recive Topic Message" connector-ref="amqp_config"  routingKey="routing.key" queueName="topicQC" exchangeName="topicEx" exchangeType="topic" queueDurable="true"/>
+        <byte-array-to-string-transformer doc:name="Transform bytearray message to String"/>
+        <logger message="Recived message on Queue{topicQC} with Key {direct2.key2}: #[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>

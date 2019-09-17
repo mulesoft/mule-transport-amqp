@@ -2,7 +2,7 @@
 <feature
       id="org.mule.tooling.ui.extension.mule-transport-amqp-tooling.3.9.0"
       label="Mule AMQP Transport"
-      version="3.9.4.qualifier"
+      version="3.9.5.qualifier"
       provider-name="MuleSoft Inc."
       plugin="mule-transport-amqp-contribution"
       exclusive="true">
@@ -12,7 +12,7 @@
    </description>
 
    <copyright url="http://www.mulesoft.org">
-      Copyright 2018 MuleSoft Inc.
+      Copyright 2019 MuleSoft Inc.
    </copyright>
 
    <license url="http://opensource.org/licenses/CPAL-1.0">

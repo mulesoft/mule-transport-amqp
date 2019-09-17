@@ -229,7 +229,6 @@ public class MultiChannelMessageReceiver extends AbstractMessageReceiver
             this.muleContext = muleContext;
         }
 
-        @Override
         public void onNotification(ClusterNodeNotification notification)
         {
             if (notification.getAction() == PRIMARY_CLUSTER_NODE_SELECTED)
