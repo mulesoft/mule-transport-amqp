@@ -8,6 +8,10 @@
        http://www.mulesoft.org/schema/mule/amqp http://www.mulesoft.org/schema/mule/amqp/current/mule-amqp.xsd
        http://www.mulesoft.org/schema/mule/test http://www.mulesoft.org/schema/mule/test/current/mule-test.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       
+  <spring:beans>
+        <spring:bean id="global_untilsuccessful_objectstore" name="listableQueuePersistenceObjectStoreBean" class="org.mule.util.store.QueuePersistenceObjectStore" />
+  </spring:beans>
 
   <amqp:connector name="amqpReceiverTestAutoAckLocalhostConnector"
         virtualHost="${amqpVirtualHost}"
@@ -44,6 +48,16 @@
     <!-- Use an existing queue -->
     <amqp:inbound-endpoint queueName="amqpReceiverTestExistingQueueService-queue"
                            connector-ref="amqpReceiverTestAutoAckLocalhostConnector" />
+    <test:component />
+  </flow>
+  
+  
+  <flow name="amqpReceiverTestUntilSuccessful">
+    <amqp:inbound-endpoint queueName="amqpReceiverTestUntilSuccessful-queue"
+                           connector-ref="amqpReceiverTestAutoAckLocalhostConnector" />
+    <until-successful maxRetries="5" objectStore-ref="global_untilsuccessful_objectstore">
+        <test:component />
+    </until-successful>
     <test:component />
   </flow>
 

@@ -6,6 +6,8 @@
  */
 package org.mule.transport.amqp.internal.client;
 
+import java.io.Serializable;
+
 import com.rabbitmq.client.Channel;
 
 /**
@@ -14,19 +16,20 @@ import com.rabbitmq.client.Channel;
  * @since 3.8.2
  *
  */
-public class ChannelMessageProperty
-{
+public class ChannelMessageProperty implements Serializable {
 
-    private transient Channel channel;
+	private static final long serialVersionUID = 7221650028524984122L;
 
-    public ChannelMessageProperty(Channel channel)
-    {
-        this.channel = channel;
-    }
+	private transient Channel channel;
 
-    public Channel getChannel()
-    {
-        return channel;
-    }
+	public ChannelMessageProperty(Channel channel)
+	{
+		this.channel = channel;
+	}
+
+	public Channel getChannel()
+	{
+		return channel;
+	}
 
 }

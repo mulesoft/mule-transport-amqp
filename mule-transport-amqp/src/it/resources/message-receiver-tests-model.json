@@ -2,6 +2,8 @@
 	"queues": [{
 		"name": "amqpReceiverTestExistingQueueService-queue"
 	},{
+		"name": "amqpReceiverTestUntilSuccessful-queue"
+	},{
 		"name": "amqpReceiverTestUnboundQueueService-queue",
 		"durable": true,
 		"auto_delete": false
@@ -27,6 +29,9 @@
 		"type": "fanout"
 	}, {
 		"name": "amqpReceiverTestClientConsumerTagService-exchange",
+		"type": "fanout"
+	},{
+		"name": "amqpReceiverTestUntilSuccessful-exchange",
 		"type": "fanout"
 	},{
 		"name": "amqpReceiverTestMuleAckService-exchange",
@@ -72,6 +77,11 @@
 	},{
 		"source": "amqpReceiverTestClientConsumerTagService-exchange",
 		"destination": "amqpReceiverTestClientConsumerTagService-queue",
+		"destination_type": "queue",
+		"routing_key": ""
+	},{
+		"source": "amqpReceiverTestUntilSuccessful-exchange",
+		"destination": "amqpReceiverTestUntilSuccessful-queue",
 		"destination_type": "queue",
 		"routing_key": ""
 	},{
