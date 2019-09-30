@@ -22,11 +22,13 @@ public class ChannelMessageProperty implements Serializable {
 
 	private transient Channel channel;
 
-	public ChannelMessageProperty(Channel channel) {
+	public ChannelMessageProperty(Channel channel)
+	{
 		this.channel = channel;
 	}
 
-	public Channel getChannel() {
+	public Channel getChannel()
+	{
 		return channel;
 	}
 
