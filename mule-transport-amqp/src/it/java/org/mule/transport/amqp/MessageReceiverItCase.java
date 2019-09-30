@@ -43,6 +43,16 @@ public class MessageReceiverItCase extends AbstractItCase
         String flowName = "amqpReceiverTestExistingQueueService";
 
     	amqpTestClient.dispatchTestMessageAndAssertValidReceivedMessageWithAmqp(nameFactory.getExchangeName(flowName),
+    	
+    			getFunctionalTestComponent(flowName), getTestTimeoutSecs());
+    }
+    
+    @Test
+    public void testUntilSuccessfulUsingObjectStore() throws Exception
+    {
+        String flowName = "amqpReceiverTestUntilSuccessful";
+
+    	amqpTestClient.dispatchTestMessageAndAssertValidReceivedMessageWithAmqp(nameFactory.getExchangeName(flowName),
     		getFunctionalTestComponent(flowName), getTestTimeoutSecs());
     }
 
