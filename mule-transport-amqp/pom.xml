@@ -30,7 +30,7 @@
         <jdk.version>1.6</jdk.version>
         <domainName>maven2</domainName>
         <junitVersion>4.11</junitVersion>
-        <jackson2Version>2.4.3</jackson2Version>
+        <jackson2Version>2.9.10.1</jackson2Version>
         <hamcrestVersion>1.3</hamcrestVersion>
         <mockitoVersion>1.10.19</mockitoVersion>
     </properties>
