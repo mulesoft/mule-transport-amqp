@@ -14,6 +14,10 @@
     <version>3.9.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <properties>
+        <log4jVersion>2.12.3</log4jVersion>
+    </properties>
+
     <modules>
         <module>amqp-eclipse-plugin</module>
         <module>amqp-example-project</module>
